@@ -1,7 +1,7 @@
 # Database credentials
-user="kscombr_ks"
+user="mlcombr_ml"
 password="m@tsu1001"
 host="localhost"
-db_name="kscombr_dbks"
+db_name="mlcombr_dbml"
 
 mysql --user=$user --password=$password --host=$host $db_name < "url-staging-prod.sql"
