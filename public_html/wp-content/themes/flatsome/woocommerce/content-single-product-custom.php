@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		return;
 	}
 	?>
-</div><!-- /.container -->
+</div>
 <div id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
 
 	<div class="custom-product-page">
@@ -52,7 +52,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						dynamic_sidebar( 'shop-sidebar' );
 					}
 					?>
-				</div><!-- .sidebar-inner -->
+				</div>
 			</div>
 			<?php
 		else :

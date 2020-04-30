@@ -70,7 +70,7 @@ function flatsome_customizer_header_builder(){
                     ?>
                 </div>
             </div>
-        </div><!-- .hb-wrapper -->
+        </div>
 
         <div class="hb-wrapper hb-wrapper-mobile">
 
@@ -99,7 +99,7 @@ function flatsome_customizer_header_builder(){
                 </div>
             </div>
 
-        </div><!-- Mobile -->
+        </div>
 
         <div class="hb hb-avaiable hb-avaiable-mobile">
         <div class="hb-tooltip">Not in use</div>
@@ -112,8 +112,8 @@ function flatsome_customizer_header_builder(){
                 </div>
         </div>
 
-        </div><!-- .mobile wrap -->
-        </div><!-- .hb-wrapper -->
+        </div>
+        </div>
 
     </div>
     <?php

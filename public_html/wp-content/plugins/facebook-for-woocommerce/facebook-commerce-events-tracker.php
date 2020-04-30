@@ -38,11 +38,10 @@ if ( ! class_exists( 'WC_Facebookcommerce_EventsTracker' ) ) :
 				'wp_footer',
 				array( $this, 'inject_base_pixel_noscript' )
 			);
-			add_action(
-				'woocommerce_after_single_product',
-				array( $this, 'inject_view_content_event' ),
-				self::FB_PRIORITY_HIGH
-			);
+
+			// ViewContent for individual products
+			add_action( 'woocommerce_after_single_product', [ $this, 'inject_view_content_event' ] );
+
 			add_action(
 				'woocommerce_after_shop_loop',
 				array( $this, 'inject_view_category_event' )
@@ -51,40 +50,26 @@ if ( ! class_exists( 'WC_Facebookcommerce_EventsTracker' ) ) :
 				'pre_get_posts',
 				array( $this, 'inject_search_event' )
 			);
-			add_action(
-				'woocommerce_after_cart',
-				array( $this, 'inject_add_to_cart_redirect_event' )
-			);
-			add_action(
-				'woocommerce_add_to_cart',
-				array( $this, 'inject_add_to_cart_event' ),
-				self::FB_PRIORITY_HIGH
-			);
-			add_action(
-				'wc_ajax_fb_inject_add_to_cart_event',
-				array( $this, 'inject_ajax_add_to_cart_event' ),
-				self::FB_PRIORITY_HIGH
-			);
-			add_action(
-				'woocommerce_after_checkout_form',
-				array( $this, 'inject_initiate_checkout_event' )
-			);
-			add_action(
-				'woocommerce_thankyou',
-				array( $this, 'inject_gateway_purchase_event' ),
-				self::FB_PRIORITY_HIGH
-			);
-			add_action(
-				'woocommerce_payment_complete',
-				array( $this, 'inject_purchase_event' ),
-				self::FB_PRIORITY_HIGH
-			);
-			add_action(
-				'wpcf7_contact_form',
-				array( $this, 'inject_lead_event_hook' ),
-				self::FB_PRIORITY_LOW
-			);
 
+			// AddToCart events
+			add_action( 'woocommerce_add_to_cart', [ $this, 'inject_add_to_cart_event' ], 40, 4 );
+			// AddToCart while AJAX is enabled
+			add_action( 'woocommerce_ajax_added_to_cart', [ $this, 'add_filter_for_add_to_cart_fragments' ] );
+			// AddToCart while using redirect to cart page
+			if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
+				add_filter( 'woocommerce_add_to_cart_redirect', [ $this, 'set_last_product_added_to_cart_upon_redirect' ], 10, 2 );
+				add_action( 'woocommerce_ajax_added_to_cart',   [ $this, 'set_last_product_added_to_cart_upon_ajax_redirect' ] );
+				add_action( 'woocommerce_after_cart',           [ $this, 'inject_add_to_cart_redirect_event' ], 10, 2 );
+			}
+
+			// InitiateCheckout events
+			add_action( 'woocommerce_after_checkout_form', [ $this, 'inject_initiate_checkout_event' ] );
+			// Purchase and Subscribe events
+			add_action( 'woocommerce_thankyou',         [ $this, 'inject_purchase_event' ], 40 );
+			add_action( 'woocommerce_payment_complete', [ $this, 'inject_purchase_event' ], 40 );
+
+			// TODO move this in some 3rd party plugin integrations handler at some point {FN 2020-03-20}
+			add_action( 'wpcf7_contact_form', [ $this, 'inject_lead_event_hook' ], self::FB_PRIORITY_LOW );
 		}
 
 		public function apply_filters() {
@@ -94,26 +79,32 @@ if ( ! class_exists( 'WC_Facebookcommerce_EventsTracker' ) ) :
 			);
 		}
 
+
 		/**
-		 * Base pixel code to be injected on page head. Because of this, it's better
-		 * to echo the return value than using
-		 * WC_Facebookcommerce_Utils::wc_enqueue_js() in this case
+		 * Prints the base JavaScript pixel code.
 		 */
 		public function inject_base_pixel() {
+
 			if ( self::$isEnabled ) {
+				// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 				echo $this->pixel->pixel_base_code();
 			}
 		}
 
+
 		/**
-		 * Base pixel noscript to be injected on page body. This is to avoid W3
-		 * validation error.
+		 * Prints the base <noscript> pixel code.
+		 *
+		 * This is necessary to avoid W3 validation errors.
 		 */
 		public function inject_base_pixel_noscript() {
+
 			if ( self::$isEnabled ) {
+				// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 				echo $this->pixel->pixel_base_code_noscript();
 			}
 		}
+
 
 		/**
 		 * Triggers ViewCategory for product category listings
@@ -174,7 +165,7 @@ if ( ! class_exists( 'WC_Facebookcommerce_EventsTracker' ) ) :
 			}
 
 			if ( ! is_admin() && is_search() && get_search_query() !== '' ) {
-				if ( $this->pixel->check_last_event( 'Search' ) ) {
+				if ( $this->pixel->is_last_event( 'Search' ) ) {
 					return;
 				}
 
@@ -202,216 +193,382 @@ if ( ! class_exists( 'WC_Facebookcommerce_EventsTracker' ) ) :
 			);
 		}
 
-		/**
-		 * Helper function to iterate through a cart and gather all content ids
-		 */
-		private function get_content_ids_from_cart( $cart ) {
-			$product_ids = array();
-			foreach ( $cart as $item ) {
-				$product_ids = array_merge(
-					$product_ids,
-					WC_Facebookcommerce_Utils::get_fb_content_ids( $item['data'] )
-				);
-			}
-			return $product_ids;
-		}
 
 		/**
-		 * Triggers ViewContent product pages
+		 * Triggers ViewContent event on product pages
+		 *
+		 * @internal
 		 */
 		public function inject_view_content_event() {
-			if ( ! self::$isEnabled ) {
-				return;
-			}
 			global $post;
-			$product      = wc_get_product( $post->ID );
-			$content_type = 'product_group';
-			if ( ! $product ) {
+
+			if ( ! self::$isEnabled || ! isset( $post->ID ) ) {
 				return;
 			}
 
-			// if product is a variant, fire the pixel with content_type: product_group
-			if ( WC_Facebookcommerce_Utils::is_variation_type( $product->get_type() ) ) {
+			$product = wc_get_product( $post->ID );
+
+			if ( ! $product instanceof \WC_Product ) {
+				return;
+			}
+
+			// if product is variable or grouped, fire the pixel with content_type: product_group
+			if ( $product->is_type( [ 'variable', 'grouped' ] ) ) {
+				$content_type = 'product_group';
+			} else {
 				$content_type = 'product';
 			}
 
-			$content_ids = WC_Facebookcommerce_Utils::get_fb_content_ids( $product );
-			$this->pixel->inject_event(
-				'ViewContent',
-				array(
-					'content_name' => $product->get_title(),
-					'content_ids'  => json_encode( $content_ids ),
-					'content_type' => $content_type,
-					'value'        => $product->get_price(),
-					'currency'     => get_woocommerce_currency(),
-				)
-			);
+			$this->pixel->inject_event( 'ViewContent', [
+				'content_name' => $product->get_title(),
+				'content_ids'  => wp_json_encode( \WC_Facebookcommerce_Utils::get_fb_content_ids( $product ) ),
+				'content_type' => $content_type,
+				'value'        => $product->get_price(),
+				'currency'     => get_woocommerce_currency(),
+			] );
 		}
 
+
 		/**
-		 * Triggers AddToCart for cart page and add_to_cart button clicks
+		 * Triggers an AddToCart event when a product is added to cart.
+		 *
+		 * @internal
+		 *
+		 * @param string $cart_item_key the cart item key
+		 * @param int $product_id the product identifier
+		 * @param int $quantity the added product quantity
+		 * @param int $variation_id the product variation identifier
 		 */
-		public function inject_add_to_cart_event() {
-			if ( ! self::$isEnabled ) {
+		public function inject_add_to_cart_event( $cart_item_key, $product_id, $quantity, $variation_id ) {
+
+			// bail if pixel tracking disabled or invalid variables
+			if ( ! self::$isEnabled || ! $product_id || ! $quantity ) {
 				return;
 			}
 
-			$product_ids = $this->get_content_ids_from_cart( WC()->cart->get_cart() );
+			$product = wc_get_product( $variation_id ?: $product_id );
 
-			$this->pixel->inject_event(
-				'AddToCart',
-				array(
-					'content_ids'  => json_encode( $product_ids ),
-					'content_type' => 'product',
-					'value'        => WC()->cart->total,
-					'currency'     => get_woocommerce_currency(),
-				)
-			);
+			// bail if invalid product or error
+			if ( ! $product instanceof \WC_Product ) {
+				return;
+			}
+
+			$this->pixel->inject_event( 'AddToCart', [
+				'content_ids'  => $this->get_cart_content_ids(),
+				'content_type' => 'product',
+				'contents'     => $this->get_cart_contents(),
+				'value'        => $this->get_cart_total(),
+				'currency'     => get_woocommerce_currency(),
+			] );
 		}
 
+
 		/**
-		 * Triggered by add_to_cart jquery trigger
+		 * Setups a filter to add an add to cart fragment whenever a product is added to the cart through Ajax.
+		 *
+		 * @see \WC_Facebookcommerce_EventsTracker::add_add_to_cart_event_fragment
+		 *
+		 * @internal
+		 *
+		 * @since 1.10.2
+		 */
+		public function add_filter_for_add_to_cart_fragments() {
+
+			if ( 'no' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
+				add_filter( 'woocommerce_add_to_cart_fragments', [ $this, 'add_add_to_cart_event_fragment' ] );
+			}
+		}
+
+
+		/**
+		 * Adds an add to cart fragment to trigger an AddToCart event.
+		 *
+		 * @internal
+		 *
+		 * @since 1.10.2
+		 *
+		 * @param array $fragments add to cart fragments
+		 * @return array
+		 */
+		public function add_add_to_cart_event_fragment( $fragments ) {
+
+			if ( self::$isEnabled ) {
+
+				$script = $this->pixel->get_event_script( 'AddToCart', [
+					'content_ids'  => $this->get_cart_content_ids(),
+					'content_type' => 'product',
+					'contents'     => $this->get_cart_contents(),
+					'value'        => $this->get_cart_total(),
+					'currency'     => get_woocommerce_currency(),
+				] );
+
+				$fragments['div.wc-facebook-pixel-event-placeholder'] = '<div class="wc-facebook-pixel-event-placeholder">' . $script . '</div>';
+			}
+
+			return $fragments;
+		}
+
+
+		/**
+		 * Setups a filter to add an add to cart fragment to trigger an AddToCart event on added_to_cart JS event.
+		 *
+		 * This method is used by code snippets and should not be removed.
+		 *
+		 * @see \WC_Facebookcommerce_EventsTracker::add_conditional_add_to_cart_event_fragment
+		 *
+		 * @internal
+		 *
+		 * @since 1.10.2
+		 */
+		public function add_filter_for_conditional_add_to_cart_fragment() {
+
+			if ( 'no' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
+				add_filter( 'woocommerce_add_to_cart_fragments', [ $this, 'add_conditional_add_to_cart_event_fragment' ] );
+			}
+		}
+
+
+		/**
+		 * Adds an add to cart fragment to trigger an AddToCart event on added_to_cart JS event.
+		 *
+		 * @internal
+		 *
+		 * @since 1.10.2
+		 *
+		 * @param array $fragments add to cart fragments
+		 * @return array
+		 */
+		public function add_conditional_add_to_cart_event_fragment( $fragments ) {
+
+			if ( self::$isEnabled ) {
+
+				$params = [
+					'content_ids'  => $this->get_cart_content_ids(),
+					'content_type' => 'product',
+					'contents'     => $this->get_cart_contents(),
+					'value'        => $this->get_cart_total(),
+					'currency'     => get_woocommerce_currency(),
+				];
+
+				$script = $this->pixel->get_conditional_one_time_event_script( 'AddToCart', $params, 'added_to_cart' );
+
+				$fragments['div.wc-facebook-pixel-event-placeholder'] = '<div class="wc-facebook-pixel-event-placeholder">' . $script . '</div>';
+			}
+
+			return $fragments;
+		}
+
+
+		/**
+		 * Sends a JSON response with the JavaScript code to track an AddToCart event.
+		 *
+		 * @internal
+		 * @deprecated since 1.10.2
 		 */
 		public function inject_ajax_add_to_cart_event() {
-			if ( ! self::$isEnabled ) {
+
+			wc_deprecated_function( __METHOD__, '1.10.2' );
+		}
+
+
+		/**
+		 * Sets last product added to cart to session when adding to cart a product and redirection to cart is enabled.
+		 *
+		 * @internal
+		 *
+		 * @since 1.10.2
+		 *
+		 * @param string $redirect URL redirecting to (usually cart)
+		 * @param null|\WC_Product $product the product just added to the cart
+		 * @return string
+		 */
+		public function set_last_product_added_to_cart_upon_redirect( $redirect, $product = null ) {
+
+			if ( $product instanceof \WC_Product ) {
+				WC()->session->set( 'facebook_for_woocommerce_last_product_added_to_cart', $product->get_id() );
+			} else {
+				facebook_for_woocommerce()->log( 'Cannot record AddToCart event because the product cannot be determined. Backtrace: ' . print_r( wp_debug_backtrace_summary(), true ) );
+			}
+
+			return $redirect;
+		}
+
+
+		/**
+		 * Sets last product added to cart to session when adding a product to cart from an archive page and both AJAX adding and redirection to cart are enabled.
+		 *
+		 * @internal
+		 *
+		 * @since 1.10.2
+		 *
+		 * @param null|int $product_id the ID of the product just added to the cart
+		 */
+		public function set_last_product_added_to_cart_upon_ajax_redirect( $product_id = null ) {
+
+			if ( ! $product_id ) {
+				facebook_for_woocommerce()->log( 'Cannot record AddToCart event because the product cannot be determined. Backtrace: ' . print_r( wp_debug_backtrace_summary(), true ) );
 				return;
 			}
 
-			ob_start();
+			$product = wc_get_product( $product_id );
 
-			echo '<script>';
-
-			$product_ids = $this->get_content_ids_from_cart( WC()->cart->get_cart() );
-
-			echo $this->pixel->build_event(
-				'AddToCart',
-				array(
-					'content_ids'  => json_encode( $product_ids ),
-					'content_type' => 'product',
-					'value'        => WC()->cart->total,
-					'currency'     => get_woocommerce_currency(),
-				)
-			);
-			echo '</script>';
-
-			$pixel = ob_get_clean();
-
-			wp_send_json( $pixel );
+			if ( $product instanceof \WC_Product ) {
+				WC()->session->set( 'facebook_for_woocommerce_last_product_added_to_cart', $product->get_id() );
+			}
 		}
 
+
 		/**
-		 * Trigger AddToCart for cart page and woocommerce_after_cart hook.
-		 * When set 'redirect to cart', ajax call for button click and
-		 * woocommerce_add_to_cart will be skipped.
+		 * Triggers an AddToCart event when redirecting to the cart page.
+		 *
+		 * @internal
 		 */
 		public function inject_add_to_cart_redirect_event() {
+
 			if ( ! self::$isEnabled ) {
 				return;
 			}
-			$redirect_checked = get_option( 'woocommerce_cart_redirect_after_add', 'no' );
-			if ( $redirect_checked == 'yes' ) {
-				$this->inject_add_to_cart_event();
+
+			$last_product_id = WC()->session->get( 'facebook_for_woocommerce_last_product_added_to_cart', 0 );
+
+			if ( $last_product_id > 0 ) {
+
+				$this->inject_add_to_cart_event( '', $last_product_id, 1, 0 );
+
+				WC()->session->set( 'facebook_for_woocommerce_last_product_added_to_cart', 0 );
 			}
 		}
 
+
 		/**
-		 * Triggers InitiateCheckout for checkout page
+		 * Triggers an InitiateCheckout event when customer reaches checkout page.
+		 *
+		 * @internal
 		 */
 		public function inject_initiate_checkout_event() {
-			if ( ! self::$isEnabled ||
-			  $this->pixel->check_last_event( 'InitiateCheckout' ) ) {
+
+			if ( ! self::$isEnabled || $this->pixel->is_last_event( 'InitiateCheckout' ) ) {
 				return;
 			}
 
-			$product_ids = $this->get_content_ids_from_cart( WC()->cart->get_cart() );
-
-			$this->pixel->inject_event(
-				'InitiateCheckout',
-				array(
-					'num_items'    => WC()->cart->get_cart_contents_count(),
-					'content_ids'  => json_encode( $product_ids ),
-					'content_type' => 'product',
-					'value'        => WC()->cart->total,
-					'currency'     => get_woocommerce_currency(),
-				)
-			);
+			$this->pixel->inject_event( 'InitiateCheckout', [
+				'num_items'    => $this->get_cart_num_items(),
+				'content_ids'  => $this->get_cart_content_ids(),
+				'content_type' => 'product',
+				'value'        => $this->get_cart_total(),
+				'currency'     => get_woocommerce_currency(),
+			] );
 		}
 
+
 		/**
-		 * Triggers Purchase for payment transaction complete and for the thank you
-		 * page in cases of delayed payment.
+		 * Triggers a Purchase event when checkout is completed.
+		 *
+		 * This may happen either when:
+		 * - WooCommerce signals a payment transaction complete (most gateways)
+		 * - Customer reaches Thank You page skipping payment (for gateways that do not require payment, e.g. Cheque, BACS, Cash on delivery...)
+		 *
+		 * The method checks if the event was not triggered already avoiding a duplicate.
+		 * Finally, if the order contains subscriptions, it will also track an associated Subscription event.
+		 *
+		 * @internal
+		 *
+		 * @param int $order_id order identifier
 		 */
 		public function inject_purchase_event( $order_id ) {
-			if ( ! self::$isEnabled ||
-			  $this->pixel->check_last_event( 'Purchase' ) ) {
+
+			if ( ! self::$isEnabled || $this->pixel->is_last_event( 'Purchase' ) ) {
 				return;
 			}
 
-			$this->inject_subscribe_event( $order_id );
-
-			$order        = new WC_Order( $order_id );
+			$order        = wc_get_order( $order_id );
 			$content_type = 'product';
-			$product_ids  = array();
+			$num_items    = 0;
+			$contents     = [];
+			$product_ids  = [ [] ];
+
 			foreach ( $order->get_items() as $item ) {
-				$product     = wc_get_product( $item['product_id'] );
-				$product_ids = array_merge(
-					$product_ids,
-					WC_Facebookcommerce_Utils::get_fb_content_ids( $product )
-				);
-				if ( WC_Facebookcommerce_Utils::is_variable_type( $product->get_type() ) ) {
-					$content_type = 'product_group';
+
+				if ( $product = isset( $item['product_id'] ) ? wc_get_product( $item['product_id'] ) : null ) {
+
+					$product_ids[] = \WC_Facebookcommerce_Utils::get_fb_content_ids( $product );
+
+					if ( 'product_group' !== $content_type && $product->is_type( 'variable' ) ) {
+						$content_type = 'product_group';
+					}
+
+					$quantity = $item->get_quantity();
+					$content  = new \stdClass();
+
+					$content->id       = \WC_Facebookcommerce_Utils::get_fb_retailer_id( $product );
+					$content->quantity = $quantity;
+
+					$contents[] = $content;
+					$num_items += $quantity;
 				}
 			}
 
-			$this->pixel->inject_event(
-				'Purchase',
-				array(
-					'content_ids'  => json_encode( $product_ids ),
-					'content_type' => $content_type,
-					'value'        => $order->get_total(),
-					'currency'     => get_woocommerce_currency(),
-				)
-			);
-		}
+			$this->pixel->inject_event( 'Purchase', [
+				'num_items'    => $num_items,
+				'content_ids'  => wp_json_encode( array_merge( ... $product_ids ) ),
+				'contents'     => wp_json_encode( $contents ),
+				'content_type' => $content_type,
+				'value'        => $order->get_total(),
+				'currency'     => get_woocommerce_currency(),
+			] );
 
-		/**
-		 * Triggers Subscribe for payment transaction complete of purchase with
-		 * subscription.
-		 */
-		public function inject_subscribe_event( $order_id ) {
-			if ( ! function_exists( 'wcs_get_subscriptions_for_order' ) ) {
-				return;
-			}
-
-			$subscription_ids = wcs_get_subscriptions_for_order( $order_id );
-			foreach ( $subscription_ids as $subscription_id ) {
-				$subscription = new WC_Subscription( $subscription_id );
-				$this->pixel->inject_event(
-					'Subscribe',
-					array(
-						'sign_up_fee' => $subscription->get_sign_up_fee(),
-						'value'       => $subscription->get_total(),
-						'currency'    => get_woocommerce_currency(),
-					)
-				);
-			}
-		}
-
-		/**
-		 * Triggers Purchase for thank you page for COD, BACS CHEQUE payment
-		 * which won't invoke woocommerce_payment_complete.
-		 */
-		public function inject_gateway_purchase_event( $order_id ) {
-			if ( ! self::$isEnabled ||
-			  $this->pixel->check_last_event( 'Purchase' ) ) {
-				return;
-			}
-
-			$order   = new WC_Order( $order_id );
-			$payment = $order->get_payment_method();
-			$this->inject_purchase_event( $order_id );
 			$this->inject_subscribe_event( $order_id );
 		}
+
+
+		/**
+		 * Triggers a Subscribe event when a given order contains subscription products.
+		 *
+		 * @see \WC_Facebookcommerce_EventsTracker::inject_purchase_event()
+		 *
+		 * @internal
+		 *
+		 * @param int $order_id order identifier
+		 */
+		public function inject_subscribe_event( $order_id ) {
+
+			if ( ! self::$isEnabled || ! function_exists( 'wcs_get_subscriptions_for_order' ) || $this->pixel->is_last_event( 'Subscribe' )  ) {
+				return;
+			}
+
+			foreach ( wcs_get_subscriptions_for_order( $order_id ) as $subscription ) {
+
+				// TODO consider 'StartTrial' event for free trial Subscriptions, which is the same as here (minus sign_up_fee) and tracks "when a person starts a free trial of a product or service" {FN 2020-03-20}
+
+				// TODO consider including (int|float) 'predicted_ltv': "Predicted lifetime value of a subscriber as defined by the advertiser and expressed as an exact value." {FN 2020-03-20}
+				$this->pixel->inject_event( 'Subscribe', [
+					'sign_up_fee' => $subscription->get_sign_up_fee(),
+					'value'       => $subscription->get_total(),
+					'currency'    => get_woocommerce_currency(),
+				] );
+			}
+		}
+
+
+		/**
+		 * Triggers a Purchase event.
+		 *
+		 * Duplicate of {@see \WC_Facebookcommerce_EventsTracker::inject_purchase_event()}
+		 *
+		 * TODO remove this deprecated method by version 2.0.0 or by March 2020 {FN 2020-03-20}
+		 *
+		 * @internal
+		 * @deprecated since 1.11.0
+		 *
+		 * @param int $order_id order identifier
+		 */
+		public function inject_gateway_purchase_event( $order_id ) {
+
+			wc_deprecated_function( __METHOD__, '1.11.0', __CLASS__ . '::inject_purchase_event()' );
+
+			$this->inject_purchase_event( $order_id );
+		}
+
 
 		/** Contact Form 7 Support **/
 		public function inject_lead_event_hook() {
@@ -428,6 +585,90 @@ if ( ! class_exists( 'WC_Facebookcommerce_EventsTracker' ) ) :
 				);
 			}
 		}
+
+
+		/**
+		 * Gets the cart content items count.
+		 *
+		 * @since 1.10.2
+		 *
+		 * @return int
+		 */
+		private function get_cart_num_items() {
+
+			return WC()->cart ? WC()->cart->get_cart_contents_count() : 0;
+		}
+
+
+		/**
+		 * Gets all content IDs from cart.
+		 *
+		 * @since 1.10.2
+		 *
+		 * @return string JSON data
+		 */
+		private function get_cart_content_ids() {
+
+			$product_ids = [ [] ];
+
+			if ( $cart = WC()->cart ) {
+
+				foreach ( $cart->get_cart() as $item ) {
+
+					if ( isset( $item['data'] ) && $item['data'] instanceof \WC_Product ) {
+
+						$product_ids[] = \WC_Facebookcommerce_Utils::get_fb_content_ids( $item['data'] );
+					}
+				}
+			}
+
+			return wp_json_encode( array_unique( array_merge( ... $product_ids ) ) );
+		}
+
+
+		/**
+		 * Gets the cart content data.
+		 *
+		 * @since 1.10.2
+		 *
+		 * @return string JSON data
+		 */
+		private function get_cart_contents() {
+
+			$cart_contents = [];
+
+			if ( $cart = WC()->cart ) {
+
+				foreach ( $cart->get_cart() as $item ) {
+
+					if ( ! isset( $item['data'], $item['quantity'] ) || ! $item['data'] instanceof \WC_Product ) {
+						continue;
+					}
+
+					$content = new \stdClass();
+
+					$content->id       = \WC_Facebookcommerce_Utils::get_fb_retailer_id( $item['data'] );
+					$content->quantity = $item['quantity'];
+
+					$cart_contents[] = $content;
+				}
+			}
+
+			return wp_json_encode( $cart_contents );
+		}
+
+
+		/**
+		 * Gets the cart total.
+		 *
+		 * @return float|int
+		 */
+		private function get_cart_total() {
+
+			return WC()->cart ? WC()->cart->total : 0;
+		}
+
+
 	}
 
 endif;

@@ -25,7 +25,7 @@ if ( empty( $product ) || ! $product->is_visible() ) {
 }
 
 // Check stock status.
-$out_of_stock = get_post_meta( $post->ID, '_stock_status', true ) == 'outofstock';
+$out_of_stock = ! $product->is_in_stock();
 
 // Extra post classes.
 $classes   = array();
@@ -64,7 +64,7 @@ if ( $out_of_stock ) $classes[] = 'out-of-stock';
 				<?php do_action( 'flatsome_product_box_actions' ); ?>
 			</div>
 			<?php if ( $out_of_stock ) { ?><div class="out-of-stock-label"><?php _e( 'Out of stock', 'woocommerce' ); ?></div><?php } ?>
-		</div><!-- box-image -->
+		</div>
 
 		<div class="box-text <?php echo flatsome_product_box_text_class(); ?>">
 			<?php
@@ -82,8 +82,8 @@ if ( $out_of_stock ) $classes[] = 'out-of-stock';
 				do_action( 'flatsome_product_box_after' );
 
 			?>
-		</div><!-- box-text -->
-	</div><!-- box -->
+		</div>
+	</div>
 	<?php do_action( 'woocommerce_after_shop_loop_item' ); ?>
-	</div><!-- .col-inner -->
-</div><!-- col -->
+	</div>
+</div>

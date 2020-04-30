@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 Flatsome_Option::add_section( 'blog-layout', array(
 	'title'       => __( 'Blog Layout', 'flatsome-admin' ),
@@ -61,6 +61,25 @@ Flatsome_Option::add_field( 'option',  array(
 		'2-col' => $image_url . 'blog-two-col.svg',
 		'3-col' =>$image_url . 'blog-three-col.svg',
 		'list' => $image_url . 'blog-list.svg',
+	),
+));
+
+Flatsome_Option::add_field( 'option', array(
+	'type'            => 'radio-buttonset',
+	'settings'        => 'blog_style_type',
+	'label'           => __( 'Posts Layout Type', 'flatsome-admin' ) . ' (NEW)',
+	'section'         => 'blog-layout',
+	'default'         => 'masonry',
+	'choices'         => array(
+		'row'     => __( 'Row', 'flatsome-admin' ),
+		'masonry' => __( 'Masonry', 'flatsome-admin' ),
+	),
+	'active_callback' => array(
+		array(
+			'setting'  => 'blog_style',
+			'operator' => 'contains',
+			'value'    => array( '2-col', '3-col' ),
+		),
 	),
 ));
 
@@ -158,20 +177,5 @@ Flatsome_Option::add_field( 'option',  array(
 		'left' =>	$image_url . 'align-left.svg',
 		'center' => $image_url . 'align-center.svg',
 		'right' => 	$image_url . 'align-right.svg',
-	),
-));
-
-
-Flatsome_Option::add_field( 'option',  array(
-	'type'        => 'radio-image',
-	'settings'     => 'blog_badge_style',
-	'label'       => __( 'Date Box Style', 'flatsome-admin' ),
-	'section'     => 'blog-layout',
-	'default'     => 'outline',
-	'choices'     => array(
-		'square' => $image_url . 'badge-square.svg',
-		'circle' => $image_url . 'badge-circle.svg',
-		'circle-inside' => $image_url . 'badge-circle-inside.svg',
-		'outline' => $image_url . 'badge-outline.svg',
 	),
 ));

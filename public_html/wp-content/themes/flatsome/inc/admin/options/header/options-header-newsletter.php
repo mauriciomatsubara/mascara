@@ -192,7 +192,7 @@ Flatsome_Option::add_field( 'option',
 		'default'         => 3000,
 		'choices'         => array(
 			'min'  => 1000,
-			'max'  => 60000,
+			'max'  => 300000,
 			'step' => 500,
 		),
 	)
@@ -220,6 +220,23 @@ Flatsome_Option::add_field( 'option',
 		),
 	)
 );
+
+Flatsome_Option::add_field( 'option', array(
+	'type'            => 'text',
+	'settings'        => 'header_newsletter_version',
+	'active_callback' => array(
+		array(
+			'setting'  => 'header_newsletter_auto_open',
+			'operator' => '==',
+			'value'    => true,
+		),
+	),
+	'label'           => __( 'Version', 'flatsome-admin' ),
+	'description'     => __( 'Increase the version to reopen a "show once" configured newsletter popup to visitors after making changes to it.', 'flatsome-admin' ),
+	'section'         => 'header_newsletter',
+	'transport'       => $transport,
+	'default'         => '1',
+) );
 
 function flatsome_refresh_header_newsletter_partials( WP_Customize_Manager $wp_customize ) {
 

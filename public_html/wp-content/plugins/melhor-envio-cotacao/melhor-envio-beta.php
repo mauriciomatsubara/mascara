@@ -1,13 +1,12 @@
 <?php
 
-session_start();
 require __DIR__ . '/vendor/autoload.php';
 
 /*
 Plugin Name: Melhor Envio v2
 Plugin URI: https://melhorenvio.com.br
 Description: Plugin para cotação e compra de fretes utilizando a API da Melhor Envio.
-Version: 2.6.1
+Version: 2.6.2
 Author: Melhor Envio
 Author URI: melhorenvio.com.br
 License: GPL2
@@ -85,7 +84,7 @@ final class Base_Plugin {
      *
      * @var string
      */
-    public $version = '2.6.1';
+    public $version = '2.6.2';
 
     /**
      * Holds various class instances
@@ -110,11 +109,11 @@ final class Base_Plugin {
 
         add_action( 'plugins_loaded', array( $this, 'init_plugin' ), 9, false );
 
-        function my_plugin_load_plugin_textdomain() {
+        function melhor_envio_load_plugin_textdomain() {
             load_plugin_textdomain( 'melhor-envio', FALSE, basename( dirname( __FILE__ ) ) . '/languages/' );
         }
 
-        add_action( 'plugins_loaded', 'my_plugin_load_plugin_textdomain' );
+        add_action( 'plugins_loaded', 'melhor_envio_load_plugin_textdomain' );
 
         self::clearCotationSession();
     }
@@ -405,6 +404,7 @@ final class Base_Plugin {
         add_action('wp_ajax_get_balance', [$users, 'getBalance']);
         add_action('wp_ajax_insert_invoice_order', [$order, 'insertInvoiceOrder']);
         add_action('wp_ajax_get_agency_jadlog', [$conf, 'getAgencyJadlog']);
+        add_action('wp_ajax_get_all_agencies_jadlog', [$conf, 'getAgencyJadlog']);
         add_action('wp_ajax_nopriv_cotation_product_page', [$cotacao, 'cotationProductPage']);
         add_action('wp_ajax_cotation_product_page', [$cotacao, 'cotationProductPage']);
         add_action('wp_ajax_update_order', [$cotacao, 'refreshCotation']);
@@ -489,6 +489,8 @@ final class Base_Plugin {
                 wp_remote_get('https://api.melhorenvio.com/v2/me', $params)
             );
 
+            $response['server'] = (new LogsController())->getServerStatus();
+
             echo json_encode($response);
             die;
         });
@@ -534,26 +536,30 @@ final class Base_Plugin {
 
         // Todas as configurações
         add_action('wp_ajax_get_configuracoes', function(){
+            $responseAgencies = (new Models\Agency())->getAgencies();
 
             $data = [
-                'addresses'        => (new Models\Address())->getAddressesShopping()['addresses'],
-                'stores'           => (new Models\Store())->getStories()['stores'],
-                'agencies'         => (new Models\Agency())->getAgencies()['agencies'],
-                'calculator'       => (new Models\CalculatorShow())->get(),
-                'use_insurance'    => (new Models\UseInsurance())->get(),
-                'where_calculator' => (!get_option('melhor_envio_option_where_show_calculator')) ? 'woocommerce_before_add_to_cart_button' : get_option('melhor_envio_option_where_show_calculator'),
-                'metodos'          => (new Controllers\ConfigurationController())->getMethodsEnablesArray(),
-                'services_codes'   => (new ShippingMethodsController())->getCodes(),
-                'style_calculator' => (new Controllers\ConfigurationController())->getStyleArray(),
-                'path_plugins'     => (new Controllers\ConfigurationController())->getPathPluginsArray(),
-                'options_calculator' => (new Controllers\ConfigurationController())->getOptionsCalculator()
+                'addresses'           => (new Models\Address())->getAddressesShopping()['addresses'],
+                'stores'              => (new Models\Store())->getStories()['stores'],
+                'agencies'            => $responseAgencies['agencies'],
+                'allAgencies'         => $responseAgencies['allAgencies'],
+                'agencySelected'      => $responseAgencies['agencySelected'],
+                'calculator'          => (new Models\CalculatorShow())->get(),
+                'all_agencies_jadlog' => (new Models\JadlogAgenciesShow())->get(),
+                'use_insurance'       => (new Models\UseInsurance())->get(),
+                'where_calculator'    => (!get_option('melhor_envio_option_where_show_calculator')) ? 'woocommerce_before_add_to_cart_button' : get_option('melhor_envio_option_where_show_calculator'),
+                'metodos'             => (new Controllers\ConfigurationController())->getMethodsEnablesArray(),
+                'services_codes'      => (new ShippingMethodsController())->getCodes(),
+                'style_calculator'    => (new Controllers\ConfigurationController())->getStyleArray(),
+                'path_plugins'        => (new Controllers\ConfigurationController())->getPathPluginsArray(),
+                'options_calculator'  => (new Controllers\ConfigurationController())->getOptionsCalculator()
             ];
 
             echo json_encode($data);
             die;
         });
 
-        // Salvar as confifurações
+        // Salvar as configurações
         add_action('wp_ajax_save_configuracoes', function() {
             echo json_encode((new Controllers\ConfigurationController())->saveAll($_POST));
             die;

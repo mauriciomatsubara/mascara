@@ -122,7 +122,12 @@ if ( ! function_exists( 'of_options' ) ) {
 		$of_options[] = array(
 			'name' => 'Performance',
 			'type' => 'heading',
-			'desc' => ' <strong>Use with caution! Disable if you have plugin compatibility problems.</strong>',
+		);
+
+		$of_options[] = array(
+			'name' => '',
+			'type' => 'info',
+			'desc' => '<p style="font-size:14px">Use with caution! Disable if you have plugin compatibility problems.</p>',
 		);
 
 		$of_options[] = array(
@@ -174,6 +179,14 @@ if ( ! function_exists( 'of_options' ) ) {
 		);
 
 		$of_options[] = array(
+			'name' => 'Disable jQuery Migrate',
+			'type' => 'checkbox',
+			'id'   => 'jquery_migrate',
+			'std'  => 0,
+			'desc' => 'Remove jQuery Migrate. Most up-to-date front-end code and plugins don’t require jquery-migrate.min.js. More often than not, keeping this - simply adds unnecessary load to your site.',
+		);
+
+		$of_options[] = array(
 			'name' => 'Site Loader',
 			'type' => 'heading',
 		);
@@ -217,14 +230,14 @@ if ( ! function_exists( 'of_options' ) ) {
 		$of_options[] = array(
 			'name' => 'Live Search',
 			'id'   => 'live_search',
-			'desc' => 'Enable live search for products and pages.',
+			'desc' => 'Enable live search for products, pages and posts.',
 			'std'  => 1,
 			'type' => 'checkbox',
 		);
 
 		$of_options[] = array(
 			'name' => 'Search placeholder',
-			'desc' => 'Change the search field placeholder',
+			'desc' => 'Change the search field placeholder.',
 			'id'   => 'search_placeholder',
 			'type' => 'text',
 		);
@@ -234,9 +247,22 @@ if ( ! function_exists( 'of_options' ) ) {
 			$of_options[] = array(
 				'name' => 'Show Blog and pages in search results',
 				'id'   => 'search_result',
-				'desc' => 'Enable blog and pages in search results',
+				'desc' => 'Enable blog and pages in search results.',
 				'std'  => 1,
 				'type' => 'checkbox',
+			);
+
+			$of_options[] = array(
+				'name'    => 'Posts and pages list style',
+				'id'      => 'search_result_style',
+				'desc'    => 'Display results as row, masonry or slider style.',
+				'type'    => 'select',
+				'std'     => 'slider',
+				'options' => array(
+					'row'     => 'Row',
+					'masonry' => 'Masonry',
+					'slider'  => 'Slider',
+				),
 			);
 
 			$of_options[] = array(

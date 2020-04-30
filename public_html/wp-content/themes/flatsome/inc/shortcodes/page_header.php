@@ -178,7 +178,7 @@ function flatsome_page_header_shortcode($atts) {
       <div class="title-content <?php echo implode( ' ', $content_classes ); ?>">
         <?php echo $content; ?>
       </div>
-    </div><!-- flex-row -->
+    </div>
 
      <?php
       // Get custom CSS
@@ -211,9 +211,9 @@ function flatsome_page_header_shortcode($atts) {
       );
       echo ux_builder_element_style_tag($_id, $args, $atts);
     ?>
-  </div><!-- .page-title -->
+  </div>
   <?php if($style == 'divided') echo '<div class="container header-wrapper-divider"><hr/></div>'; ?>
-  </div><!-- .page-header-wrapper -->
+  </div>
   <?php
    $content = ob_get_contents();
    ob_end_clean();

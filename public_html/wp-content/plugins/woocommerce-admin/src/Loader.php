@@ -9,6 +9,8 @@
 namespace Automattic\WooCommerce\Admin;
 
 use \_WP_Dependency;
+use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 
 /**
  * Loader Class.
@@ -34,6 +36,13 @@ class Loader {
 	protected static $classes = array();
 
 	/**
+	 * WordPress capability required to use analytics features.
+	 *
+	 * @var string
+	 */
+	protected static $required_capability = null;
+
+	/**
 	 * Get class instance.
 	 */
 	public static function get_instance() {
@@ -49,7 +58,8 @@ class Loader {
 	 */
 	public function __construct() {
 		add_action( 'init', array( __CLASS__, 'define_tables' ) );
-		add_action( 'init', array( __CLASS__, 'load_features' ) );
+		// Load feature before WooCommerce update hooks.
+		add_action( 'init', array( __CLASS__, 'load_features' ), 4 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'register_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'inject_wc_settings_dependencies' ), 14 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'load_scripts' ), 15 );
@@ -67,6 +77,9 @@ class Loader {
 		add_action( 'admin_head', array( __CLASS__, 'remove_notices' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'inject_before_notices' ), -9999 );
 		add_action( 'admin_notices', array( __CLASS__, 'inject_after_notices' ), PHP_INT_MAX );
+
+		// Added this hook to delete the field woocommerce_onboarding_homepage_post_id when deleting the homepage.
+		add_action( 'trashed_post', array( __CLASS__, 'delete_homepage' ) );
 
 		// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
 		add_action( 'admin_head', array( __CLASS__, 'remove_app_entry_page_menu_item' ), 20 );
@@ -96,12 +109,48 @@ class Loader {
 	}
 
 	/**
+	 * Returns true if WooCommerce Admin is currently running in a development environment.
+	 */
+	public static function is_dev() {
+		if ( self::is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Gets an array of enabled WooCommerce Admin features/sections.
 	 *
 	 * @return bool Enabled Woocommerce Admin features/sections.
 	 */
 	public static function get_features() {
 		return apply_filters( 'woocommerce_admin_features', array() );
+	}
+
+	/**
+	 * Gets WordPress capability required to use analytics features.
+	 *
+	 * @return string
+	 */
+	public static function get_analytics_capability() {
+		if ( null === static::$required_capability ) {
+			/**
+			 * Filters the required capability to use the analytics features.
+			 *
+			 * @param string $capability WordPress capability.
+			 */
+			static::$required_capability = apply_filters( 'woocommerce_analytics_menu_capability', 'view_woocommerce_reports' );
+		}
+		return static::$required_capability;
+	}
+
+	/**
+	 * Helper function indicating whether the current user has the required analytics capability.
+	 *
+	 * @return bool
+	 */
+	public static function user_can_analytics() {
+		return current_user_can( static::get_analytics_capability() );
 	}
 
 	/**
@@ -113,6 +162,28 @@ class Loader {
 	public static function is_feature_enabled( $feature ) {
 		$features = self::get_features();
 		return in_array( $feature, $features, true );
+	}
+
+	/**
+	 * Returns if the onboarding feature of WooCommerce Admin should be enabled.
+	 *
+	 * While we preform an a/b test of onboarding, the feature will be enabled within the plugin build, but only if the user recieved the test/opted in.
+	 *
+	 * @return bool Returns true if the onboarding is enabled.
+	 */
+	public static function is_onboarding_enabled() {
+		if ( ! self::is_feature_enabled( 'onboarding' ) ) {
+			return false;
+		}
+
+		$onboarding_opt_in        = 'yes' === get_option( Onboarding::OPT_IN_OPTION, 'no' );
+		$legacy_onboarding_opt_in = 'yes' === get_option( 'wc_onboarding_opt_in', 'no' );
+
+		if ( $onboarding_opt_in || $legacy_onboarding_opt_in ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -170,14 +241,13 @@ class Loader {
 	 * @todo The entry point for the embed needs moved to this class as well.
 	 */
 	public static function register_page_handler() {
-		$analytics_cap = apply_filters( 'woocommerce_admin_analytics_menu_capability', 'view_woocommerce_reports' );
 		wc_admin_register_page(
 			array(
 				'id'         => 'woocommerce-dashboard', // Expected to be overridden if dashboard is enabled.
 				'parent'     => 'woocommerce',
 				'title'      => null,
 				'path'       => self::APP_ENTRY_POINT,
-				'capability' => $analytics_cap,
+				'capability' => static::get_analytics_capability(),
 			)
 		);
 
@@ -222,7 +292,7 @@ class Loader {
 		wp_register_script(
 			'wc-csv',
 			self::get_url( 'csv-export/index.js' ),
-			array(),
+			array( 'moment' ),
 			self::get_file_version( 'csv-export/index.js' ),
 			true
 		);
@@ -256,8 +326,16 @@ class Loader {
 		wp_register_script(
 			'wc-date',
 			self::get_url( 'date/index.js' ),
-			array( 'wp-date', 'wp-i18n' ),
+			array( 'moment', 'wp-date', 'wp-i18n' ),
 			self::get_file_version( 'date/index.js' ),
+			true
+		);
+
+		wp_register_script(
+			'wc-store-data',
+			self::get_url( 'data/index.js' ),
+			array(),
+			self::get_file_version( 'data/index.js' ),
 			true
 		);
 
@@ -267,11 +345,13 @@ class Loader {
 			'wc-components',
 			self::get_url( 'components/index.js' ),
 			array(
+				'moment',
 				'wp-api-fetch',
-				'wp-components',
 				'wp-data',
+				'wp-data-controls',
 				'wp-element',
 				'wp-hooks',
+				'wp-html-entities',
 				'wp-i18n',
 				'wp-keycodes',
 				'wc-csv',
@@ -279,6 +359,7 @@ class Loader {
 				'wc-date',
 				'wc-navigation',
 				'wc-number',
+				'wc-store-data',
 			),
 			self::get_file_version( 'components/index.js' ),
 			true
@@ -289,7 +370,7 @@ class Loader {
 		wp_register_style(
 			'wc-components',
 			self::get_url( 'components/style.css' ),
-			array( 'wp-components' ),
+			array(),
 			self::get_file_version( 'components/style.css' )
 		);
 		wp_style_add_data( 'wc-components', 'rtl', 'replace' );
@@ -297,7 +378,7 @@ class Loader {
 		wp_register_style(
 			'wc-components-ie',
 			self::get_url( 'components/ie.css' ),
-			array( 'wp-components' ),
+			array(),
 			self::get_file_version( 'components/ie.css' )
 		);
 		wp_style_add_data( 'wc-components-ie', 'rtl', 'replace' );
@@ -305,7 +386,7 @@ class Loader {
 		wp_register_script(
 			WC_ADMIN_APP,
 			self::get_url( 'app/index.js' ),
-			array( 'wc-components', 'wc-navigation', 'wp-date', 'wp-html-entities', 'wp-keycodes', 'wp-i18n' ),
+			array( 'wc-components', 'wc-navigation', 'wp-date', 'wp-html-entities', 'wp-keycodes', 'wp-i18n', 'moment' ),
 			self::get_file_version( 'app/index.js' ),
 			true
 		);
@@ -340,7 +421,11 @@ class Loader {
 	 * Loads the required scripts on the correct pages.
 	 */
 	public static function load_scripts() {
-		if ( ! self::is_admin_page() && ! self::is_embed_page() ) {
+		if ( ! self::is_admin_or_embed_page() ) {
+			return;
+		}
+
+		if ( ! static::user_can_analytics() ) {
 			return;
 		}
 
@@ -349,7 +434,7 @@ class Loader {
 		wp_enqueue_style( 'wc-material-icons' );
 
 		// Use server-side detection to prevent unneccessary stylesheet loading in other browsers.
-		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : ''; // WPCS: sanitization ok.
+		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : ''; // phpcs:ignore sanitization ok.
 		preg_match( '/MSIE (.*?);/', $user_agent, $matches );
 		if ( count( $matches ) < 2 ) {
 			preg_match( '/Trident\/\d{1,2}.\d{1,2}; rv:([0-9]*)/', $user_agent, $matches );
@@ -359,6 +444,14 @@ class Loader {
 			wp_enqueue_style( 'wc-admin-ie' );
 		}
 
+	}
+
+	/**
+	 * Returns true if we are on a JS powered admin page or
+	 * a "classic" (non JS app) powered admin page (an embedded page).
+	 */
+	public static function is_admin_or_embed_page() {
+		return self::is_admin_page() || self::is_embed_page();
 	}
 
 	/**
@@ -390,6 +483,9 @@ class Loader {
 	 * @param array $section Section to create breadcrumb from.
 	 */
 	private static function output_breadcrumbs( $section ) {
+		if ( ! static::user_can_analytics() ) {
+			return;
+		}
 		?>
 		<span>
 		<?php if ( is_array( $section ) ) : ?>
@@ -410,6 +506,10 @@ class Loader {
 			return;
 		}
 
+		if ( ! static::user_can_analytics() ) {
+			return;
+		}
+
 		$sections = self::get_embed_breadcrumbs();
 		$sections = is_array( $sections ) ? $sections : array( $sections );
 		?>
@@ -417,9 +517,6 @@ class Loader {
 			<div class="woocommerce-layout">
 				<div class="woocommerce-layout__header is-embed-loading">
 					<h1 class="woocommerce-layout__header-breadcrumbs">
-					<span>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-admin' ) ); ?>"><?php esc_html_e( 'WooCommerce', 'woocommerce-admin' ); ?></a>
-					</span>
 						<?php foreach ( $sections as $section ) : ?>
 							<?php self::output_breadcrumbs( $section ); ?>
 						<?php endforeach; ?>
@@ -436,7 +533,7 @@ class Loader {
 	 * @param string $admin_body_class Body class to add.
 	 */
 	public static function add_admin_body_classes( $admin_body_class = '' ) {
-		if ( ! self::is_admin_page() && ! self::is_embed_page() ) {
+		if ( ! self::is_admin_or_embed_page() ) {
 			return $admin_body_class;
 		}
 
@@ -466,7 +563,7 @@ class Loader {
 	 * Removes notices that should not be displayed on WC Admin pages.
 	 */
 	public static function remove_notices() {
-		if ( ! self::is_admin_page() && ! self::is_embed_page() ) {
+		if ( ! self::is_admin_or_embed_page() ) {
 			return;
 		}
 
@@ -480,20 +577,32 @@ class Loader {
 	 * Runs before admin notices action and hides them.
 	 */
 	public static function inject_before_notices() {
-		if ( ( ! self::is_admin_page() && ! self::is_embed_page() ) ) {
+		if ( ! self::is_admin_or_embed_page() ) {
 			return;
 		}
+
+		// Wrap the notices in a hidden div to prevent flickering before
+		// they are moved elsewhere in the page by WordPress Core.
 		echo '<div class="woocommerce-layout__notice-list-hide" id="wp__notice-list">';
-		echo '<div class="wp-header-end" id="woocommerce-layout__notice-catcher"></div>'; // https://github.com/WordPress/WordPress/blob/f6a37e7d39e2534d05b9e542045174498edfe536/wp-admin/js/common.js#L737.
+
+		if ( self::is_admin_page() ) {
+			// Capture all notices and hide them. WordPress Core looks for
+			// `.wp-header-end` and appends notices after it if found.
+			// https://github.com/WordPress/WordPress/blob/f6a37e7d39e2534d05b9e542045174498edfe536/wp-admin/js/common.js#L737 .
+			echo '<div class="wp-header-end" id="woocommerce-layout__notice-catcher"></div>';
+		}
 	}
 
 	/**
 	 * Runs after admin notices and closes div.
 	 */
 	public static function inject_after_notices() {
-		if ( ( ! self::is_admin_page() && ! self::is_embed_page() ) ) {
+		if ( ! self::is_admin_or_embed_page() ) {
 			return;
 		}
+
+		// Close the hidden div used to prevent notices from flickering before
+		// they are inserted elsewhere in the page.
 		echo '</div>';
 	}
 
@@ -506,10 +615,7 @@ class Loader {
 	public static function update_admin_title( $admin_title ) {
 		if (
 			! did_action( 'current_screen' ) ||
-			(
-				! self::is_admin_page() &&
-				! self::is_embed_page()
-			)
+			! self::is_admin_page()
 		) {
 			return $admin_title;
 		}
@@ -554,6 +660,7 @@ class Loader {
 			global $wp_locale;
 			// inject data not available via older versions of wc_blocks/woo.
 			$settings['orderStatuses'] = self::get_order_statuses( wc_get_order_statuses() );
+			$settings['stockStatuses'] = self::get_order_statuses( wc_get_product_stock_status_options() );
 			$settings['currency']      = self::get_currency_settings();
 			$settings['locale']        = [
 				'siteLocale'    => isset( $settings['siteLocale'] )
@@ -583,9 +690,22 @@ class Loader {
 			}
 		}
 
+		$preload_settings = apply_filters( 'woocommerce_admin_preload_settings', array() );
+		if ( ! empty( $preload_settings ) ) {
+			$setting_options = new \WC_REST_Setting_Options_V2_Controller();
+			foreach ( $preload_settings as $group ) {
+				$group_settings   = $setting_options->get_group_settings( $group );
+				$preload_settings = [];
+				foreach ( $group_settings as $option ) {
+					$preload_settings[ $option['id'] ] = $option['value'];
+				}
+				$settings['preloadSettings'][ $group ] = $preload_settings;
+			}
+		}
+
 		$current_user_data = array();
 		foreach ( self::get_user_data_fields() as $user_field ) {
-			$current_user_data[ $user_field ] = json_decode( get_user_meta( get_current_user_id(), 'wc_admin_' . $user_field, true ) );
+			$current_user_data[ $user_field ] = json_decode( get_user_meta( get_current_user_id(), 'woocommerce_admin_' . $user_field, true ) );
 		}
 		$settings['currentUserData']      = $current_user_data;
 		$settings['reviewsEnabled']       = get_option( 'woocommerce_enable_reviews' );
@@ -594,7 +714,18 @@ class Loader {
 		$settings['notifyLowStockAmount'] = get_option( 'woocommerce_notify_low_stock_amount' );
 		// @todo On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired,
 		// and `wcAssetUrl` can be used in its place throughout the codebase.
-		$settings['wcAdminAssetUrl'] = plugins_url( 'images/', dirname( __DIR__ ) . '/woocommerce-admin.php' );
+		$settings['wcAdminAssetUrl']   = plugins_url( 'images/', dirname( __DIR__ ) . '/woocommerce-admin.php' );
+		$settings['wcVersion']         = WC_VERSION;
+		$settings['siteUrl']           = site_url();
+		$settings['onboardingEnabled'] = self::is_onboarding_enabled();
+		$settings['dateFormat']        = get_option( 'date_format' );
+		// Plugins that depend on changing the translation work on the server but not the client -
+		// WooCommerce Branding is an example of this - so pass through the translation of
+		// 'WooCommerce' to wcSettings.
+		$settings['woocommerceTranslation'] = __( 'WooCommerce', 'woocommerce-admin' );
+		// We may have synced orders with a now-unregistered status.
+		// E.g An extension that added statuses is now inactive or removed.
+		$settings['unregisteredOrderStatuses'] = self::get_unregistered_order_statuses();
 
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
@@ -632,6 +763,21 @@ class Loader {
 	}
 
 	/**
+	 * Get all order statuses present in analytics tables that aren't registered.
+	 *
+	 * @return array Unregistered order statuses.
+	 */
+	public static function get_unregistered_order_statuses() {
+		$registered_statuses   = wc_get_order_statuses();
+		$all_synced_statuses   = OrdersDataStore::get_all_statuses();
+		$unregistered_statuses = array_diff( $all_synced_statuses, array_keys( $registered_statuses ) );
+		$formatted_status_keys = self::get_order_statuses( array_fill_keys( $unregistered_statuses, '' ) );
+		$formatted_statuses    = array_keys( $formatted_status_keys );
+
+		return array_combine( $formatted_statuses, $formatted_statuses );
+	}
+
+	/**
 	 * Register the admin settings for use in the WC REST API
 	 *
 	 * @param array $groups Array of setting groups.
@@ -653,7 +799,10 @@ class Loader {
 	 * @return array
 	 */
 	public static function add_settings( $settings ) {
-		$statuses   = self::get_order_statuses( wc_get_order_statuses() );
+		$unregistered_statuses = self::get_unregistered_order_statuses();
+		$registered_statuses   = self::get_order_statuses( wc_get_order_statuses() );
+		$all_statuses          = array_merge( $unregistered_statuses, $registered_statuses );
+
 		$settings[] = array(
 			'id'          => 'woocommerce_excluded_report_order_statuses',
 			'option_key'  => 'woocommerce_excluded_report_order_statuses',
@@ -661,7 +810,7 @@ class Loader {
 			'description' => __( 'Statuses that should not be included when calculating report totals.', 'woocommerce-admin' ),
 			'default'     => array( 'pending', 'cancelled', 'failed' ),
 			'type'        => 'multiselect',
-			'options'     => $statuses,
+			'options'     => $all_statuses,
 		);
 		$settings[] = array(
 			'id'          => 'woocommerce_actionable_order_statuses',
@@ -670,7 +819,7 @@ class Loader {
 			'description' => __( 'Statuses that require extra action on behalf of the store admin.', 'woocommerce-admin' ),
 			'default'     => array( 'processing', 'on-hold' ),
 			'type'        => 'multiselect',
-			'options'     => $statuses,
+			'options'     => $all_statuses,
 		);
 		$settings[] = array(
 			'id'          => 'woocommerce_default_date_range',
@@ -754,7 +903,7 @@ class Loader {
 	public static function get_user_data_values( $user ) {
 		$values = array();
 		foreach ( self::get_user_data_fields() as $field ) {
-			$values[ $field ] = get_user_meta( $user['id'], 'wc_admin_' . $field, true );
+			$values[ $field ] = self::get_user_data_field( $user['id'], $field );
 		}
 		return $values;
 	}
@@ -776,7 +925,7 @@ class Loader {
 		foreach ( $values as $field => $value ) {
 			if ( in_array( $field, $fields, true ) ) {
 				$updates[ $field ] = $value;
-				update_user_meta( $user->ID, 'wc_admin_' . $field, $value );
+				self::update_user_data_field( $user->ID, $field, $value );
 			}
 		}
 		return $updates;
@@ -790,7 +939,45 @@ class Loader {
 	 * @return array Fields to expose over the WP user endpoint.
 	 */
 	public static function get_user_data_fields() {
-		return apply_filters( 'wc_admin_get_user_data_fields', array() );
+		return apply_filters( 'woocommerce_admin_get_user_data_fields', array() );
+	}
+
+	/**
+	 * Helper to update user data fields.
+	 *
+	 * @param int    $user_id  User ID.
+	 * @param string $field Field name.
+	 * @param mixed  $value  Field value.
+	 */
+	public static function update_user_data_field( $user_id, $field, $value ) {
+		update_user_meta( $user_id, 'woocommerce_admin_' . $field, $value );
+	}
+
+	/**
+	 * Helper to retrive user data fields.
+	 *
+	 * Migrates old key prefixes as well.
+	 *
+	 * @param int    $user_id  User ID.
+	 * @param string $field Field name.
+	 * @return mixed The user field value.
+	 */
+	public static function get_user_data_field( $user_id, $field ) {
+		$meta_value = get_user_meta( $user_id, 'woocommerce_admin_' . $field, true );
+
+		// Migrate old meta values (prefix changed from `wc_admin_` to `woocommerce_admin_`).
+		if ( '' === $meta_value ) {
+			$old_meta_value = get_user_meta( $user_id, 'wc_admin_' . $field, true );
+
+			if ( '' !== $old_meta_value ) {
+				self::update_user_data_field( $user_id, $field, $old_meta_value );
+				delete_user_meta( $user_id, 'wc_admin_' . $field );
+
+				$meta_value = $old_meta_value;
+			}
+		}
+
+		return $meta_value;
 	}
 
 	/**
@@ -812,6 +999,21 @@ class Loader {
 					$script->deps[] = 'wc-settings';
 				}
 			}
+		}
+	}
+
+	/**
+	 * Delete woocommerce_onboarding_homepage_post_id field when the homepage is deleted
+	 *
+	 * @param int $post_id The deleted post id.
+	 */
+	public static function delete_homepage( $post_id ) {
+		if ( 'page' !== get_post_type( $post_id ) ) {
+			return;
+		}
+		$homepage_id = intval( get_option( 'woocommerce_onboarding_homepage_post_id', false ) );
+		if ( $homepage_id === $post_id ) {
+			delete_option( 'woocommerce_onboarding_homepage_post_id' );
 		}
 	}
 }

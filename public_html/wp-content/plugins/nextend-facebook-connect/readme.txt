@@ -3,9 +3,9 @@ Contributors: nextendweb
 Tags: social login, facebook, google, twitter, linkedin, register, login, social, nextend facebook connect, social sign in
 Donate link: https://www.facebook.com/nextendweb
 Requires at least: 4.5
-Tested up to: 5.2
-Stable tag: 3.0.20
-Requires PHP: 5.4
+Tested up to: 5.3.2
+Stable tag: 3.0.22
+Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,7 +43,7 @@ Providers are the services which the visitors can use to register and log in to 
 #### Additional features in the [Pro addon](https://nextendweb.com/social-login/)
 
 * WooCommerce compatibility
-* Pro providers: LinkedIn, Amazon, VKontakte VK.com and more coming soon
+* Pro providers: LinkedIn, Amazon, VKontakte, WordPress.com, Yahoo, PayPal, Disqus, Apple and more coming soon
 * Configure whether email address should be asked on registration at each provider
 * Configure whether username should be asked on registration at each provider
 * Choose from icons or wide buttons
@@ -117,6 +117,37 @@ Using the Pro Addon you can set where the login buttons should appear on the Reg
 2. Nextend Social Login and Register in the profile page for account linking
 
 == Changelog ==
+
+= 3.0.22 =
+* Fix: Updated language files
+
+* PRO: Fix: Plugin could not be activated because it triggered a fatal error. - Fix for the problem: Deactivate and delete "Nextend Social Login Pro Addon" plugin with version 3.0.21, then activate the version 3.0.22.
+
+= 3.0.21 =
+* Compatibility: PHP 7 or greater is required for the new version!.
+* Fix: Icon style - Icons will be wrapped into multiple lines when there is no more room for them.
+* Fix: Social buttons will no longer be distorted when the page is translated with Google translator.
+* Fix: WPLMS theme - social button style and duplicated social buttons.
+* Fix: WP Rocket - compatibility with combine JavaScript feature.
+* Fix: Popup target window when the social buttons appear in certain modals.
+* Fix: Ultimate Member avatars with social registration.
+* Fix: Avatar will be synchronized again, if the attachment was already set, but the file doesn't exist.
+* Improvement: Database - Register, Link and Login date will be stored in database.
+* Improvement: Improvement: Google - Light skin will be the default button skin.
+* Improvement:  Pages which are being used by other plugins will be filtered out from [Page for register flow and OAuth redirect uri proxy page](https://nextendweb.com/nextend-social-login-docs/global-settings/)
+* Improvement: The Getting Started sections are updated with new steps.
+* Improvement: New registrations happening with social login will also be displayed in the BuddyPress - Activity log.
+* Improvement: Shortcode [provider](https://nextendweb.com/nextend-social-login-docs/theme-developer/#shortcode) parameter will also define the visibility of the link and unlink buttons.
+* Feature: Option to disable the Google account select prompt on each login.
+* For developers: The provider instance can now be accessed over "nsl_registration_form_start" and "nsl_registration_form_end" actions
+
+* PRO: Provider: [Apple](https://nextendweb.com/nextend-social-login-docs/provider-apple/)
+* PRO: Fix: Plugin update error - WordPress cached the wrong update url.
+* PRO: Fix: Social button layouts in Theme My Login forms.
+* PRO: Fix: Ultimate Member and [Support login restrictions](https://nextendweb.com/nextend-social-login-docs/login-restriction/) - Users will be redirected to the Ultimate Member login page after the registration.
+* PRO: Improvement: Yahoo new endpoint and app creation guide. New and deprecated [Sync data](https://nextendweb.com/nextend-social-login-docs/provider-yahoo/#sync_data) fields.
+* PRO: Improvement: WooCommerce automatically generated password feature support when [Registration notification sent to](https://nextendweb.com/nextend-social-login-docs/global-settings/#pro-settings) is set to User or User and Admin.
+
 = 3.0.20 =
 * Fix: Ultimate Member Auto Approve + Support Login Restriction - Avatars will be synchronized.
 * Fix: Error message didn't show up when an "OAuth redirect uri proxy page" was selected.

@@ -241,7 +241,7 @@ while ( $recentPosts->have_posts() ) : $recentPosts->the_post();
   				                </div>
   				            </div>
   						<?php } ?>
-  					</div><!-- .box-image -->
+  					</div>
           <?php } ?>
 					<div class="box-text <?php echo $classes_text; ?>" <?php echo get_shortcode_inline_css($css_args); ?>>
 					<div class="box-text-inner blog-post-inner">
@@ -287,8 +287,8 @@ while ( $recentPosts->have_posts() ) : $recentPosts->the_post();
 
 					<?php do_action('flatsome_blog_post_after'); ?>
 
-					</div><!-- .box-text-inner -->
-					</div><!-- .box-text -->
+					</div>
+					</div>
 					<?php if(has_post_thumbnail() && ($show_date == 'badge' || $show_date == 'true')) {?>
 					<?php if(!$badge_style) $badge_style = get_theme_mod('blog_badge_style', 'outline'); ?>
 						<div class="badge absolute top post-date badge-<?php echo $badge_style; ?>">
@@ -298,10 +298,10 @@ while ( $recentPosts->have_posts() ) : $recentPosts->the_post();
 							</div>
 						</div>
 					<?php } ?>
-				</div><!-- .box -->
-				</a><!-- .link -->
-			</div><!-- .col-inner -->
-		</div><!-- .col -->
+				</div>
+				</a>
+			</div>
+		</div>
 <?php endwhile;
 wp_reset_query();
 

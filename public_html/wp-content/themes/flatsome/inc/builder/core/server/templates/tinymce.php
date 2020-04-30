@@ -103,6 +103,7 @@ global $title, $hook_suffix, $current_screen, $wp_locale, $pagenow,
     }
     .wp-editor-tools .wp-media-buttons .dashicons {
       display: inline-block;
+      margin-top: 10px;
       margin-right: 5px;
       width: 18px;
       height: 18px;

@@ -8,8 +8,8 @@
 				  	} else{ echo '<p>You need to assign Widgets to <strong>"Shop Sidebar"</strong> in <a href="'.get_site_url().'/wp-admin/widgets.php">Appearance > Widgets</a> to show anything here</p>';
 				  }
 				?>
-			</div><!-- .sidebar-inner -->
-		</div><!-- #shop-sidebar -->
+			</div>
+		</div>
 
 		<div class="col large-9">
 		<?php
@@ -96,6 +96,5 @@
 			 */
 			do_action( 'woocommerce_after_main_content' );
 		?>
-
 		</div>
 </div>

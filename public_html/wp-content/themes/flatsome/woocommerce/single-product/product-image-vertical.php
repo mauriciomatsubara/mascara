@@ -161,7 +161,7 @@ if(get_theme_mod('product_zoom', 0)){
         $loop++;
       }
       ?>
-    </div><!-- .product-thumbnails -->
-    </div><!-- .col -->
+    </div>
+    </div>
 <?php } ?>
 </div>

@@ -70,4 +70,11 @@ class Enhanced_Ecommerce_Google_Settings {
         printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 
     }
+    public function show_message(){
+        echo '
+            <div class="notice notice-warning is-dismissible">
+                    <strong><p>Get all the 9 GA - Enhanced Ecommerce reports, 20+ custom dimensions and metrics, google ads conversion tracking, FB pixel tracking, Google Optimize integration and many more advanced features in the <a href="https://codecanyon.net/item/actionable-google-analytics-for-woocommerce/9899552?utm_source=TatvicEE&utm_medium=DashboardMsgText&utm_campaign=WPlisting" target="_blank">Premium Version</a>.</p></strong>
+            </div>
+        ';
+    }
 }

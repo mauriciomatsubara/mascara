@@ -4,10 +4,10 @@ Plugin URI: http://www.wpcodelibrary.com/
 Author: wpcodelibrary
 Author URI: http://www.wpcodelibrary.com/
 Contributors: wpcodelibrary
-Stable tag: 1.1.3
+Stable tag: 1.2.0
 Tags: discount, coupon, payment, payment method, woocommerce
 Requires at least: 3.8
-Tested up to: 5.0
+Tested up to: 5.3.2
 Donate link: 
 Copyright:  
 License: GPLv3 or later
@@ -56,6 +56,10 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 This is the first version of the plugin so you don't need any information about upgrade.
 
 == Changelog ==
+
+= 1.2.0 - 11-01-2020 =
+* Check compatibility with latest WordPress and WooCommerce
+* Validation added for nagative value.
 
 = 1.1.3 - 14-03-2019 =
 * Minor Code format changes

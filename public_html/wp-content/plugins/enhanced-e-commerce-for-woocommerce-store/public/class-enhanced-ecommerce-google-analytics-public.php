@@ -18,7 +18,7 @@
  *
  * @package    Enhanced_Ecommerce_Google_Analytics
  * @subpackage Enhanced_Ecommerce_Google_Analytics/public
- * @author     Chiranjiv Pathak <chiranjiv@tatvic.com>
+ * @author     Chetan Rode <chetan@tatvic.com>
  */
 class Enhanced_Ecommerce_Google_Analytics_Public {
     /**
@@ -28,7 +28,7 @@ class Enhanced_Ecommerce_Google_Analytics_Public {
      * @return void
      */
     //set plugin version
-    public $tvc_eeVer = '2.2.0';
+    public $tvc_eeVer = '2.3.2';
 
     protected $tvc_aga;
 
@@ -242,17 +242,30 @@ class Enhanced_Ecommerce_Google_Analytics_Public {
         $order = new WC_Order($order_id);
         //Get Applied Coupon Codes
         $coupons_list = '';
-        if ($order->get_used_coupons()) {
-            $coupons_count = count($order->get_used_coupons());
-            $i = 1;
-            foreach ($order->get_used_coupons() as $coupon) {
-                $coupons_list .= $coupon;
-                if ($i < $coupons_count)
-                    $coupons_list .= ', ';
-                $i++;
+        if(version_compare($woocommerce->version, "3.7", ">")){
+            if ($order->get_coupon_codes()) {
+                $coupons_count = count($order->get_coupon_codes());
+                $i = 1;
+                foreach ($order->get_coupon_codes() as $coupon) {
+                    $coupons_list .= $coupon;
+                    if ($i < $coupons_count)
+                        $coupons_list .= ', ';
+                    $i++;
+                }
             }
+        }else{
+            if ($order->get_used_coupons()) {
+                $coupons_count = count($order->get_used_coupons());
+                $i = 1;
+                foreach ($order->get_used_coupons() as $coupon) {
+                    $coupons_list .= $coupon;
+                    if ($i < $coupons_count)
+                        $coupons_list .= ', ';
+                    $i++;
+                }
+            }    
         }
-
+        
         //get domain name if value is set
         if (!empty($this->ga_Dname)) {
             $set_domain_name = esc_js($this->ga_Dname);
@@ -263,10 +276,9 @@ class Enhanced_Ecommerce_Google_Analytics_Public {
         // Order items
         if ($order->get_items()) {
             foreach ($order->get_items() as $item) {
-                $_product = $order->get_product_from_item($item);
+                $_product = $item->get_product();
                 if (isset($_product->variation_data)) {
                     $categories=esc_js(wc_get_formatted_variation($_product->get_variation_attributes(), true));
-
                 } else {
                     $out = array();
                     if(version_compare($woocommerce->version, "2.7", "<")){
@@ -367,7 +379,7 @@ class Enhanced_Ecommerce_Google_Analytics_Public {
     function add_to_cart() {
         if ($this->disable_tracking($this->ga_eeT))
             return;
-        //return if not product page       
+        //return if not product page
         if (!is_single())
             return;
         global $product,$woocommerce;
@@ -574,7 +586,7 @@ class Enhanced_Ecommerce_Google_Analytics_Public {
                 }
 
             } else {
-                //else prod add in homepage recent json  
+                //else prod add in homepage recent json
                 if(version_compare($woocommerce->version, "2.7", "<")){
                     $homepage_json_rp[get_permalink($product->id)] =array(
                         "tvc_id" => esc_html($product->id),

@@ -134,7 +134,7 @@ function shortcode_ux_slider($atts, $content=null) {
             #<?php echo $_id; ?> .flickity-slider > *{ max-width: <?php echo $slide_width; ?>!important;
          <?php } ?>
      </style>
-</div><!-- .ux-slider-wrapper -->
+</div>
 
 <?php
     $content = ob_get_contents();

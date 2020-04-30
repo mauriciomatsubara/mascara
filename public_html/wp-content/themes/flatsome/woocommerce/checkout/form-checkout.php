@@ -80,7 +80,7 @@ if ( flatsome_option( 'facebook_login_checkout' ) && get_option( 'woocommerce_en
 
 			<?php endif; ?>
 
-		</div><!-- large-7 -->
+		</div>
 
 		<div class="large-5 col">
 			<?php if ( get_theme_mod( 'checkout_sticky_sidebar', 0 ) ) { ?>
@@ -106,9 +106,9 @@ if ( flatsome_option( 'facebook_login_checkout' ) && get_option( 'woocommerce_en
 				</div>
 			</div>
 		<?php } ?>
-		</div><!-- large-5 -->
+		</div>
 
-	</div><!-- row -->
+	</div>
 </form>
 
 <?php do_action( 'woocommerce_after_checkout_form', $checkout ); ?>

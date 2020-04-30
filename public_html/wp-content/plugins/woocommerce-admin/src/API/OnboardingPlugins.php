@@ -10,6 +10,7 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Admin\Features\Onboarding;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -25,7 +26,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-admin/v1';
+	protected $namespace = 'wc-admin';
 
 	/**
 	 * Route base.
@@ -131,6 +132,19 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/connect-wcpay',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'connect_wcpay' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_connect_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/connect-square',
 			array(
 				array(
@@ -160,7 +174,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 * Installs the requested plugin.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return array Plugin Status
+	 * @return WP_Error|array Plugin Status
 	 */
 	public function install_plugin( $request ) {
 		$allowed_plugins = Onboarding::get_allowed_plugins();
@@ -171,8 +185,8 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-		$slug              = $plugin;
-		$path              = $allowed_plugins[ $slug ];
+		$path              = $allowed_plugins[ $plugin ];
+		$slug              = sanitize_key( $plugin );
 		$installed_plugins = get_plugins();
 
 		if ( in_array( $path, array_keys( $installed_plugins ), true ) ) {
@@ -192,7 +206,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		$api = plugins_api(
 			'plugin_information',
 			array(
-				'slug'   => sanitize_key( $slug ),
+				'slug'   => $slug,
 				'fields' => array(
 					'sections' => false,
 				),
@@ -200,14 +214,48 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		);
 
 		if ( is_wp_error( $api ) ) {
-			return new \WP_Error( 'woocommerce_rest_plugin_install', __( 'The requested plugin could not be installed.', 'woocommerce-admin' ), 500 );
+			$properties = array(
+				/* translators: %s: plugin slug (example: woocommerce-services) */
+				'error_message' => __( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce-admin' ),
+				'api'           => $api,
+				'slug'          => $slug,
+			);
+			wc_admin_record_tracks_event( 'install_plugin_error', $properties );
+
+			return new \WP_Error(
+				'woocommerce_rest_plugin_install',
+				sprintf(
+					/* translators: %s: plugin slug (example: woocommerce-services) */
+					__( 'The requested plugin `%s` could not be installed. Plugin API call failed.', 'woocommerce-admin' ),
+					$slug
+				),
+				500
+			);
 		}
 
 		$upgrader = new \Plugin_Upgrader( new \Automatic_Upgrader_Skin() );
 		$result   = $upgrader->install( $api->download_link );
 
 		if ( is_wp_error( $result ) || is_null( $result ) ) {
-			return new \WP_Error( 'woocommerce_rest_plugin_install', __( 'The requested plugin could not be installed.', 'woocommerce-admin' ), 500 );
+			$properties = array(
+				/* translators: %s: plugin slug (example: woocommerce-services) */
+				'error_message' => __( 'The requested plugin `%s` could not be installed.', 'woocommerce-admin' ),
+				'slug'          => $slug,
+				'api'           => $api,
+				'upgrader'      => $upgrader,
+				'result'        => $result,
+			);
+			wc_admin_record_tracks_event( 'install_plugin_error', $properties );
+
+			return new \WP_Error(
+				'woocommerce_rest_plugin_install',
+				sprintf(
+					/* translators: %s: plugin slug (example: woocommerce-services) */
+					__( 'The requested plugin `%s` could not be installed.', 'woocommerce-admin' ),
+					$slug
+				),
+				500
+			);
 		}
 
 		return array(
@@ -220,10 +268,9 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a list of active plugins.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return array Active plugins
 	 */
-	public function active_plugins( $request ) {
+	public function active_plugins() {
 		$plugins = Onboarding::get_active_plugins();
 		return( array(
 			'plugins' => array_values( $plugins ),
@@ -234,7 +281,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 * Activate the requested plugin.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return array Plugin Status
+	 * @return WP_Error|array Plugin Status
 	 */
 	public function activate_plugins( $request ) {
 		$allowed_plugins = Onboarding::get_allowed_plugins();
@@ -248,11 +295,10 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 		foreach ( $plugins as $plugin ) {
-			$slug              = $plugin;
-			$path              = $allowed_plugins[ $slug ];
-			$installed_plugins = get_plugins();
+			$slug = $plugin;
+			$path = $allowed_plugins[ $slug ];
 
-			if ( ! in_array( $path, array_keys( $installed_plugins ), true ) ) {
+			if ( ! PluginsHelper::is_plugin_installed( $path ) ) {
 				/* translators: %s: plugin slug (example: woocommerce-services) */
 				return new \WP_Error( 'woocommerce_rest_invalid_plugin', sprintf( __( 'Invalid plugin %s.', 'woocommerce-admin' ), $slug ), 404 );
 			}
@@ -274,18 +320,17 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 * Generates a Jetpack Connect URL.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return array Connection URL for Jetpack
+	 * @return WP_Error|array Connection URL for Jetpack
 	 */
 	public function connect_jetpack( $request ) {
 		if ( ! class_exists( '\Jetpack' ) ) {
 			return new \WP_Error( 'woocommerce_rest_jetpack_not_active', __( 'Jetpack is not installed or active.', 'woocommerce-admin' ), 404 );
 		}
 
-		$redirect_url = apply_filters( 'woocommerce_onboarding_jetpack_connect_redirect_url', esc_url_raw( $request['redirect_url'] ) );
-		$connect_url  = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );
+		$redirect_url = apply_filters( 'woocommerce_admin_onboarding_jetpack_connect_redirect_url', esc_url_raw( $request['redirect_url'] ) );
+		$connect_url  = \Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-onboarding' );
 
-		// @todo When implementing user-facing split testing, this should be abled to a default of 'production'.
-		$calypso_env = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ) ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'wpcalypso';
+		$calypso_env = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ), true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
 		$connect_url = add_query_arg( array( 'calypso_env' => $calypso_env ), $connect_url );
 
 		return( array(
@@ -298,12 +343,12 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	/**
 	 *  Kicks off the WCCOM Connect process.
 	 *
-	 * @return array Connection URL for WooCommerce.com
+	 * @return WP_Error|array Connection URL for WooCommerce.com
 	 */
 	public function request_wccom_connect() {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-api.php';
 		if ( ! class_exists( 'WC_Helper_API' ) ) {
-			return new WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce-admin' ), 404 );
 		}
 
 		$redirect_uri = wc_admin_url( '&task=connect&wccom-connected=1' );
@@ -320,12 +365,12 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		$code = wp_remote_retrieve_response_code( $request );
 		if ( 200 !== $code ) {
-			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
 		}
 
 		$secret = json_decode( wp_remote_retrieve_body( $request ) );
 		if ( empty( $secret ) ) {
-			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
 		}
 
 		do_action( 'woocommerce_helper_connect_start' );
@@ -340,7 +385,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 			\WC_Helper_API::url( 'oauth/authorize' )
 		);
 
-		if ( defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ) ) ) {
+		if ( defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ), true ) ) {
 			$connect_url = add_query_arg(
 				array(
 					'calypso_env' => WOOCOMMERCE_CALYPSO_ENVIRONMENT,
@@ -358,7 +403,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	 * Finishes connecting to WooCommerce.com.
 	 *
 	 * @param  object $rest_request Request details.
-	 * @return array Contains success status.
+	 * @return WP_Error|array Contains success status.
 	 */
 	public function finish_wccom_connect( $rest_request ) {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php';
@@ -366,7 +411,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-updater.php';
 		include_once WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php';
 		if ( ! class_exists( 'WC_Helper_API' ) ) {
-			return new WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce-admin' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce-admin' ), 404 );
 		}
 
 		// Obtain an access token.
@@ -382,12 +427,12 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		$code = wp_remote_retrieve_response_code( $request );
 		if ( 200 !== $code ) {
-			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
 		}
 
 		$access_token = json_decode( wp_remote_retrieve_body( $request ), true );
 		if ( ! $access_token ) {
-			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
 		}
 
 		\WC_Helper_Options::update(
@@ -403,7 +448,7 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 
 		if ( ! \WC_Helper::_flush_authentication_cache() ) {
 			\WC_Helper_Options::update( 'auth', array() );
-			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce-admin' ), 500 );
 		}
 
 		delete_transient( '_woocommerce_helper_subscriptions' );
@@ -419,11 +464,11 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a URL that can be used to connect to PayPal.
 	 *
-	 * @return array Connect URL.
+	 * @return WP_Error|array Connect URL.
 	 */
 	public function connect_paypal() {
 		if ( ! function_exists( 'wc_gateway_ppec' ) ) {
-			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to PayPal.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to PayPal.', 'woocommerce-admin' ), 500 );
 		}
 
 		$redirect_url = add_query_arg(
@@ -431,12 +476,12 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 				'env'                     => 'live',
 				'wc_ppec_ips_admin_nonce' => wp_create_nonce( 'wc_ppec_ips' ),
 			),
-			wc_admin_url( '&task=payments&paypal-connect-finish=1' )
+			wc_admin_url( '&task=payments&method=paypal&paypal-connect-finish=1' )
 		);
 
 		// https://github.com/woocommerce/woocommerce-gateway-paypal-express-checkout/blob/b6df13ba035038aac5024d501e8099a37e13d6cf/includes/class-wc-gateway-ppec-ips-handler.php#L79-L93.
 		$query_args  = array(
-			'redirect'    => urlencode( $redirect_url ),
+			'redirect'    => rawurlencode( $redirect_url ),
 			'countryCode' => WC()->countries->get_base_country(),
 			'merchantId'  => md5( site_url( '/' ) . time() ),
 		);
@@ -450,18 +495,29 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 	/**
 	 * Returns a URL that can be used to connect to Square.
 	 *
-	 * @return array Connect URL.
+	 * @return WP_Error|array Connect URL.
 	 */
 	public function connect_square() {
 		if ( ! class_exists( '\WooCommerce\Square\Handlers\Connection' ) ) {
-			return new WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Square.', 'woocommerce-admin' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to Square.', 'woocommerce-admin' ), 500 );
 		}
 
-		$url = \WooCommerce\Square\Handlers\Connection::CONNECT_URL_PRODUCTION;
+		if ( 'US' === WC()->countries->get_base_country() ) {
+			$profile = get_option( Onboarding::PROFILE_DATA_OPTION, array() );
+			if ( ! empty( $profile['industry'] ) ) {
+				$has_cbd_industry = in_array( 'cbd-other-hemp-derived-products', array_column( $profile['industry'], 'slug' ), true );
+			}
+		}
 
-		$redirect_url = wp_nonce_url( wc_admin_url( '&task=payments&square-connect-finish=1' ), 'wc_square_connected' );
+		if ( $has_cbd_industry ) {
+			$url = 'https://squareup.com/t/f_partnerships/d_referrals/p_woocommerce/c_general/o_none/l_us/dt_alldevice/pr_payments/?route=/solutions/cbd';
+		} else {
+			$url = \WooCommerce\Square\Handlers\Connection::CONNECT_URL_PRODUCTION;
+		}
+
+		$redirect_url = wp_nonce_url( wc_admin_url( '&task=payments&method=square&square-connect-finish=1' ), 'wc_square_connected' );
 		$args         = array(
-			'redirect' => urlencode( urlencode( $redirect_url ) ),
+			'redirect' => rawurlencode( rawurlencode( $redirect_url ) ),
 			'scopes'   => implode(
 				',',
 				array(
@@ -482,6 +538,29 @@ class OnboardingPlugins extends \WC_REST_Data_Controller {
 		);
 
 		$connect_url = add_query_arg( $args, $url );
+
+		return( array(
+			'connectUrl' => $connect_url,
+		) );
+	}
+
+	/**
+	 * Returns a URL that can be used to by WCPay to verify business details with Stripe.
+	 *
+	 * @return WP_Error|array Connect URL.
+	 */
+	public function connect_wcpay() {
+		if ( ! class_exists( 'WC_Payments_Account' ) ) {
+			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error communicating with the WooCommerce Payments plugin.', 'woocommerce-admin' ), 500 );
+		}
+
+		$connect_url = add_query_arg(
+			array(
+				'wcpay-connect' => 'WCADMIN_PAYMENT_TASK',
+				'_wpnonce'      => wp_create_nonce( 'wcpay-connect' ),
+			),
+			admin_url()
+		);
 
 		return( array(
 			'connectUrl' => $connect_url,

@@ -8,11 +8,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( isset( $_POST['wpd_submit'] ) ) {
 	$settings_arr = array();
+	$flag         = false;
 	if ( isset( $_POST['woo_payment_discounts'] ) && ! empty( $_POST['woo_payment_discounts'] ) ) {
-		$settings_arr = maybe_serialize( $_POST['woo_payment_discounts'] );
-		update_option( 'woo_payment_discounts_setting', $settings_arr );
-	}
-}
+		foreach ( $_POST['woo_payment_discounts'] as $v ) {
+			if ( $v['amount'] < 0 ) {
+				$flag = true;
+				break;
+			}
+		}
+		if ( $flag == true ) { ?>
+			<div class="notice error my-acf-notice is-dismissible">
+				<p><?php _e( 'Enter positive value only', 'woo-payment-discounts' ); ?></p>
+			</div>
+		<?php } else {
+			$settings_arr = maybe_serialize( $_POST['woo_payment_discounts'] );
+			update_option( 'woo_payment_discounts_setting', $settings_arr );
+			$flag = false;
+		}
+	} ?>
+
+
+<?php }
 ?>
 
 <div class="wrap">

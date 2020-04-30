@@ -243,7 +243,7 @@ Flatsome_Option::add_field( 'option', array(
 	'choices'         => array(
 		''     => __( 'Default', 'flatsome-admin' ),
 		'flat' => __( 'Flat', 'flatsome-admin' ),
-		'minimal' => __( 'Minimal', 'flatsome-admin' ) . ' (NEW)'
+		'minimal' => __( 'Minimal', 'flatsome-admin' ),
 	),
 ) );
 

@@ -18,13 +18,11 @@
 			get_template_part( 'template-parts/posts/archive', flatsome_option('blog_style') );
 		}
 	?>
-	</div> <!-- .large-9 -->
-
+	</div>
 	<div class="post-sidebar large-3 col">
 		<?php get_sidebar(); ?>
-	</div><!-- .post-sidebar -->
-
-</div><!-- .row -->
+	</div>
+</div>
 
 <?php 
 	do_action('flatsome_after_blog');

@@ -82,6 +82,6 @@ if ( $attachment_ids ) {
       $loop++;
     }
   ?>
-  </div><!-- .product-thumbnails -->
+  </div>
   <?php
 } ?>

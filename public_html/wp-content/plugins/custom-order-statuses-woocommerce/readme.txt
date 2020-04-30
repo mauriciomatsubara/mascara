@@ -1,8 +1,8 @@
 === Custom Order Status for WooCommerce ===
 Contributors: tychesoftwares
-Tags: woocommerce, order status, woo commerce
+Tags: woocommerce, order status, woo commerce, custom status
 Requires at least: 4.4
-Tested up to: 5.2.3
+Tested up to: 5.3.2
 Stable tag: trunk
 Requires PHP: 5.6
 License: GNU General Public License v3.0
@@ -79,6 +79,9 @@ Added custom statuses can be added to admin order list **bulk actions** and to a
 2. Order with custom status.
 
 == Changelog ==
+
+= 1.4.9 - 19/03/2020 = 
+* Updated compatibility with WC 4.0.0
 
 = 1.4.8 - 23/09/2019 = 
 * Made the plugin code compliant with WPCS standards.

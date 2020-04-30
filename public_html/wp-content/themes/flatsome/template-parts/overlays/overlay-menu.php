@@ -4,5 +4,5 @@
         <ul class="nav nav-sidebar <?php if(get_theme_mod('mobile_overlay') == 'center') echo 'nav-anim';?> nav-vertical nav-uppercase">
               <?php flatsome_header_elements('mobile_sidebar','sidebar'); ?>
         </ul>
-    </div><!-- inner -->
-</div><!-- #mobile-menu -->
+    </div>
+</div>

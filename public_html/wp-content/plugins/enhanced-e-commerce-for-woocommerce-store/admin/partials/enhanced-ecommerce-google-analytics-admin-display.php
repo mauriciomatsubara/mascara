@@ -32,13 +32,15 @@ else{
 if(empty($_GET['tab'])){
     $general_class_active = "active";
 }
+
+
 ?>
 <header class='background-color:#E8E8E8;height:500px;width:auto;margin-top:100px;margin-left:20px;'>
     <img class ="banner" src='<?php echo plugins_url('../images/banner.png', __FILE__ )  ?>' style="margin-left:10px;">
 </header>
 <ul class="nav nav-tabs nav-pills" style="margin-left: 10px;margin-top:20px;">
     <li class="nav-item">
-        <a  href="<?php echo $site_url.'general_settings'; ?>"  class="border-left aga-tab nav-link <?php echo $general_class_active; ?>">General Setting</a>
+        <a  href="<?php echo $site_url.'general_settings'; ?>"  class="border-left aga-tab nav-link <?php echo $general_class_active; ?>">General Settings</a>
     </li>
-    <li class="nav-item"><a href="<?php echo $site_url.'about_plugin'; ?>" class="border-left aga-tab nav-link <?php echo $advanced_class_active; ?>">Premium Plugin</a></li>
+    <li class="nav-item"><a href="<?php echo $site_url.'about_plugin'; ?>" class="border-left aga-tab nav-link <?php echo $advanced_class_active; ?>">Premium <img class="new-img-blink" src='<?php echo plugins_url('../images/new-2.gif', __FILE__ )  ?>' /></a></li>
 </ul>

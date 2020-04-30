@@ -235,6 +235,25 @@ if ( ! is_admin() && get_theme_mod( 'lazy_load_backgrounds', 1 ) ) {
 	add_filter( 'wp_head', 'flatsome_lazy_load_backgrounds_css' );
 }
 
+/**
+ * Remove jQuery migrate.
+ *
+ * @param WP_Scripts $scripts WP_Scripts object.
+ */
+function flatsome_remove_jquery_migrate( $scripts ) {
+	if ( ! get_theme_mod( 'jquery_migrate' ) ) return;
+	if ( ! is_admin() && isset( $scripts->registered['jquery'] ) ) {
+		$script = $scripts->registered['jquery'];
+
+		if ( $script->deps ) { // Check whether the script has any dependencies.
+			$script->deps = array_diff( $script->deps, array(
+				'jquery-migrate',
+			) );
+		}
+	}
+}
+
+add_action( 'wp_default_scripts', 'flatsome_remove_jquery_migrate' );
 
 // Disable emoji scripts
 if ( ! is_admin() && get_theme_mod( 'disable_emoji', 0 ) ) {

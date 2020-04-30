@@ -1,3 +1,7 @@
+<?php
+$message = new Enhanced_Ecommerce_Google_Settings();
+?>
+
 <style>
     td{
         text-align: center !important;
@@ -16,6 +20,7 @@
     <div class="row" style="margin-left:-11%; !important;">
         <div class= "col col-9">
             <div class="card mw-100" style="padding:0;">
+                <?php $message->show_message();?>
                 <div class="card-header">
                     <h5>Feature difference between <span style="font-weight: 800;">Free & Premium</span> Plugin</h5>
                 </div>
@@ -144,12 +149,12 @@
                                             <tfoot class="thead-inverse">
                                             <tr>
                                                 <th class="w-25"></th>
-                                                <th class=""></th>
-                                                <th class=""><a href="https://1.envato.market/Yvn3R" target="_blank"><button class="btn btn-primary"><strong>Buy Premium Plugin</strong></button></a></th>
+                                                <th class="w-25"></th>
+                                                <th class=""><a href="https://codecanyon.net/item/actionable-google-analytics-for-woocommerce/9899552?utm_source=TatvicEE&utm_medium=DashboardBuyBottom&utm_campaign=WPlisting" target="_blank"><button class="btn btn-primary"><strong>Premium Plugin</strong></button></a></th>
                                             </tr>
                                             </tfoot>
                                         </table>
-                                        <p class="description" style="font-size: 15px;"><strong>Feel free to contact us regarding premium version inquiry at <span style="color:blue;font-size:15px;">analytics2@tatvic.com<span></strong>.<br/>Agencies & Marketers can also contact us for the bulk licenses for their clients.</p>
+                                        <p class="description" style="font-size: 15px;"><strong>Feel free to contact us regarding premium version inquiry at <span style="color:blue;font-size:15px;">analytics2@tatvic.com<span></strong>.<br/>Get your 10 Days Free Trial of Actionable Google Analytics by writing us at <strong><span style="color:blue;font-size:15px;">analytics2@tatvic.com<span></strong><br/>Agencies & Marketers can also contact us for the bulk licenses for their clients.</p>
                                     </div>
                                 </div>
                             </div>

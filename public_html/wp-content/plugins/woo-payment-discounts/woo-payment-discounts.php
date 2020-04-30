@@ -4,7 +4,7 @@
  * Plugin Name:       Woo Payment Discounts
  * Plugin URI:        http://www.wpcodelibrary.com
  * Description:       Setup discounts for specific payment methods is selected on checkout.
- * Version:           1.1.3
+ * Version:           1.2.0
  * Author:            WPCodelibrary
  * Author URI:        http://www.wpcodelibrary.com
  * License:           GPL-2.0+

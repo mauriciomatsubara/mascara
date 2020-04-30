@@ -28,11 +28,12 @@ if ( is_admin_bar_showing() ) {
 // Add Notices
 require get_template_directory() . '/inc/admin/admin-notice.php';
 
+// Include Kirki.
+require_once dirname( __FILE__ ) . '/kirki-config.php';
+require_once dirname( __FILE__ ) . '/kirki/kirki.php';
+
 // Add Options
 if(is_customize_preview()){
-
-  // Include Kirki
-  include_once( dirname( __FILE__ ) . '/kirki/kirki.php' );
 
   // Include Customizer Settings
   include_once(dirname( __FILE__ ).'/customizer/customizer-config.php');

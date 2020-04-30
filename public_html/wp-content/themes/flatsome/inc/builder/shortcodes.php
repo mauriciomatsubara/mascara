@@ -64,6 +64,7 @@ if ( class_exists( 'WooCommerce' ) ) {
   require_once __DIR__ . '/shortcodes/woocommerce_cart.php';
   require_once __DIR__ . '/shortcodes/woocommerce_checkout.php';
   require_once __DIR__ . '/shortcodes/woocommerce_shortcodes.php';
+  require_once __DIR__ . '/shortcodes/ux_payment_icons.php';
   require_once __DIR__ . '/shortcodes/ux_product_categories.php';
   require_once __DIR__ . '/shortcodes/ux_products.php';
   require_once __DIR__ . '/shortcodes/ux_products_list.php';

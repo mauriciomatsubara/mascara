@@ -82,7 +82,7 @@ if ( $upsells ) : ?>
           wc_get_template_part( 'content', 'product-small' ); ?>
 
       <?php endforeach; ?>
-    </ul><!-- row -->
+    </ul>
   </aside>
 
   <?php } ?>
