@@ -183,6 +183,9 @@ class NextendSocialProviderTwitter extends NextendSocialProvider {
                         case 'mini':
                             $avatar_url = str_replace('_normal.', '_' . $profile_image_size . '.', $profile_image);
                             break;
+                        case 'normal':
+                            $avatar_url = $profile_image;
+                            break;
                         case 'bigger':
                             $avatar_url = str_replace('_normal.', '_' . $profile_image_size . '.', $profile_image);
                             break;

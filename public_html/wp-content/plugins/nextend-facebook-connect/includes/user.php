@@ -274,6 +274,10 @@ class NextendSocialUser {
             do_action('register_post', $userData['username'], $userData['email'], $errors);
 
             if ($errors->get_error_code()) {
+                //unset the persistent data, so if an error happened, the user can re-authenticate with providers (Google) that offer account selector screen
+                Persistent::delete($this->provider->getId() . '_at');
+                Persistent::delete($this->provider->getId() . '_state');
+
                 Notices::addError($errors);
                 $this->redirectToLastLocationLogin();
             }
@@ -401,10 +405,12 @@ class NextendSocialUser {
 
         //BuddyPress - add register activity to accounts registered with social login
         if (class_exists('BuddyPress', false)) {
-            if (!function_exists('bp_core_new_user_activity')) {
-                require_once(buddypress()->plugin_dir . '/bp-members/bp-members-activity.php');
+            if (bp_is_active('activity')) {
+                if (!function_exists('bp_core_new_user_activity')) {
+                    require_once(buddypress()->plugin_dir . '/bp-members/bp-members-activity.php');
+                }
+                bp_core_new_user_activity($user_id);
             }
-            bp_core_new_user_activity($user_id);
         }
 
         /*Ultimate Member Registration integration -> Registration notificationhoz*/

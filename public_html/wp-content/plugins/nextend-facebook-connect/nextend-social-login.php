@@ -19,9 +19,9 @@ require_once(NSL_PATH . '/compat.php');
 
 class NextendSocialLogin {
 
-    public static $version = '3.0.22';
+    public static $version = '3.0.23';
 
-    public static $nslPROMinVersion = '3.0.22';
+    public static $nslPROMinVersion = '3.0.23';
 
     public static $proxyPage = false;
 
@@ -183,6 +183,8 @@ class NextendSocialLogin {
             'woocoommerce_form_button_style'   => 'default',
             'woocoommerce_form_button_align'   => 'left',
             'woocommerce_account_details'      => 'before',
+            'woocommerce_cfw'                  => 'show',
+            'woocommerce_cfw_layout'           => 'below',
 
             'memberpress_form_button_align'        => 'left',
             'memberpress_login_form_button_style'  => 'default',
