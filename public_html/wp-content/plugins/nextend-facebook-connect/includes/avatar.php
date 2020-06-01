@@ -152,26 +152,32 @@ class NextendSocialLoginAvatar {
                     $avatarTempPath = download_url($avatarUrl);
 
                     if (!is_wp_error($avatarTempPath)) {
-                        if (!function_exists('xprofile_avatar_upload_dir')) {
-                            require_once(buddypress()->plugin_dir . '/bp-xprofile/bp-xprofile-functions.php');
+                        if (!function_exists('bp_members_avatar_upload_dir')) {
+                            $bpMembersFunctionsPath = buddypress()->plugin_dir . '/bp-members/bp-members-functions.php';
+                            if (file_exists($bpMembersFunctionsPath)) {
+                                require_once($bpMembersFunctionsPath);
+                            }
                         }
-                        $pathInfo = xprofile_avatar_upload_dir('avatars', $user_id);
 
-                        if (wp_mkdir_p($pathInfo['path'])) {
-                            if ($av_dir = opendir($pathInfo['path'] . '/')) {
-                                $hasAvatar = false;
-                                while (false !== ($avatar_file = readdir($av_dir))) {
-                                    if ((preg_match("/-bpfull/", $avatar_file) || preg_match("/-bpthumb/", $avatar_file))) {
-                                        $hasAvatar = true;
-                                        break;
+                        if (function_exists('bp_members_avatar_upload_dir')) {
+                            $pathInfo = bp_members_avatar_upload_dir('avatars', $user_id);
+
+                            if (wp_mkdir_p($pathInfo['path'])) {
+                                if ($av_dir = opendir($pathInfo['path'] . '/')) {
+                                    $hasAvatar = false;
+                                    while (false !== ($avatar_file = readdir($av_dir))) {
+                                        if ((preg_match("/-bpfull/", $avatar_file) || preg_match("/-bpthumb/", $avatar_file))) {
+                                            $hasAvatar = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!$hasAvatar) {
+                                        copy($avatarTempPath, $pathInfo['path'] . '/' . 'avatar-bpfull.' . $extension);
+                                        rename($avatarTempPath, $pathInfo['path'] . '/' . 'avatar-bpthumb.' . $extension);
                                     }
                                 }
-                                if (!$hasAvatar) {
-                                    copy($avatarTempPath, $pathInfo['path'] . '/' . 'avatar-bpfull.' . $extension);
-                                    rename($avatarTempPath, $pathInfo['path'] . '/' . 'avatar-bpthumb.' . $extension);
-                                }
+                                closedir($av_dir);
                             }
-                            closedir($av_dir);
                         }
                     }
                 }

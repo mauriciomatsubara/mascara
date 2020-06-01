@@ -45,11 +45,7 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 			$this->layout['default']['options'][] = 'custom_fields';
 			$this->default_options['custom_fields'] = array( 'name' => __( 'Include Custom Fields', 'all-in-one-seo-pack' ) );
 
-			unset( $this->layout['excl_pages']['options'][0] ); // Exclude categories.
-			unset( $this->layout['priorities']['options'][2] );
-			unset( $this->layout['frequencies']['options'][2] );
-			unset( $this->layout['default']['options'][5] ); // Exclude taxonomies.
-			unset( $this->layout['default']['options'][6] ); // Exclude date archives.
+			$this->filter_unused_settings();
 
 			if ( is_null( self::$_wp_oembed ) ) {
 				global $wp_version;
@@ -81,6 +77,20 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 
 			// Good for testing.
 			// add_action('admin_init', array($this, 'scan_all_posts' ));
+		}
+
+		/**
+		 * Hides a number of settings in the Video Sitemap menu.
+		 *
+		 * @since 3.5.2
+		 */
+		private function filter_unused_settings() {
+			unset( $this->layout['excl_pages']['options'][0] ); // Exclude categories.
+			unset( $this->layout['priorities']['options'][2] );
+			unset( $this->layout['frequencies']['options'][2] );
+			unset( $this->layout['default']['options'][5] ); // Exclude taxonomies.
+			unset( $this->layout['default']['options'][6] ); // Exclude date archives.
+			unset( $this->layout['addl_sitemaps'] );
 		}
 
 		/**

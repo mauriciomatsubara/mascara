@@ -25,11 +25,7 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Image_SEO' ) ) {
 		public function __construct() {
 
 			global $aioseop_options;
-			if ( ! AIOSEOPPRO ||
-				! isset( $aioseop_options['addons'] ) ||
-				! is_array( $aioseop_options['addons'] ) ||
-				! in_array( 'image_seo', $aioseop_options['addons'], true )
-			) {
+			if ( ! aioseop_is_addon_allowed( 'image_seo' ) ) {
 				return;
 			}
 

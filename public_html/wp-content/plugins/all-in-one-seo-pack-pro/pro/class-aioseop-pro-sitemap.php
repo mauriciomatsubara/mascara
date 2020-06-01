@@ -16,14 +16,92 @@ class All_in_One_SEO_Pack_Sitemap_Pro extends All_in_One_SEO_Pack_Sitemap {
 		 *
 		 * @since 3.4.0
 		 */
-	public function __construct() {
-		$this->name           = __( 'XML Sitemap', 'all-in-one-seo-pack' ); // Human-readable name of the plugin.
-		$this->prefix         = 'aiosp_sitemap_';                           // Option prefix.
-		$this->file           = __FILE__;                                   // The current file.
-		$this->extra_sitemaps = array();
-		$this->extra_sitemaps = apply_filters( $this->prefix . 'extra', $this->extra_sitemaps );
-		parent::__construct();
-	}
+		public function __construct() {
+			$this->name           = __( 'XML Sitemap', 'all-in-one-seo-pack' ); // Human-readable name of the plugin.
+			$this->prefix         = 'aiosp_sitemap_';                           // Option prefix.
+			$this->file           = __FILE__;                                   // The current file.
+			$this->extra_sitemaps = array();
+			$this->extra_sitemaps = apply_filters( $this->prefix . 'extra', $this->extra_sitemaps );
+			parent::__construct();
+		}
+
+		/**
+		 * Gets all content for the sitemap.
+		 *
+		 * @since	3.4.0	Refactored to improve readability.
+		 *
+		 * @param   string  $sitemap_type   The type of sitemap that has to be generated.
+		 * @param   int     $page_number    The page number of the sitemap index.
+		 * @return  array   $sitemap_data   All URLs with their meta info (last modified, priority, frequency).
+		 */
+		public function get_sitemap_data( $sitemap_type, $page_number = 0 ) {
+			$sitemap_data = array();
+
+			switch( $sitemap_type ) {
+				case 'rss': {
+					$sitemap_data = $this->get_sitemap_without_indexes();
+					break;
+				}
+				case 'news': {
+					if ( ! aioseop_is_addon_allowed( 'news_sitemap' ) ) {
+						return;
+					}
+					$sitemap_data = $this->get_news_sitemap_data();
+					break;
+				}
+				case 'root': {
+					if( $this->options[ "{$this->prefix}indexes" ] ) {
+						$sitemap_data = array_merge( $this->get_sitemap_index_filenames() );
+					} else {
+						$sitemap_data = $this->get_sitemap_without_indexes();
+					}
+					break;
+				}
+				case 'addl': {
+					$sitemap_data = $this->get_addl_pages();
+					break;
+				}
+				case 'archive': {
+					$sitemap_data = $this->get_date_archive_data();
+					break;
+				}
+				case 'author': {
+					$sitemap_data = $this->get_author_archive_data();
+					break;
+				}
+				default: {
+					$posttypes = $this->options[ "{$this->prefix}posttypes" ];
+					if ( empty( $posttypes ) ) {
+						$posttypes = array();
+					}
+
+					$taxonomies = $this->options[ "{$this->prefix}taxonomies" ];
+					if ( empty( $taxonomies ) ) {
+						$taxonomies = array();
+					}
+
+					if ( in_array( $sitemap_type, $posttypes ) ) {
+						$sitemap_data = $this->get_custom_posts_data( $sitemap_type, 'publish', $page_number );
+					}
+					else if ( in_array( $sitemap_type, $taxonomies ) ) {
+						$sitemap_data = $this->get_terms_data( get_terms( $this->get_tax_args( (array) $sitemap_type, $page_number ) ) );
+					}
+					else if ( is_array( $this->extra_sitemaps ) && in_array( $sitemap_type, $this->extra_sitemaps ) ) {
+						$sitemap_data = apply_filters( $this->prefix . 'custom_' . $sitemap_type, $sitemap_data, $page_number, $this_options );
+					}
+				}
+			}
+
+			/**
+			 * Allows users to filter the sitemap data for a given page of a sitemap index.
+			 *
+			 * @param   array   $sitemap_data       All entries for the given sitemap index.
+			 * @param   string  $sitemap_type       The type of sitemap (e.g. "root", "posts", "pages", etc.).
+			 * @param   int     $page_number        The page number of the sitemap index.
+			 * @param   array   $aioseop_options    The user-defined plugin settings.
+			 */
+			return apply_filters( "{$this->prefix}data", $sitemap_data, $sitemap_type, $page_number, $this->options );
+		}
 
 		/**
 		 * Gets the last modified timestamp, priority and frequency for taxonomy terms.
@@ -285,8 +363,341 @@ class All_in_One_SEO_Pack_Sitemap_Pro extends All_in_One_SEO_Pack_Sitemap {
 		if ( ! empty( $postmeta_freq ) ) {
 			$links[ $blogpage_index ]['changefreq'] = $postmeta_freq;
 		}
-
 		return $links;
 	}
 
+		/**
+		 * Returns the content for the News Sitemap.
+		 *
+		 * @since	3.4.0
+		 *
+		 * @return	array	$entries
+		 */
+		private function get_news_sitemap_data() {
+			global $aioseop_options;
+
+			if ( ! apply_filters( 'aioseo_news_sitemap_enabled', true ) ) {
+				return array();
+			}
+
+			// Use 'post' as default if options have not been set yet.
+			if ( ! isset( $aioseop_options['modules']['aiosp_sitemap_options'] ) || ! isset( $this->options['aiosp_sitemap_posttypes_news'] ) ) {
+				$this->options['aiosp_sitemap_posttypes_news'] = array( 'post' );
+			}
+
+			$post_types = apply_filters( 'aioseo_news_sitemap_post_types', $this->options['aiosp_sitemap_posttypes_news'] );
+			if ( ! $post_types || ! is_array( $post_types ) ) {
+				return array();
+			}
+
+			$args = array(
+				'numberposts'   => 50000,
+				'orderby'       => 'date',
+				'order'         => 'DESC',
+				'date_query'    => array(
+					array(
+						'after' => '48 hours ago'
+					),
+				),
+				'no_found_rows' => true,
+				'cache_results' => false,
+				'meta_query'    => array(
+				'relation'      => 'AND',
+					array(
+						'relation' => 'OR',
+						array(
+						'key'     => '_aioseop_sitemap_exclude',
+						'value'   => 'on',
+						'compare' => '!='
+						),
+						array(
+						'key'     => '_aioseop_sitemap_exclude',
+						'compare' => 'NOT EXISTS'
+						),
+					),
+				),
+			);
+
+			$totalPosts = array();
+			foreach ( $post_types as $post_type ) {
+				$args['post_type'] = $post_type;
+				// Don't include posts that are noindexed.
+				if (
+					isset( $aioseop_options['aiosp_cpostnoindex'] ) &&
+					$aioseop_options['aiosp_cpostnoindex'] &&
+					in_array( $post_type, $aioseop_options['aiosp_cpostnoindex'], true )
+				) {
+					array_push( $args['meta_query'],
+						array(
+							'key'     => '_aioseop_noindex',
+							'value'   => 'off',
+							'compare' => '=',
+						)
+					);
+				} else {
+					$extraArgs = array(
+						'relation' => 'OR',
+						array(
+							'key'     => '_aioseop_noindex',
+							'value'   => 'on',
+							'compare' => '!=',
+						),
+						array(
+							'key'     => '_aioseop_noindex',
+							'compare' => 'NOT EXISTS',
+						),
+					);
+
+					array_push( $args['meta_query'], $extraArgs );
+				}
+
+				$posts = get_posts( $args );
+				if ( $posts ) {
+					$totalPosts = array_merge( $totalPosts, $posts );
+				}
+			}
+
+			if ( ! $totalPosts ) {
+				return array();
+			}
+
+			$entries = array();
+			foreach ( $totalPosts as $post ) {
+				$entry = array(
+					'location'         => get_permalink( $post->ID ),
+					'publication'      => array(
+						'name'     => $post->post_title,
+						'language' => $this->get_publication_language(),
+					),
+					'publication_date' => date( 'c', mysql2date( 'U', $post->post_date ) ),
+					'title'            => $post->post_title,
+				);
+
+				array_push( $entries, $entry );
+			}
+
+			return $entries;
+		}
+
+		/**
+		 * Returns the language code for the site in the ISO 639-1 format.
+		 *
+		 * @since	3.4.0
+		 *
+		 * @return	string
+		 */
+		private function get_publication_language() {
+			$locale = get_locale();
+
+			if ( strlen( $locale ) < 2 ) {
+				return $locale = 'en';
+			}
+
+			// These are two exceptions as stated on https://support.google.com/news/publisher-center/answer/9606710.
+			if ( 'zh_CN' === $locale ) {
+				return 'zh-cn';
+			}
+
+			if ( 'zh_TW' === $locale ) {
+				return 'zh-tw';
+			}
+
+			return substr( $locale, 0, 2 );
+		}
+
+		/**
+		 * Output Sitemap
+		 *
+		 * Output the XML for a sitemap.
+		 *
+		 * @since 	?
+		 * @since	3.4.0	Added support for News Sitemap.
+		 *
+		 * @param        $urls
+		 * @param string $sitemap_type The type of sitemap viz. root, rss, rss_latest etc.. For static sitemaps, this would be empty.
+		 * @param string $comment
+		 * @return null
+		 */
+		protected function output_sitemap( $urls, $sitemap_type, $comment = '' ) {
+			if ( 'rss' === $sitemap_type ) {
+				$this->output_rss( $urls, $sitemap_type, $comment );
+				return;
+			}
+
+			else if( 'news' === $sitemap_type ) {
+				$this->output_news_sitemap( $urls, $comment );
+				return;
+			}
+
+			$max_items = 50000;
+			if ( ! is_array( $urls ) ) {
+				return null;
+			}
+			echo '<?xml version="1.0" encoding="UTF-8"?>' . "\r\n\r\n";
+			// TODO Add esc_* function.
+			echo '<!-- ' . sprintf( $this->comment_string, $comment, AIOSEOP_VERSION, date( 'D, d M Y H:i:s e' ) ) . " -->\r\n";
+			$plugin_path  = $this->plugin_path['url'];
+			$plugin_url   = wp_parse_url( $plugin_path );
+			$current_host = $_SERVER['HTTP_HOST'];
+			if ( empty( $current_host ) ) {
+				$current_host = $_SERVER['SERVER_NAME'];
+			}
+
+			if ( ! empty( $current_host ) && ( $current_host !== $plugin_url['host'] ) ) {
+				$plugin_url['host'] = $current_host;
+			}
+
+			// Code `unset( $plugin_url['scheme'] )`.
+			$plugin_path = $this->unparse_url( $plugin_url );
+
+			// Using the filter you need the full path to the custom xsl file.
+			$xsl_url = $this->get_sitemap_xsl();
+
+			$xml_header = '<?xml-stylesheet type="text/xsl" href="' . $xsl_url . '"?>' . "\r\n" . '<urlset ';
+			$namespaces = apply_filters(
+				$this->prefix . 'xml_namespace',
+				array(
+					'xmlns'       => 'http://www.sitemaps.org/schemas/sitemap/0.9',
+					'xmlns:image' => 'http://www.google.com/schemas/sitemap-image/1.1',
+				)
+			);
+			if ( ! empty( $namespaces ) ) {
+				$ns = array();
+				foreach ( $namespaces as $k => $v ) {
+					$ns[] = esc_attr( $k ) . '="' . esc_url( $v, array( 'http', 'https' ) ) . '"';
+				}
+				$xml_header .= join( "\r\n\t", $ns );
+			}
+			$xml_header .= '>' . "\r\n";
+			// TODO Add esc_* function.
+			echo $xml_header;
+			$count = 0;
+			foreach ( $urls as $url ) {
+				echo "\t<url>\r\n";
+				if ( is_array( $url ) ) {
+					if ( isset( $url['rss'] ) ) {
+						unset( $url['rss'] );
+					}
+					foreach ( $url as $k => $v ) {
+						if ( ! empty( $v ) ) {
+							$v = aiosp_common::esc_xml( $k, $v );
+							if ( is_array( $v ) ) {
+								$buf = "\t\t\t<$k>\r\n";
+								foreach ( $v as $ext => $attr ) {
+									if ( is_array( $attr ) ) {
+										$buf = '';
+										// TODO Add esc_* function.
+										echo "\t\t<$k>\r\n";
+										foreach ( $attr as $a => $nested ) {
+											if ( is_array( $nested ) ) {
+												// TODO Add esc_* function.
+												echo "\t\t\t<$a>\r\n";
+												foreach ( $nested as $next => $nattr ) {
+													$value = aiosp_common::esc_xml( $next, $nattr );
+													// TODO Add esc_* function.
+													echo "\t\t\t\t<$next>$value</$next>\r\n";
+												}
+												// TODO Add esc_* function.
+												echo "\t\t\t</$a>\r\n";
+											} else {
+												$value = aiosp_common::esc_xml( $a, $nested );
+												// TODO Add esc_* function.
+												echo "\t\t\t<$a>$value</$a>\r\n";
+											}
+										}
+										// TODO Add esc_* function.
+										echo "\t\t</$k>\r\n";
+									} else {
+										$value = aiosp_common::esc_xml( $ext, $attr );
+										$buf  .= "\t\t\t<$ext>$value</$ext>\r\n";
+									}
+								}
+								if ( ! empty( $buf ) ) {
+									// TODO Add esc_* function.
+									echo $buf . "\t\t</$k>\r\n";
+								}
+							} else {
+								$value = aiosp_common::esc_xml( $k, $v );
+								// TODO Add esc_* function.
+								echo "\t\t<$k>$value</$k>\r\n";
+							}
+						}
+					}
+				} else {
+					$value = aiosp_common::esc_xml( 'loc', $url );
+					// TODO Add esc_* function.
+					echo "\t\t<loc>$value</loc>\r\n";
+				}
+				echo "\t</url>\r\n";
+				if ( $count >= $max_items ) {
+					break;
+				}
+			}
+			echo '</urlset>';
+		}
+
+		/**
+		 * Outputs the Google News sitemap.
+		 *
+		 * @since	3.4.0
+		 *
+		 * @param	array	$urls
+		 * @param	string	$comment	Whether the sitemap is a static one or is dynamically generated.
+		 */
+		private function output_news_sitemap( $urls, $comment ) {
+			if ( ! aioseop_is_addon_allowed( 'news_sitemap' ) ) {
+				exit();
+			}
+
+			echo '<?xml version="1.0" encoding="UTF-8"?>' . "\r\n\r\n";
+			echo '<!-- ' . sprintf( $this->comment_string, $comment, AIOSEOP_VERSION, date( 'D, d M Y H:i:s e' ) ) . " -->\r\n";
+
+			$site_url = site_url( '/' );
+			echo "<?xml-stylesheet type=\"text/xsl\" href=\"${site_url}news-sitemap.xsl\"?>" . "\r\n";
+
+			echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' . "\r\n";
+
+			foreach ( $urls as $url ) {
+
+			echo
+				"\t" . '<url>' . "\r\n" .
+				"\t\t". '<loc>' . aiosp_common::esc_xml( 'loc', $url['location'] ) . '</loc>' . "\r\n" .
+				"\t\t". '<news:news>' . "\r\n" .
+				"\t\t\t". '<news:publication>' . "\r\n" .
+				"\t\t\t\t". '<news:name>' . aiosp_common::esc_xml( 'news:name', $url['publication']['name'] ) . '</news:name>' . "\r\n" .
+				"\t\t\t\t". '<news:language>' . aiosp_common::esc_xml( 'news:language', $url['publication']['language'] ) . '</news:language>' . "\r\n" .
+				"\t\t\t". '</news:publication>' . "\r\n" .
+				"\t\t\t". '<news:publication_date>' . aiosp_common::esc_xml( 'news:language', $url['publication_date'] ) . '</news:publication_date>' . "\r\n" .
+				"\t\t\t". '<news:title>' . aiosp_common::esc_xml( 'news:title', $url['title'] ) . '</news:title>' . "\r\n" .
+				"\t\t". '</news:news>' . "\r\n" .
+				"\t" . '</url>' . "\r\n";
+			}
+
+			echo '</urlset>';
+		}
+
+		/**
+		 * Returns a sitemap's XSL styling sheet when requested.
+		 *
+		 * @since	?
+		 * @since	3.4.0	Added stylesheet for News Sitemap.
+		 */
+		public function make_dynamic_xsl() {
+			if ( ! preg_match( '#.*sitemap.xsl#i', $_SERVER['REQUEST_URI'] ) ) {
+				return;
+			}
+
+			$blog_charset = get_option( 'blog_charset' );
+			header( "Content-Type: text/xml; charset=$blog_charset", true );
+
+			if ( aioseop_is_addon_allowed( 'news_sitemap' ) && preg_match( '#.*news-sitemap.xsl#i', $_SERVER['REQUEST_URI'] ) ) {
+				include_once AIOSEOP_PLUGIN_DIR . '/inc/news-sitemap-xsl.php';
+			}
+
+			else if ( preg_match( '#.*sitemap.xsl#i', $_SERVER['REQUEST_URI'] ) ) {
+				include_once AIOSEOP_PLUGIN_DIR . '/inc/sitemap-xsl.php';
+			}
+
+			exit();
+		}
 }

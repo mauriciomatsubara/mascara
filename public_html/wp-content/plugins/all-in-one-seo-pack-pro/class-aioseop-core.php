@@ -453,9 +453,9 @@ class AIOSEOP_Core {
 		// Low priority allows us to override implementations of other plugins.
 		add_action( 'wp_enqueue_editor', array( 'AIOSEOP_Link_Attributes', 'enqueue_link_attributes_classic_editor' ), 999999 );
 
-		add_action( 'admin_init', array( 'AIOSEOP_Link_Attributes', 'register_link_attributes_gutenberg_editor' ) );
-
-		if ( version_compare( $wp_version, '5.0', '>=' ) ) {
+		include_once ABSPATH . 'wp-admin/includes/plugin.php';
+		if ( version_compare( $wp_version, '5.3', '>=' ) || is_plugin_active( 'gutenberg/gutenberg.php' ) ) {
+			add_action( 'admin_init', array( 'AIOSEOP_Link_Attributes', 'register_link_attributes_gutenberg_editor' ) );
 			add_action( 'enqueue_block_editor_assets', array( 'AIOSEOP_Link_Attributes', 'enqueue_link_attributes_gutenberg_editor' ) );
 		}
 

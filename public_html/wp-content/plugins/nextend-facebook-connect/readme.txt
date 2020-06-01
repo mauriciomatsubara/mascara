@@ -4,7 +4,7 @@ Tags: social login, facebook, google, twitter, linkedin, register, login, social
 Donate link: https://www.facebook.com/nextendweb
 Requires at least: 4.5
 Tested up to: 5.4.1
-Stable tag: 3.0.23
+Stable tag: 3.0.24
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -117,6 +117,9 @@ Using the Pro Addon you can set where the login buttons should appear on the Reg
 2. Nextend Social Login and Register in the profile page for account linking
 
 == Changelog ==
+
+= 3.0.24 =
+* Fix: BuddyPress 6.0 compatibility fix.
 
 = 3.0.23 =
 * Fix: PHP error when BuddyPress – Activity is disabled.

@@ -19,7 +19,7 @@ require_once(NSL_PATH . '/compat.php');
 
 class NextendSocialLogin {
 
-    public static $version = '3.0.23';
+    public static $version = '3.0.24';
 
     public static $nslPROMinVersion = '3.0.23';
 
