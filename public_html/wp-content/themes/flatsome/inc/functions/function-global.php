@@ -146,6 +146,36 @@ function flatsome_get_block_id( $post_id ) {
 }
 
 /**
+ * Retrieve a list of blocks.
+ *
+ * @param array|string $args Optional. Array or string of arguments.
+ *
+ * @return array|false List of blocks matching defaults or `$args`.
+ */
+function flatsome_get_block_list_by_id( $args = '' ) {
+
+	$defaults = array(
+		'option_none' => '',
+	);
+
+	$parsed_args = wp_parse_args( $args, $defaults );
+
+	$blocks = array();
+
+	if ( $parsed_args['option_none'] ) {
+		$blocks = array( 0 => $parsed_args['option_none'] );
+	}
+	$posts = flatsome_get_post_type_items( 'blocks' );
+	if ( $posts ) {
+		foreach ( $posts as $value ) {
+			$blocks[ $value->ID ] = $value->post_title;
+		}
+	}
+
+	return $blocks;
+}
+
+/**
  * Calls a shortcode function by its tag name.
  *
  * @param string $tag     The shortcode of the function to be called.

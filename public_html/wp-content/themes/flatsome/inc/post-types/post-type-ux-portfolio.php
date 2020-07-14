@@ -105,10 +105,11 @@ class Featured_Item_Post_Type {
 				'author',
 				'custom-fields',
 				'revisions',
+				'page-attributes',
 			),
 			'capability_type' => 'page',
 			'menu_position'   => 5,
-			'hierarchical'      => true,
+			'hierarchical'    => false,
 			'has_archive'     => true,
 		);
 

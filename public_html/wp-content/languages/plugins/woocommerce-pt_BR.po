@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - WooCommerce - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2020-07-08 19:24:15+0000\n"
+"PO-Revision-Date: 2020-07-14 20:13:56+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -10,6 +10,166 @@ msgstr ""
 "X-Generator: GlotPress/3.0.0-alpha.2\n"
 "Language: pt_BR\n"
 "Project-Id-Version: Plugins - WooCommerce - Stable (latest release)\n"
+
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/empty-cart/index.js:28
+msgid "Browse store"
+msgstr "Navegar pela loja"
+
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/empty-cart/index.js:21
+msgid "Checkout is not available whilst your cart is empty—please take a look through our store and come back when you're ready to place an order."
+msgstr "Não é possível finalizar um pedido com carrinho está vazio. Dê uma olhada na nossa loja e volte quando estiver pronto para fazer um pedido."
+
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/frontend.js:50
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/frontend.js:86
+msgid "The checkout has encountered an unexpected error. <button>Try reloading the page</button>. If the error persists, please get in touch with us so we can assist."
+msgstr "Encontrado um erro inesperado durante a finalização do pedido. <button>Tente recarregar a página</button>. Se o erro persistir, entre em contato conosco para que possamos ajudá-lo."
+
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/empty-cart/index.js:18
+msgid "Your cart is empty!"
+msgstr "Seu carrinho está vazio!"
+
+#: packages/woocommerce-blocks/build/cart-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/frontend.js:48
+msgid "The cart has encountered an unexpected error. <button>Try reloading the page</button>. If the error persists, please get in touch with us so we can assist."
+msgstr "Encontrado um erro inesperado no carrinho. <button>Tente recarregar a página</button>. Se o erro persistir, entre em contato conosco para que possamos ajudá-lo."
+
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/build/cart-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/full-cart/cart-line-items-table.js:39
+msgid "Details"
+msgstr "Detalhes"
+
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/edit.js:83
+msgid "Allow customers to estimate shipping by entering their address."
+msgstr "Permita que os clientes calculem o valor de entrega inserindo seus endereço."
+
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/build/cart-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/full-cart/cart-line-items-title.js:12
+msgid "Your cart (%d item)"
+msgid_plural "Your cart (%d items)"
+msgstr[0] "Seu carrinho (%d item)"
+msgstr[1] "Seu carrinho (%d itens)"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/previews/cart.js:121
+msgid "Orange"
+msgstr "Laranja"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/previews/cart.js:97
+msgid "Lightweight baseball cap"
+msgstr "Boné leve de baseball"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/previews/cart.js:96
+msgid "Cap"
+msgstr "Boné"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/previews/cart.js:53
+msgid "Yellow"
+msgstr "Amarelo"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/previews/cart.js:28
+msgid "Warm hat for winter"
+msgstr "Chapéu quente para o inverno"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/previews/cart.js:27
+msgid "Beanie"
+msgstr "Toca"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/previews/shipping-rates.js:23
+msgctxt "example product in Cart Block"
+msgid "Beanie"
+msgstr "Toca"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/previews/shipping-rates.js:14
+msgctxt "example product in Cart Block"
+msgid "Beanie with Logo"
+msgstr "Toca com logo"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/build/cart-frontend.js:14
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/base/components/cart-checkout/totals/totals-shipping-item/index.js:108
+msgid "(change address)"
+msgstr "(alterar endereço)"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/build/cart-frontend.js:14
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/base/components/cart-checkout/totals/totals-discount-item/index.js:43
+msgid "Removing coupon…"
+msgstr "Removendo cupom…"
+
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/edit.js:166
+msgid "Empty Cart"
+msgstr "Carrinho vazio"
+
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/edit.js:162
+msgid "Full Cart"
+msgstr "Carrinho cheio"
+
+#: packages/woocommerce-blocks/build/cart-frontend.js:14
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/frontend.js:46
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/frontend.js:45
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/frontend.js:84
+msgid "Something went wrong…"
+msgstr "Ocorreu um erro…"
+
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/build/cart-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/checkout-button/index.js:45
+msgid "Proceed to Checkout"
+msgstr "Concluir compra"
+
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/index.js:27
+msgid "Shopping cart."
+msgstr "Carrinho de compras."
+
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/edit.js:179
+msgid "There was an error whilst rendering the cart block. If this problem continues, try re-creating the block."
+msgstr "Ocorreu um erro ao renderizar o bloco do carrinho. Se esse problema persistir, tente recriar o bloco."
+
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/edit.js:175
+msgid "Cart Block Error"
+msgstr "Erro no bloco de carrinho"
+
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/edit.js:125
+msgid "WooCommerce Checkout Page"
+msgstr "Página de finalização de compra do WooCommerce"
+
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/edit.js:121
+msgid "Proceed to Checkout button"
+msgstr "Botão \"concluir compra\""
 
 #: packages/woocommerce-blocks/build/checkout.js:1
 #: packages/woocommerce-blocks/build/checkout-frontend.js:14
@@ -22,12 +182,409 @@ msgid "Payment method"
 msgstr "Método de pagamento"
 
 #: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Select a payment method below."
+msgstr "Selecione uma forma de pagamento abaixo."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Already have an account? "
+msgstr "Já possui uma conta?"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Phone (optional)"
+msgstr "Telefone (opcional)"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "We'll use this email to send you details and updates about your order."
+msgstr "Usaremos este e-mail para enviar informações e atualizações sobre seu pedido."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Contact information"
+msgstr "Informações de contato"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Click here to log in."
+msgstr "Clique aqui para fazer login."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "You must be logged in to checkout. "
+msgstr "Você precisa estar conectado para finalizar o seu pedido."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Select shipping options below."
+msgstr "Selecione uma das opções de entrega abaixo."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Use same address for billing"
+msgstr "Usar o mesmo endereço para cobrança"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Enter the address that matches your card or payment method."
+msgstr "Digite o endereço que corresponde ao seu cartão ou forma de pagamento."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Enter the physical address where you want us to deliver your order."
+msgstr "Digite o endereço onde deseja que o seu pedido seja entregue."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "There was an error with this payment method. Please verify it's configured correctly."
+msgstr "Ocorreu um erro com este método de pagamento. Verifique se está configurado corretamente."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "This site is experiencing difficulties with this payment method. Please contact the owner of the site for assistance."
+msgstr "Este site está com dificuldades com este método de pagamento. Entre em contato com o proprietário do site para obter ajuda."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/checkout-order-error/index.js:114
+msgid "Edit your cart"
+msgstr "Editar o seu carrinho"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/checkout-order-error/index.js:95
+msgid "Please edit your cart and try again."
+msgstr "Edite o seu carrinho e tente novamente."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/checkout-order-error/index.js:72
+msgid "There is a problem with your cart"
+msgstr "Ocorreu um problema com seu carrinho"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/checkout-order-error/index.js:69
+msgid "Checkout error"
+msgstr "Erro na finalização do pedido"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/checkout-order-error/index.js:42
+msgid "There was a problem checking out. Please try again. If the problem persists, please get in touch with us so we can assist."
+msgstr "Ocorreu um problema ao finalizar o pedido. Tente novamente. Se o problema persistir, entre em contato conosco para que possamos ajudá-lo."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/index.js:24
+msgid "Display a checkout form so your customers can submit orders."
+msgstr "Exiba um formulário de pagamento para que seus clientes possam enviar pedidos."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:274
+msgid "There was an error whilst rendering the checkout block. If this problem continues, try re-creating the block."
+msgstr "Ocorreu um erro ao renderizar o bloco do finalização de pedido. Se esse problema persistir, tente recriar o bloco."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:270
+msgid "Checkout Block Error"
+msgstr "Erro com o bloco de finalização de pedido"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:235
+msgid "WooCommerce Cart Page"
+msgstr "Página de carrinho do WooCommerce"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:231
+msgid "Return to Cart button"
+msgstr "Botão \"retornar ao carrinho\""
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:209
+msgid "Show a \"Return to Cart\" link"
+msgstr "Mostrar um link para \"Retornar ao carrinho\""
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:179
+msgid "Pages must be first setup in store settings: <a1>Privacy policy</a1>, <a2>Terms and conditions</a2>."
+msgstr "As páginas precisam antes serem configuradas nas opções da loja: <a1>Política de privacidade</a1>, <a2>Termos e condições</a2>."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:162
+msgid "Shows links to your \"terms and conditions\" and \"privacy policy\" pages."
+msgstr "Mostra links para suas páginas de \"termos e condições\" e \"política de privacidade\"."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:158
+msgid "Show links to policies"
+msgstr "Mostrar links para políticas"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:152
+msgid "Navigation options"
+msgstr "Opções de navegação"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:137
+msgid "Require phone number?"
+msgstr "Requer número de telefone?"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:101
+msgid "Require company name?"
+msgstr "Requer nome da empresa?"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:85
+msgid "Include additional address fields in the checkout form."
+msgstr "Inclua campos de endereço adicionais no formulário de finalização de pedido."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:79
+msgid "Address options"
+msgstr "Opções de endereço"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/edit.js:184
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:279
+msgid "Error message:"
+msgstr "Mensagem de erro:"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:59
+msgid "If you would like to use this block as your default checkout you must update your <a>page settings in WooCommerce</a>."
+msgstr "Se você deseja usar este bloco como o padrão de finalização de pedido, atualize as <a>configurações da página no WooCommerce</a>."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/no-shipping-placeholder/index.js:33
+msgid "Configure Shipping Options"
+msgstr "Configurar métodos de entrega"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/no-shipping-placeholder/index.js:22
+msgid "Your store does not have any Shipping Options configured. Once you have added your Shipping Options they will appear here."
+msgstr "Sua loja não possui nenhuma opção de entrega configurada. Depois de adicionar suas opções de entrega, elas aparecerão aqui."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/cart/edit.js:133
+#: packages/woocommerce-blocks/assets/js/blocks/cart-checkout/checkout/edit.js:244
+msgid "We are currently working on improving our cart and checkout blocks, providing merchants with the tools and customization options they need."
+msgstr "Atualmente, estamos trabalhando para melhorar nossos blocos de carrinho e finalização de pedido, fornecendo aos comerciantes as ferramentas e as opções de personalização necessárias."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
 #: packages/woocommerce-blocks/build/cart.js:1
 #: packages/woocommerce-blocks/build/cart-frontend.js:6
 #: packages/woocommerce-blocks/build/checkout-frontend.js:6
 #: packages/woocommerce-blocks/assets/js/base/components/loading-mask/index.js:37
 msgid "Loading…"
 msgstr "Carregando..."
+
+#: packages/woocommerce-blocks/build/all-products.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/products/edit.js:40
+msgid "Default sorting (menu order)"
+msgstr "Ordenação padrão (ordem no menu)"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "There was a problem with your shipping option."
+msgstr "Ocorreu um problema com sua opção de entrega."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "There was a problem with your payment option."
+msgstr "Ocorreu um problema com sua opção de pagamento."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Some input fields are invalid."
+msgstr "Alguns campos são inválidos."
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Place Order"
+msgstr "Finalizar pedido"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/build/cart-frontend.js:6
+#: packages/woocommerce-blocks/build/checkout-frontend.js:6
+#: packages/woocommerce-blocks/build/checkout-frontend.js:14
+msgid "Something went wrong. Please contact us to get assistance."
+msgstr "Ocorreu um problema. Entre em contato conosco para obter ajuda."
+
+#: packages/woocommerce-blocks/build/product-search-legacy.js:1
+#: packages/woocommerce-blocks/build/product-search.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/product-search/index.js:23
+msgid "A search box to allow customers to search for products by keyword."
+msgstr "Uma caixa de pesquisa para permitir que os clientes pesquisem produtos por palavra-chave."
+
+#: packages/woocommerce-blocks/build/all-products.js:1
+#: packages/woocommerce-blocks/assets/js/atomic/blocks/product/sku/index.js:15
+msgid "Product SKU"
+msgstr "REF do produto"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/components/feedback-prompt/index.js:21
+msgid "Feedback?"
+msgstr "Comentários?"
+
+#: packages/woocommerce-blocks/build/checkout.js:1
+#: packages/woocommerce-blocks/build/cart.js:1
+#: packages/woocommerce-blocks/assets/js/components/feedback-prompt/index.js:30
+msgid "Give us your feedback."
+msgstr "Conte-nos sobre a sua experiência."
+
+#: packages/woocommerce-blocks/build/all-products.js:1
+#: packages/woocommerce-blocks/assets/js/atomic/blocks/product/button/index.js:15
+msgid "Add to Cart Button"
+msgstr "Botão \"Adicionar ao carrinho\""
+
+#: packages/woocommerce-blocks/build/all-products.js:1
+#: packages/woocommerce-blocks/assets/js/atomic/blocks/product/sku/index.js:16
+msgid "Display the SKU of a product."
+msgstr "Exibir o REF de um produto."
+
+#: packages/woocommerce-blocks/build/attribute-filter.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/attribute-filter/edit.js:194
+msgid "Products will update as options are selected."
+msgstr "Os produtos serão atualizados à medida que as opções forem selecionadas."
+
+#: packages/woocommerce-blocks/build/attribute-filter.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/attribute-filter/index.js:22
+msgid "Allow customers to filter the grid by product attribute, such as color. Works in combination with the All Products block."
+msgstr "Permita que os clientes filtrem a grade por atributo do produto, como cor. Funciona em combinação com o bloco Todos os produtos."
+
+#: packages/woocommerce-blocks/build/attribute-filter.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/attribute-filter/edit.js:264
+msgid "Showing Filter Products by Attribute block preview."
+msgstr "Mostrando a pré-visualização do bloco de \"Filtro de produtos por atributo\"."
+
+#: packages/woocommerce-blocks/build/wc-payment-method-stripe.js:1
+msgid "Sorry, we're not accepting prepaid cards at this time."
+msgstr "No momento, não estamos aceitando cartões pré-pagos."
+
+#: packages/woocommerce-blocks/build/product-on-sale.js:1
+#: packages/woocommerce-blocks/build/product-on-sale-legacy.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/product-on-sale/index.js:26
+msgid "Display a grid of products currently on sale."
+msgstr "Exiba uma grade de produtos em promoção."
+
+#: packages/woocommerce-blocks/build/product-on-sale.js:1
+#: packages/woocommerce-blocks/build/product-on-sale-legacy.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/product-on-sale/block.js:23
+msgid "This block shows on-sale products. There are currently no discounted products in your store."
+msgstr "Esse bloco mostra produtos em promoção. No momento não há nenhum produto em promoção na sua loja."
+
+#: packages/woocommerce-blocks/build/product-categories-legacy.js:1
+#: packages/woocommerce-blocks/build/product-categories.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/product-categories/block.js:117
+msgid "Category images are hidden."
+msgstr "Imagens de categoria são ocultas."
+
+#: packages/woocommerce-blocks/build/product-categories-legacy.js:1
+#: packages/woocommerce-blocks/build/product-categories.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/product-categories/block.js:113
+msgid "Category images are visible."
+msgstr "Imagens de categoria são visíveis."
+
+#: packages/woocommerce-blocks/build/product-categories-legacy.js:1
+#: packages/woocommerce-blocks/build/product-categories.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/product-categories/block.js:107
+msgid "Show category images"
+msgstr "Mostrar imagens da categoria"
+
+#: packages/woocommerce-blocks/build/handpicked-products-legacy.js:1
+#: packages/woocommerce-blocks/build/handpicked-products.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/handpicked-products/index.js:24
+msgid "Handpicked Products"
+msgstr "Produtos escolhidos a dedo"
+
+#: packages/woocommerce-blocks/build/price-filter.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/price-filter/index.js:22
+msgid "Allow customers to filter the products by choosing a lower or upper price limit. Works in combination with the All Products block."
+msgstr "Permite aos clientes filtrar os escolhendo um limite de preço superior ou inferior. Funciona em combinação no bloco \"Todos os produtos\"."
+
+#: packages/woocommerce-blocks/build/active-filters.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/active-filters/index.js:22
+msgid "Show the currently active product filters. Works in combination with the All Products and filters blocks."
+msgstr "Mostrar os filtros de produtos atualmente ativos. Funciona em combinação com os blocos \"Todos os produtos\" e \"filtros\"."
+
+#: packages/woocommerce-blocks/build/active-filters.js:1
+#: packages/woocommerce-blocks/build/active-filters-frontend.js:1
+#: packages/woocommerce-blocks/assets/js/blocks/active-filters/block.js:131
+msgid "Clear All Filters"
+msgstr "Limpar todos os filtros"
+
+#: packages/woocommerce-blocks/src/StoreApi/Schemas/CartItemSchema.php:262
+msgid "Line total tax."
+msgstr "Taxa total da linha."
+
+#: packages/woocommerce-admin/dist/chunks/44.c1db5d77c3c79d0dd95b.js:5740
+#: packages/woocommerce-admin/dist/chunks/44.c1db5d77c3c79d0dd95b.js:5763
+#: packages/woocommerce-admin/dist/chunks/44.c1db5d77c3c79d0dd95b.js:5794
+msgid "2 minutes"
+msgstr "2 minutos"
+
+#: packages/woocommerce-admin/dist/chunks/44.c1db5d77c3c79d0dd95b.js:5749
+#: packages/woocommerce-admin/dist/chunks/44.c1db5d77c3c79d0dd95b.js:5770
+#: packages/woocommerce-admin/dist/chunks/44.c1db5d77c3c79d0dd95b.js:5777
+msgid "1 minute"
+msgstr "1 minuto"
+
+#: packages/woocommerce-admin/dist/chunks/44.c1db5d77c3c79d0dd95b.js:5723
+msgid "Store details"
+msgstr "Detalhes da loja"
+
+#: packages/woocommerce-admin/dist/chunks/44.c1db5d77c3c79d0dd95b.js:6042
+msgid "Hide this"
+msgstr "Esconder isso"
+
+#: packages/woocommerce-admin/dist/chunks/29.9d67beb382e2ce4a09d0.js:1461
+#: packages/woocommerce-admin/dist/chunks/6.8a01ef3df76cbe04b5e5.js:909
+msgid "Dismiss this message"
+msgstr "Dispensar essa mensagem"
+
+#: packages/woocommerce-admin/dist/chunks/29.9d67beb382e2ce4a09d0.js:1466
+#: packages/woocommerce-admin/dist/chunks/6.8a01ef3df76cbe04b5e5.js:914
+msgid "Dismiss all messages"
+msgstr "Dispensar todas as mensagens"
+
+#: packages/woocommerce-admin/dist/chunks/29.9d67beb382e2ce4a09d0.js:1478
+#: packages/woocommerce-admin/dist/chunks/6.8a01ef3df76cbe04b5e5.js:926
+msgid "Yes, I'm sure"
+msgstr "Sim, eu tenho certeza"
+
+#: packages/woocommerce-admin/dist/chunks/44.c1db5d77c3c79d0dd95b.js:5756
+msgid "1 minute per product"
+msgstr "1 minuto por produto"
+
+#: packages/woocommerce-admin/dist/chunks/44.c1db5d77c3c79d0dd95b.js:5752
+msgid "Add my products"
+msgstr "Adicione meus produtos"
+
+#: packages/woocommerce-admin/dist/chunks/44.c1db5d77c3c79d0dd95b.js:5730
+msgid "4 minutes"
+msgstr "4 minutos"
+
+#: packages/woocommerce-admin/dist/app/index.js:16119
+#: packages/woocommerce-admin/dist/app/index.js:16170
+msgid "Undo"
+msgstr "Desfazer"
+
+#: packages/woocommerce-admin/dist/app/index.js:16168
+msgid "All messages dismissed."
+msgstr "Todas as mensagens foram dispensadas."
+
+#: packages/woocommerce-blocks/src/StoreApi/Schemas/ProductCategorySchema.php:47
+msgid "Category image."
+msgstr "Imagem da categoria."
 
 #. translators: %s: product name
 #: src/Checkout/Helpers/ReserveStock.php:92
@@ -41,6 +598,194 @@ msgstr "&quot;%s&quot; está esgotado e não pode ser comprado."
 #: packages/woocommerce-blocks/src/StoreApi/Utilities/ReserveStock.php:185
 msgid "Not enough units of %s are available in stock to fulfil this order."
 msgstr "Não há unidades suficientes de %s disponíveis em estoque para atender a esse pedido."
+
+#: i18n/states.php:757
+msgid "Taita-Taveta"
+msgstr "Taita-Taveta"
+
+#: i18n/states.php:758
+msgid "Tana River"
+msgstr "Tana River"
+
+#: i18n/states.php:759
+msgid "Tharaka-Nithi"
+msgstr "Tharaka-Nithi"
+
+#: i18n/states.php:760
+msgid "Trans Nzoia"
+msgstr "Trans Nzoia"
+
+#: i18n/states.php:761
+msgid "Turkana"
+msgstr "Turkana"
+
+#: i18n/states.php:762
+msgid "Uasin Gishu"
+msgstr "Uasin Gishu"
+
+#: i18n/states.php:763
+msgid "Vihiga"
+msgstr "Vihiga"
+
+#: i18n/states.php:764
+msgid "Wajir"
+msgstr "Wajir"
+
+#: i18n/states.php:765
+msgid "West Pokot"
+msgstr "West Pokot"
+
+#: i18n/states.php:720
+msgid "Bomet"
+msgstr "Bomet"
+
+#: i18n/states.php:719
+msgid "Baringo"
+msgstr "Baringo"
+
+#: i18n/states.php:723
+msgid "Elgeyo-Marakwet"
+msgstr "Elgeyo-Marakwet"
+
+#: i18n/states.php:721
+msgid "Bungoma"
+msgstr "Bungoma"
+
+#: i18n/states.php:725
+msgid "Garissa"
+msgstr "Garissa"
+
+#: i18n/states.php:724
+msgid "Embu"
+msgstr "Embu"
+
+#: i18n/states.php:727
+msgid "Isiolo"
+msgstr "Isiolo"
+
+#: i18n/states.php:726
+msgid "Homa Bay"
+msgstr "Homa Bay"
+
+#: i18n/states.php:742
+msgid "Mandera"
+msgstr "Mandera"
+
+#: i18n/states.php:741
+msgid "Makueni"
+msgstr "Makueni"
+
+#: i18n/states.php:740
+msgid "Machakos"
+msgstr "Machakos"
+
+#: i18n/states.php:739
+msgid "Lamu"
+msgstr "Lamu"
+
+#: i18n/states.php:738
+msgid "Laikipia"
+msgstr "Laikipia"
+
+#: i18n/states.php:737
+msgid "Kwale"
+msgstr "Kwale"
+
+#: i18n/states.php:754
+msgid "Nyeri"
+msgstr "Nyeri"
+
+#: i18n/states.php:753
+msgid "Nyandarua"
+msgstr "Nyandarua"
+
+#: i18n/states.php:752
+msgid "Nyamira"
+msgstr "Nyamira"
+
+#: i18n/states.php:751
+msgid "Narok"
+msgstr "Narok"
+
+#: i18n/states.php:750
+msgid "Nandi"
+msgstr "Nandi"
+
+#: i18n/states.php:749
+msgid "Nakuru"
+msgstr "Nakuru"
+
+#: i18n/states.php:748
+msgid "Nairobi County"
+msgstr "Nairobi County"
+
+#: i18n/states.php:728
+msgid "Kajiado"
+msgstr "Kajiado"
+
+#: i18n/states.php:729
+msgid "Kakamega"
+msgstr "Kakamega"
+
+#: i18n/states.php:730
+msgid "Kericho"
+msgstr "Kericho"
+
+#: i18n/states.php:731
+msgid "Kiambu"
+msgstr "Kiambu"
+
+#: i18n/states.php:732
+msgid "Kilifi"
+msgstr "Kilifi"
+
+#: i18n/states.php:733
+msgid "Kirinyaga"
+msgstr "Kirinyaga"
+
+#: i18n/states.php:734
+msgid "Kisii"
+msgstr "Kisii"
+
+#: i18n/states.php:736
+msgid "Kitui"
+msgstr "Kitui"
+
+#: i18n/states.php:735
+msgid "Kisumu"
+msgstr "Kisumu"
+
+#: i18n/states.php:745
+msgid "Migori"
+msgstr "Migori"
+
+#: i18n/states.php:744
+msgid "Meru"
+msgstr "Meru"
+
+#: i18n/states.php:747
+msgid "Murang’a"
+msgstr "Murang’a"
+
+#: i18n/states.php:746
+msgid "Mombasa"
+msgstr "Mombasa"
+
+#: i18n/states.php:743
+msgid "Marsabit"
+msgstr "Marsabit"
+
+#: i18n/states.php:756
+msgid "Siaya"
+msgstr "Siaya"
+
+#: i18n/states.php:755
+msgid "Samburu"
+msgstr "Samburu"
+
+#: includes/admin/views/html-notice-base-table-missing.php:17
+msgid "Database tables missing"
+msgstr "Tabelas de banco de dados ausentes"
 
 #. translators: includes tax information
 #: includes/wc-cart-functions.php:323
@@ -24450,10 +25195,6 @@ msgstr "Retornar para o carrinho"
 msgid "Calculate shipping"
 msgstr "Calcular entrega"
 
-#: templates/cart/proceed-to-checkout-button.php:26
-msgid "Proceed to checkout"
-msgstr "Fechar compra"
-
 #: templates/cart/cart.php:148
 msgid "Update cart"
 msgstr "Atualizar carrinho"
@@ -24676,6 +25417,10 @@ msgstr "Mostrar produtos ocultos"
 #: templates/myaccount/form-login.php:70 templates/myaccount/form-login.php:107
 msgid "Register"
 msgstr "Cadastre-se"
+
+#: templates/cart/proceed-to-checkout-button.php:26
+msgid "Proceed to checkout"
+msgstr "Concluir compra"
 
 #: includes/class-wc-product-variable.php:60
 msgid "Select options"
