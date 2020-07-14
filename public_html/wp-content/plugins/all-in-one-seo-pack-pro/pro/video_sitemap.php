@@ -77,6 +77,23 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 
 			// Good for testing.
 			// add_action('admin_init', array($this, 'scan_all_posts' ));
+
+			$this->set_filename();
+		}
+
+		/**
+		 * Sets the default sitemap filename if it isn't set.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @return void
+		 */
+		private function set_filename() {
+			global $aioseop_options;
+			if ( isset( $aioseop_options['modules']['aiosp_video_sitemap_options'] ) && empty( $aioseop_options['modules']['aiosp_video_sitemap_options']['aiosp_video_sitemap_filename'] ) ) {
+				$aioseop_options['modules']['aiosp_video_sitemap_options']['aiosp_video_sitemap_filename'] = 'video-sitemap';
+				update_option( 'aioseop_options', $aioseop_options );
+			}
 		}
 
 		/**
@@ -380,14 +397,6 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 				true,
 			);
 
-			if ( version_compare( $wp_version, '4.0.0', '>=' ) ) {
-				// viddler was removed in WP 4.0.0
-				// also, remove the provider in case it is added back in a later WP version
-				$providers['#https?://(www\.)?viddler.com/v/.*#i'] = array(
-					'http://www.viddler.com/oembed/',
-					true,
-				);
-			}
 			return $providers;
 		}
 
@@ -445,6 +454,9 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 							}
 							foreach ( $video as $vid ) {
 								if ( ! in_array( $vid['video:player_loc'], $urls ) ) {
+									if ( ! isset ( $vid['video:thumbnail_loc'] ) || ! $vid['video:thumbnail_loc'] ) {
+										$vid['video:thumbnail_loc'] = $this->get_thumbnail();
+									}
 									$pr_info['video:video'][] = $vid;
 									$urls[] = $vid['video:player_loc'];
 								}
@@ -456,6 +468,21 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 			}
 			return array();
 		}
+
+		/**
+		 * Gets the thumbnail URL if the video doesn't have one.
+		 * 
+		 * We use the site logo if set or else use our default thumbnail.
+		 * 
+		 * @since 3.6.0
+		 *
+		 * @return string The thumbnail URL.
+		 */
+		private function get_thumbnail() {
+			return apply_filters( 'aioseo_video_sitemap_default_thumbnail', plugin_dir_url( AIOSEO_PLUGIN_FILE ) . 'images/default-thumbnail.png' );
+		}
+
+
 		function fetch_videos_only( $args ) {
 			$args['meta_query'] = array(
 				array(
@@ -729,7 +756,7 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 					$opt['video:player_loc'] = esc_url( $link );
 
 					if ( empty( $opt['video:description'] ) ) {
-						$opt['video:description'] = 'Video ';
+						$opt['video:description'] = 'Video';
 						if ( ! empty( $opt['video:title'] ) ) {
 							$opt['video:description'] .= $opt['video:title'];
 						}
@@ -740,10 +767,6 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 
 					if ( ! empty( $data['id'] ) && ! empty( $opt['video:player_loc'] ) ) {
 						$this->oembed_discovery( $link, $opt['video:player_loc'], null, $data['id'] );
-					}
-
-					if ( ! empty( $opt['video:player_loc'] ) && empty( $opt['video:thumbnail_loc'] ) ) {
-						$this->get_additional_data( $opt );
 					}
 
 					if ( in_array( $link, array_keys( $this->video_descriptions ) ) ) {
@@ -757,13 +780,10 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 							$opt = array_merge( $opt, $this->video_descriptions[ $link ] );
 						}
 
-						if ( empty( $opt['video:title'] ) ) {
-							$opt['video:title'] = $opt['video:description'];
-						}
-
 						$opt['custom']  = array( 'custom' => $this->order_sitemap_fields( $opt ) );
 					}
 
+					$this->get_additional_data( $opt );
 					$opt = $this->order_sitemap_fields( $opt );
 
 					if ( $return_single ) {
@@ -929,21 +949,8 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 
 		/** if certain attributes (such as thumnbnail) have not been provided, try a service-specific method to fetch them **/
 		function get_additional_data( &$opt ) {
-			$link   = $opt['video:player_loc'];
-			if ( strpos( $link, 'facebook.com' ) !== false ) {
-				if ( strpos( $link, '/videos/' ) !== false ) {
-					$args   = explode( '/', $link );
-					$args   = array_filter( $args );
-					// the video id is usually after /videos/
-					$index  = array_search( 'videos', $args );
-					if ( $index !== false ) {
-						$id     = $args[ $index + 1 ];
-						if ( is_numeric( $id ) ) {
-							$opt['video:title'] = $id;
-							$opt['video:thumbnail_loc'] = "http://graph.facebook.com/$id/picture";
-						}
-					}
-				}
+			if ( ! isset( $opt['video:title'] ) || ! $opt['video:title'] ) {
+				$opt['video:title'] = $opt['video:player_loc'];
 			}
 		}
 
@@ -1006,20 +1013,6 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 						// Exclude everything but video embeds.
 						$data = array();
 					}
-
-					// if its a wordpress.tv url, it will resolve into a videopress.com video
-					// but the oEmbed does not give a thumnbnail so we have to manipulate this to get it to parse as a videopress video instead
-					if ( $data && false !== strpos( $url, 'wordpress.tv' ) && false !== strpos( $data->html, 'videopress.com' ) ) {
-						$data   = $this->parse_video_opts(
-							array(
-								'id' => $id,
-								'html' => $data->html,
-							)
-						);
-						if ( is_array( $data ) && isset( $data[0]['video:player_loc'] ) && strpos( $data[0]['video:player_loc'], 'videopress.com' ) !== false ) {
-							$data   = $this->oembed_discover_url( $data[0]['video:player_loc'], $id );
-						}
-					}
 				}
 			}
 			return $data;
@@ -1030,10 +1023,6 @@ if ( class_exists( 'All_in_One_SEO_Pack_Sitemap' ) && ( ! class_exists( 'All_in_
 			$providers  = array(
 				// videopress iframe embeds have a url structure like /embed/ but the oEmbed endpoint only recognizes /v/ type urls
 				'videopress.com/embed/' => 'videopress.com/v/',
-				// funnyordie iframe embeds have a url structure like /embed/ but the oEmbed endpoint only recognizes /videos/ type urls
-				'funnyordie.com/embed/' => 'funnyordie.com/videos/',
-				// viddler iframe embeds have a url structure like /embed/ but the oEmbed endpoint only recognizes /v/ type urls
-				'viddler.com/embed/' => 'viddler.com/v/',
 				// youtube iframe embeds have a url structure like /embed/ but the oEmbed endpoint only recognizes /watch?v= type urls
 				'youtube.com/embed/' => 'youtube.com/watch?v=',
 			);

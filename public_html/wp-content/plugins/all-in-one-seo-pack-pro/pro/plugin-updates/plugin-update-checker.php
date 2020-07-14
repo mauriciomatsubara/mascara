@@ -212,6 +212,7 @@ if ( ! class_exists( 'PluginUpdateChecker_3_1', false ) ) :
 
 			$aioseop_options = get_option( 'aioseop_options' );
 			$aioseop_options['addons'] = $pluginInfo->addons;
+			$aioseop_options['plan']   = $pluginInfo->plan ? $pluginInfo->plan : 'unlicensed';
 			update_option( 'aioseop_options', $aioseop_options );
 
 			$pluginInfo = apply_filters( 'puc_request_info_result-' . $this->slug, $pluginInfo, $result );
@@ -1000,6 +1001,7 @@ if ( ! class_exists( 'PluginInfo_3_1', false ) ) :
 		public $last_updated;
 
 		public $addons;
+		public $plan;
 
 		public $id = 0; // The native WP.org API returns numeric plugin IDs, but they're not used for anything.
 

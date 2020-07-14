@@ -39,18 +39,32 @@ if ( ! function_exists( 'aioseop_taxonomy_manage_columns' ) ) {
 	 *
 	 * @return string The column value.
 	 */
-	function aioseop_taxonomy_manage_columns( $out, $column_name, $id ) {
+	function aioseop_taxonomy_manage_columns( $out, $column_name, $post_id ) {
+		$value = '';
 		switch ( $column_name ) {
 			case 'aioseop_title':
-				echo esc_html( get_term_meta( $id, '_aioseop_title', true ) );
+				$value = esc_html( get_term_meta( $post_id, '_aioseop_title', true ) );
 				break;
 			case 'aioseop_desc':
-				echo esc_html( get_term_meta( $id, '_aioseop_description', true ) );
+				$value = esc_html( get_term_meta( $post_id, '_aioseop_description', true ) );
 				break;
 			case 'aioseop_keywords':
-				echo esc_html( get_term_meta( $id, '_aioseop_keywords', true ) );
+				$value = esc_html( get_term_meta( $post_id, '_aioseop_keywords', true ) );
 				break;
+			default: 
+				return;
 		}
+
+		if ( empty( $value ) ) {
+			$value = sprintf( '<strong>%s</strong>', sprintf( __( 'No value', 'all-in-one-seo-pack' ) ) );
+		}
+
+		$span  = "<span id='aioseop_{$column_name}_{$post_id}_value'>" . trim( $value ) . '</span>';
+
+		?>
+		<div id="<?php echo "aioseop_${column_name}_${post_id}"; ?>" class="aioseop_mpc_admin_meta_options">
+		<?php echo $span; ?></div><?php
+
 		return $out;
 	}
 }

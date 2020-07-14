@@ -33,6 +33,8 @@ class AIOSEOP_Schema_Builder_Ext {
 	 * @return array
 	 */
 	public function register_schema_graphs( $graphs ) {
+		require_once AIOSEOP_PLUGIN_DIR . 'pro/inc/schema/graphs/graph-localbusiness.php';
+		$graphs['LocalBusiness'] = new AIOSEOP_Graph_LocalBusiness();
 
 		return $graphs;
 	}
@@ -46,6 +48,16 @@ class AIOSEOP_Schema_Builder_Ext {
 	 * @return array
 	 */
 	public function schema_layout( $layout ) {
+		global $aioseop_modules;
+		$loaded_modules = $aioseop_modules->get_loaded_module_list();
+
+		if (
+			is_array( $layout ) &&
+			isset( $layout['@graph'] ) &&
+			isset( $loaded_modules['schema_local_business'] )
+		) {
+			array_push( $layout['@graph'], '[aioseop_schema_LocalBusiness]' );
+		}
 
 		if ( is_singular() || is_single() ) {
 			if ( is_attachment() ) {

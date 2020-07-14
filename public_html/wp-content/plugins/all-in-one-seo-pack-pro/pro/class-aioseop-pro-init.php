@@ -25,8 +25,10 @@ class All_in_One_SEO_Pack_Pro_Init {
 	public static function init() {
 		self::require_files();
 
-		// Load extended sitemap class for Pro.
+		// Load extended sitemap class.
 		add_filter( 'aioseop_class_sitemap', array( 'All_in_One_SEO_Pack_Pro_Init', 'load_pro_sitemap_class' ) );
+		// Load Local Business schema class.
+		add_filter( 'aioseop_class_schema_local_business', array( 'All_in_One_SEO_Pack_Pro_Init', 'load_pro_local_business_class' ) );
 	}
 
 	/**
@@ -49,12 +51,27 @@ class All_in_One_SEO_Pack_Pro_Init {
 	}
 
 	/**
-	 * Loads all classes that extend functionality in the free plugin.
-	 *
+	 * Returns the class name of the extended sitemap class.
+	 * 
 	 * @since 3.4.2
+	 *
+	 * @param  string $class_name The class name.
+	 * @return string             The class name.
 	 */
 	public static function load_pro_sitemap_class( $class_name ) {
 		return 'All_in_One_SEO_Pack_Sitemap_Pro';
+	}
+
+	/**
+	 * Returns the class name of the Local Business schema class.
+	 * 
+	 * @since 3.6.0
+	 *
+	 * @param  string $class_name The class name.
+	 * @return string             The class name.
+	 */
+	public static function load_pro_local_business_class( $class_name ) {
+		return 'AIOSEOP_Schema_Local_Business';
 	}
 }
 

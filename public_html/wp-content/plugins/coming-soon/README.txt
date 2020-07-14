@@ -4,7 +4,7 @@ Donate link: http://www.seedprod.com
 Tags: maintenance mode, coming soon page, coming soon, under construction, landing page, launch, maintenance, construction, offline, unavailable, under construction page, launch page
 Requires at least: 3.5.1
 Tested up to: 5.2
-Stable tag: 5.1.0
+Stable tag: 5.1.2
 Text Domain: coming-soon
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -115,6 +115,12 @@ This is always a caching issue. Go to the caching plugin's setting page and clea
 4. Design Page
 
 == Changelog ==
+= 5.1.2 =
+* Tweak - Escape logo and custom css fields: reported by security researcher (Jinson Varghese Behanan) from the company (Astra Security)
+
+= 5.1.1 =
+* Tweak - Escape script output on certain fields: reported by security researcher (Jinson Varghese Behanan) from the company (Astra Security)
+
 = 5.1.0 =
 * Added - Suggest a Feature 
 * Added - Quicklinks to Support
@@ -236,6 +242,12 @@ This is always a caching issue. Go to the caching plugin's setting page and clea
 * Initial Commit
 
 == Upgrade Notice ==
+= 5.1.2 =
+* Tweak - Escape logo and custom css fields: reported by security researcher (Jinson Varghese Behanan) from the company (Astra Security)
+
+= 5.1.1 =
+* Tweak - Escape script output on certain fields: reported by security researcher (Jinson Varghese Behanan) from the company (Astra Security)
+
 = 5.1.0 =
 * Added - Suggest a Feature 
 * Added - Quicklinks to Support

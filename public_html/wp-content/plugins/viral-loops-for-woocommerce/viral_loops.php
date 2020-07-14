@@ -3,7 +3,7 @@
 Plugin Name: Viral Loops for WooCommerce
 Plugin URI:  https://viral-loops.com/
 Description: Integration of Viral Loops into WooCommerce
-Version:     1.3.1
+Version:     1.3.2
 Author:      Viralloops
 Author URI:  https://viral-loops.com/
 License:     GPL2

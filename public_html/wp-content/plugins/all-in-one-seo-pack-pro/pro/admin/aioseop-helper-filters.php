@@ -13,6 +13,9 @@ function aioseop_pro_video_sitemap_help_text( $help_text, $module ) {
 		case 'All_in_One_SEO_Pack_Video_Sitemap':
 			$help_text = aioseop_pro_help_text_video_sitemap( $help_text );
 			break;
+		case 'AIOSEOP_Schema_Local_Business':
+			$help_text = aioseop_pro_help_text_schema_local_business( $help_text );
+			break;
 		default:
 			break;
 	}
@@ -217,4 +220,44 @@ function aioseop_pro_help_text_video_sitemap( $help_text ) {
 	}
 
 	return $rtn_help_text;
+}
+
+/**
+ * Help Text for General Settings
+ *
+ * @since 3.4.0
+ *
+ * @param array $help_text
+ * @return array
+ */
+function aioseop_pro_help_text_schema_local_business( $help_text ) {
+	$help_text = array(
+		'aiosp_schema_local_business_aioseo_business_type'       => __( 'The type of your business.', 'all-in-one-seo-pack' ),
+		'aiosp_schema_local_business_aioseo_business_name'       => __( 'The name of your business.', 'all-in-one-seo-pack' ),
+		'aiosp_schema_local_business_aioseo_business_image'      => __( 'An image that represents your business. We recommend this to be your logo.', 'all-in-one-seo-pack' ),
+		'aiosp_schema_local_business_aioseo_postal_address'      => __( 'The location where your business is located.', 'all-in-one-seo-pack' ),
+		'aiosp_schema_local_business_aioseo_telephone'           => __( 'The main telephone number of your business where customers can reach you.', 'all-in-one-seo-pack' ),
+		'aiosp_schema_local_business_aioseo_price_range'         => __( 'The price range your business falls in.', 'all-in-one-seo-pack' ),
+		'aiosp_schema_local_business_aioseo_time_0_opening_days' => __( 'The opening days of your business. If none are selected, opening hours will be excluded in the markup.', 'all-in-one-seo-pack' ),
+		'aiosp_schema_local_business_aioseo_time_0_opens'        => __( 'The time that your business opens. You must have selected at least 1 opening day for this to be included in the markup.', 'all-in-one-seo-pack' ),
+		'aiosp_schema_local_business_aioseo_time_0_closes'       => __( 'The time that your business closes. You must have selected at least 1 opening day for this to be included in the markup.', 'all-in-one-seo-pack' ),
+	);
+
+	$help_links = array(
+		'aiosp_schema_local_business_aioseo_business_type'       => 'https://semperplugins.com/documentation/local-business-schema/',
+		'aiosp_schema_local_business_aioseo_business_name'       => 'https://semperplugins.com/documentation/local-business-schema/',
+		'aiosp_schema_local_business_aioseo_business_image'      => 'https://semperplugins.com/documentation/local-business-schema/',
+		'aiosp_schema_local_business_aioseo_postal_address'      => 'https://semperplugins.com/documentation/local-business-schema/',
+		'aiosp_schema_local_business_aioseo_telephone'           => 'https://semperplugins.com/documentation/local-business-schema/',
+		'aiosp_schema_local_business_aioseo_price_range'         => 'https://semperplugins.com/documentation/local-business-schema/',
+		'aiosp_schema_local_business_aioseo_time_0_opening_days' => 'https://semperplugins.com/documentation/local-business-schema/',
+		'aiosp_schema_local_business_aioseo_time_0_opens'        => 'https://semperplugins.com/documentation/local-business-schema/',
+		'aiosp_schema_local_business_aioseo_time_0_closes'       => 'https://semperplugins.com/documentation/local-business-schema/',
+	);
+
+	foreach ( $help_links as $k1_slug => $v1_url ) {
+		$help_text[ $k1_slug ] .= '<br /><br /><a href="' . $v1_url . '" target="_blank">' . __( 'Click here for documentation on this setting.', 'all-in-one-seo-pack' ) . '</a>';
+	}
+
+	return $help_text;
 }

@@ -23,6 +23,19 @@ class All_in_One_SEO_Pack_Sitemap_Pro extends All_in_One_SEO_Pack_Sitemap {
 			$this->extra_sitemaps = array();
 			$this->extra_sitemaps = apply_filters( $this->prefix . 'extra', $this->extra_sitemaps );
 			parent::__construct();
+
+			$this->hooks();
+		}
+
+		/**
+		 * Registers our hooks.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @return void
+		 */
+		private function hooks() {
+			add_filter( 'admin_init', array( $this, 'register_news_sitemap_notice' ) );
 		}
 
 		/**
@@ -466,7 +479,6 @@ class All_in_One_SEO_Pack_Sitemap_Pro extends All_in_One_SEO_Pack_Sitemap {
 				$entry = array(
 					'location'         => get_permalink( $post->ID ),
 					'publication'      => array(
-						'name'     => $post->post_title,
 						'language' => $this->get_publication_language(),
 					),
 					'publication_date' => date( 'c', mysql2date( 'U', $post->post_date ) ),
@@ -649,6 +661,12 @@ class All_in_One_SEO_Pack_Sitemap_Pro extends All_in_One_SEO_Pack_Sitemap {
 				exit();
 			}
 
+			if ( isset( $this->options['aiosp_sitemap_publication_name'] ) ) {
+				$publication_name = $this->options['aiosp_sitemap_publication_name'] ? $this->options['aiosp_sitemap_publication_name'] : get_bloginfo( 'name' );
+			} else {
+				$publication_name = get_bloginfo( 'name' );
+			}
+
 			echo '<?xml version="1.0" encoding="UTF-8"?>' . "\r\n\r\n";
 			echo '<!-- ' . sprintf( $this->comment_string, $comment, AIOSEOP_VERSION, date( 'D, d M Y H:i:s e' ) ) . " -->\r\n";
 
@@ -664,7 +682,7 @@ class All_in_One_SEO_Pack_Sitemap_Pro extends All_in_One_SEO_Pack_Sitemap {
 				"\t\t". '<loc>' . aiosp_common::esc_xml( 'loc', $url['location'] ) . '</loc>' . "\r\n" .
 				"\t\t". '<news:news>' . "\r\n" .
 				"\t\t\t". '<news:publication>' . "\r\n" .
-				"\t\t\t\t". '<news:name>' . aiosp_common::esc_xml( 'news:name', $url['publication']['name'] ) . '</news:name>' . "\r\n" .
+				"\t\t\t\t". '<news:name>' . aiosp_common::esc_xml( 'news:name', $publication_name ) . '</news:name>' . "\r\n" .
 				"\t\t\t\t". '<news:language>' . aiosp_common::esc_xml( 'news:language', $url['publication']['language'] ) . '</news:language>' . "\r\n" .
 				"\t\t\t". '</news:publication>' . "\r\n" .
 				"\t\t\t". '<news:publication_date>' . aiosp_common::esc_xml( 'news:language', $url['publication_date'] ) . '</news:publication_date>' . "\r\n" .
@@ -699,5 +717,36 @@ class All_in_One_SEO_Pack_Sitemap_Pro extends All_in_One_SEO_Pack_Sitemap {
 			}
 
 			exit();
+		}
+
+		/**
+		 * Shows a notice if both the Google News Publication Name and Site Title aren't set.
+		 *
+		 * At least one of these values is needed for the Google News sitemap to be valid.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @return void
+		 */
+		public function register_news_sitemap_notice() {
+			global $aioseop_notices;
+			$notice_slug = 'news_sitemap';
+
+			// Get Google News Publication Name and Site Title.
+			$publication_name = '';
+			if ( isset( $this->options['aiosp_sitemap_publication_name'] ) ) {
+				$publication_name = $this->options['aiosp_sitemap_publication_name'];
+			}
+			$blog_name = get_bloginfo( 'name' );
+
+			// If both aren't set, register notice, otherwise deregister it.
+			if ( ! empty( $publication_name ) || ! empty( $blog_name ) ) {
+				if ( isset( $aioseop_notices->active_notices[ $notice_slug ] ) ) {
+					$aioseop_notices->remove_notice( $notice_slug );
+				}
+				return;
+			}
+
+			$aioseop_notices->activate_notice( $notice_slug );
 		}
 }

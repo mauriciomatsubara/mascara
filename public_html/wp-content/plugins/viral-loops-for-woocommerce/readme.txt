@@ -1,9 +1,9 @@
 === Viral Loops for WooCommerce ===
 Contributors: viralloops
 Tags: viral marketing, referral marketing, referrals, startups
-Requires at least: 4.6
-Tested up to: 4.8.2
-Stable tag: 1.3.1
+Requires at least: 5.4
+Tested up to: 5.4.2
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,7 +28,7 @@ Do you want further customizations? [Contact us!](mail:support@viral-loops.com)
 1. Install the plugin directly through the WordPress plugins directory.
 2. Activate the plugin through the 'Plugins' screen in WordPress.
 3. Go to [Viral Loops](https://www.viral-loops.com). Create an account if you don't have one already.
-4. Create a campaign using the "Altruistic Referral" template.
+4. Create a campaign using the "e-Commerce Referral" template.
 5. Configure the campaign and set up rewards for your referrers and their referred friends.
 6. Copy the campaign ID and the campaign API key.
 7. Back to your WordPress website, edit the *Viral Loops for WooCommerce* settings and add your campaign ID and API key.
@@ -64,6 +64,9 @@ Just get the latest version!
 
 
 == Changelog ==
+
+= 1.3.2 =
+* Minor changes.
 
 = 1.3.1 =
 * fixed free shipping option.
