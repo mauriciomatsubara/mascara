@@ -40,15 +40,7 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 			add_action( 'admin_head', array( $this, 'hook_statuses_icons_css' ), 11 );
 
 			// Default Status.
-			if ( 'alg_disabled' !== get_option( 'alg_orders_custom_statuses_default_status', 'alg_disabled' ) ) {
-				add_filter( 'woocommerce_default_order_status', array( $this, 'set_default_order_status' ), $filters_priority );
-			}
-			if ( 'alg_disabled' !== get_option( 'alg_orders_custom_statuses_default_status_bacs', 'alg_disabled' ) ) {
-				add_filter( 'woocommerce_bacs_process_payment_order_status', array( $this, 'set_default_order_status_bacs' ), $filters_priority );
-			}
-			if ( 'alg_disabled' !== get_option( 'alg_orders_custom_statuses_default_status_cod', 'alg_disabled' ) ) {
-				add_filter( 'woocommerce_cod_process_payment_order_status', array( $this, 'set_default_order_status_cod' ), $filters_priority );
-			}
+			add_filter( 'woocommerce_thankyou', array( $this, 'set_default_order_status' ), $filters_priority );
 
 			// Reports.
 			if ( 'yes' === get_option( 'alg_orders_custom_statuses_add_to_reports', 'yes' ) ) {
@@ -407,31 +399,22 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		/**
 		 * Set_default_order_status.
 		 *
+		 * @param array $order_id - Order id.
+		 *
 		 * @version 1.0.0
 		 * @since   1.0.0
 		 */
-		public function set_default_order_status() {
-			return get_option( 'alg_orders_custom_statuses_default_status', 'alg_disabled' );
-		}
-
-		/**
-		 * Set_default_order_status_bacs.
-		 *
-		 * @version 1.4.4
-		 * @since   1.4.4
-		 */
-		public function set_default_order_status_bacs() {
-			return get_option( 'alg_orders_custom_statuses_default_status_bacs', 'alg_disabled' );
-		}
-
-		/**
-		 * Set_default_order_status_cod.
-		 *
-		 * @version 1.4.4
-		 * @since   1.4.4
-		 */
-		public function set_default_order_status_cod() {
-			return get_option( 'alg_orders_custom_statuses_default_status_cod', 'alg_disabled' );
+		public function set_default_order_status( $order_id ) {
+			if ( ! $order_id ) {
+				return;
+			}
+			$order          = wc_get_order( $order_id );
+			$payment_method = $order->get_payment_method();
+			if ( 'alg_disabled' !== get_option( 'alg_orders_custom_statuses_default_status_' . $payment_method, 'alg_disabled' ) ) {
+				$order->update_status( get_option( 'alg_orders_custom_statuses_default_status_' . $payment_method, 'alg_disabled' ) );
+			} elseif ( 'alg_disabled' !== get_option( 'alg_orders_custom_statuses_default_status', 'alg_disabled' ) ) {
+				$order->update_status( get_option( 'alg_orders_custom_statuses_default_status', 'alg_disabled' ) );
+			}
 		}
 
 		/**
@@ -479,22 +462,26 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 * @since   1.0.0
 		 */
 		public function hook_statuses_icons_css() {
-			$output   = '<style>';
-			$statuses = alg_get_custom_order_statuses();
-			foreach ( $statuses as $status => $status_name ) {
-				$icon_data = get_option( 'alg_orders_custom_status_icon_data_' . substr( $status, 3 ), '' );
-				if ( '' !== $icon_data ) {
-					$content = $icon_data['content'];
-					$color   = $icon_data['color'];
-				} else {
-					$content = 'e011';
-					$color   = '#999999';
+			global $post_type;
+			if ( isset( $post_type ) && 'shop_order' === $post_type ) {
+				$output   = '<style>';
+				$statuses = alg_get_custom_order_statuses();
+				foreach ( $statuses as $status => $status_name ) {
+					$icon_data = get_option( 'alg_orders_custom_status_icon_data_' . substr( $status, 3 ), '' );
+					if ( '' !== $icon_data ) {
+						$content = $icon_data['content'];
+						$color   = $icon_data['color'];
+					} else {
+						$content = 'e011';
+						$color   = '#999999';
+					}
+					$output .= '.status-' . substr( $status, 3 ) . ' { position: relative; }';
+					$output .= 'mark.status-' . substr( $status, 3 ) . '::after { content: "\\' . $content . '"; color: ' . $color . '; }';
+					$output .= 'mark.status-' . substr( $status, 3 ) . ':after {font-family:WooCommerce;speak:none;font-weight:400;font-variant:normal;text-transform:none;line-height:1;-webkit-font-smoothing:antialiased;margin:0;text-indent:0;position:absolute;top:0;left:0;width:100%;height:100%;text-align:center}';
 				}
-				$output .= 'mark.' . substr( $status, 3 ) . '::after { content: "\\' . $content . '"; color: ' . $color . '; }';
-				$output .= 'mark.' . substr( $status, 3 ) . ':after {font-family:WooCommerce;speak:none;font-weight:400;font-variant:normal;text-transform:none;line-height:1;-webkit-font-smoothing:antialiased;margin:0;text-indent:0;position:absolute;top:0;left:0;width:100%;height:100%;text-align:center}';
+				$output .= '</style>';
+				echo wp_kses( $output, array( 'style' => array() ) );
 			}
-			$output .= '</style>';
-			echo wp_kses( $output, array( 'style' => array() ) );
 		}
 
 		/**

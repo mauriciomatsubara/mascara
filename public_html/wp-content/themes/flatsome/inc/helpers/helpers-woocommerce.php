@@ -14,7 +14,7 @@ function flatsome_get_cat_product_block( $product ) {
 
 	if ( $primary_term_id ) {
 		$cat_meta = get_term_meta( $primary_term_id, 'cat_meta' );
-		if ( ! empty( $cat_meta ) && isset( $cat_meta[0]['cat_product_block'] ) ) {
+		if ( ! empty( $cat_meta ) && ! empty( $cat_meta[0]['cat_product_block'] ) ) {
 			return $cat_meta[0]['cat_product_block'];
 		}
 	}
@@ -31,7 +31,7 @@ function flatsome_get_cat_product_block( $product ) {
 	if ( $terms ) {
 		foreach ( $terms as $term ) {
 			$cat_meta = get_term_meta( $term->term_id, 'cat_meta' );
-			if ( ! empty( $cat_meta ) && isset( $cat_meta[0]['cat_product_block'] ) ) {
+			if ( ! empty( $cat_meta ) && ! empty( $cat_meta[0]['cat_product_block'] ) ) {
 				return $cat_meta[0]['cat_product_block'];
 			}
 		}

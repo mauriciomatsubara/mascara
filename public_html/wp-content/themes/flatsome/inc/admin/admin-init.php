@@ -39,11 +39,11 @@ if(is_customize_preview()){
   include_once(dirname( __FILE__ ).'/customizer/customizer-config.php');
   include_once(dirname( __FILE__ ).'/customizer/customizer-reset.php');
 
-  // Include Header builder
-  include_once(dirname( __FILE__ ).'/customizer/header-builder.php');
-
   // Include Options Helpers
   include_once(dirname( __FILE__ ).'/options/helpers/options-helpers.php');
+
+  // Include Header builder
+  include_once(dirname( __FILE__ ).'/customizer/header-builder.php');
 
   // Add Options
   include_once(dirname( __FILE__ ).'/options/global/options-general.php');
@@ -57,7 +57,7 @@ if(is_customize_preview()){
   include_once(dirname( __FILE__ ).'/options/styles/options-type.php');
   include_once(dirname( __FILE__ ).'/options/styles/options-css.php');
   include_once(dirname( __FILE__ ).'/options/styles/options-lightbox.php');
-  include_once(dirname( __FILE__ ).'/options/gdpr/options-cookies.php');
+  include_once(dirname( __FILE__ ).'/options/notifications/options-notifications.php');
 
   if(get_theme_mod('fl_portfolio', 1)){
       include_once(dirname( __FILE__ ).'/options/portfolio/options-portfolio.php');

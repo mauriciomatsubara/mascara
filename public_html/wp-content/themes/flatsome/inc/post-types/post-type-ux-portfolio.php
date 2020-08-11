@@ -7,8 +7,6 @@ if ( ! class_exists( 'Featured_Item_Post_Type' ) ) :
 class Featured_Item_Post_Type {
 
 	public function __construct() {
-	// Run when the plugin is activated
-		register_activation_hook( __FILE__, array( $this, 'plugin_activation' ) );
 
 		// Add the featured_item post type and taxonomies
 		add_action( 'init', array( $this, 'featured_item_init' ) );
@@ -30,23 +28,6 @@ class Featured_Item_Post_Type {
 		// Add taxonomy terms as body classes
 		add_filter( 'body_class', array( $this, 'add_body_classes' ) );
 
-	}
-
-	/**
-	 * Load the plugin text domain for translation.
-	 */
-
-
-	/**
-	 * Flushes rewrite rules on plugin activation to ensure featured_item posts don't 404.
-	 *
-	 * @link http://codex.wordpress.org/Function_Reference/flush_rewrite_rules
-	 *
-	 * @uses Featured Item_Post_Type::featured_item_init()
-	 */
-	public function plugin_activation() {
-		$this->featured_item_init();
-		flush_rewrite_rules();
 	}
 
 	/**
@@ -204,13 +185,9 @@ class Featured_Item_Post_Type {
 
 		register_taxonomy( 'featured_item_category', array( 'featured_item' ), $args );
 
-		if(flatsome_option('featured_items_page')){
-			add_action( 'wp_loaded', 'add_ux_featured_item_permastructure' );
-			function add_ux_featured_item_permastructure() {
-				$items_link = flatsome_option('featured_items_page');
-				add_permastruct( 'featured_item_category',  $items_link.'/%featured_item_category%', false );
-				add_permastruct( 'featured_item', $items_link.'/%featured_item_category%/%featured_item%', false );
-			}
+		if ( $items_link = flatsome_option( 'featured_items_page' ) ) {
+			add_permastruct( 'featured_item_category', $items_link . '/%featured_item_category%', false );
+			add_permastruct( 'featured_item', $items_link . '/%featured_item_category%/%featured_item%', false );
 
 			add_filter( 'post_type_link', 'ux_featured_items_permalinks', 10, 2 );
 			function ux_featured_items_permalinks( $permalink, $post ) {

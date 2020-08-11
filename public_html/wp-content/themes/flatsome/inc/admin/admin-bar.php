@@ -357,9 +357,9 @@ $wp_admin_bar->add_menu( array(
 
 	$wp_admin_bar->add_menu( array(
 		'parent' => 'theme_options',
-		'id'     => 'options_gdpr',
-		'title'  => '<span class="dashicons dashicons-shield" style="' . $icon_style . '"></span> GDPR',
-		'href'   => $optionUrl_section . 'gdpr',
+		'id'     => 'options_notifications',
+		'title'  => '<span class="dashicons dashicons-testimonial" style="' . $icon_style . '"></span> Notifications',
+		'href'   => $optionUrl_section . 'notifications',
 	) );
 
 

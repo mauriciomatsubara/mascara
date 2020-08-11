@@ -1,3 +1,29 @@
+--- 3.12.1 ---
+NEW: WordPress 5.5 compatibility.
+NEW: WooCommerce 4.4 compatibility.
+NEW: Updated Google Fonts list.
+
+FIXED: Custom product layout, global overruled category in some cases.
+FIXED: Off-canvas sidebar not scrollable with mobile slide menu activated.
+FIXED: Countdown responsive size when large is default.
+FIXED: Product Flip was only able to show max. 10 custom id's.
+FIXED: Image column link showed on mobile menu with slide effect.
+FIXED: Builder: Icon Box preview when changing icon position.
+FIXED: Custom portfolio items 404 after certain plugin updates.
+FIXED: Site Loader and 404 Block option not able to save in some cases.
+FIXED: packery JS error in customizer preview in some cases.
+FIXED: Wording of default cookie notice message.
+FIXED: Cookies banner accept button href anchor.
+FIXED: Cookies banner cookie duration.
+
+ENHANCEMENT: Builder: Preserve open hierarchy items when leaving element options.
+ENHANCEMENT: Builder: Scroll preview frame when dragging elements in side panel.
+
+DEV: Added the 'woocommerce_product_upsells_products_heading' filter.
+DEV: Updated customizer option framework.
+
+Change: Cookie banner settings moved to new 'Notifications' section.
+
 --- 3.12.0 ---
 NEW: WooCommerce 4.3 compatibility.
 NEW: Custom product layout per category and product.

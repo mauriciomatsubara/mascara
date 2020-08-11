@@ -60,7 +60,7 @@ function ux_lightbox( $atts, $content = null ) {
 					}, timer)
 
 					// Set cookie
-					cookie(cookieId, cookieValue)
+					cookie(cookieId, cookieValue, 365)
 				}
 			})
 		</script>

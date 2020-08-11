@@ -217,7 +217,7 @@ class AIOSEOP_Graph_LocalBusiness extends AIOSEOP_Graph {
 	 */
 	private function getAddress() {
 		$address         = array();
-		$addressOption   = isset( $this->options['modules']['aiosp_schema_local_business_options']['aiosp_schema_local_business_aioseo_postal_address'] ) ? $this->options['modules']['aiosp_schema_local_business_options']['aiosp_schema_local_business_aioseo_postal_address'] : array();
+		$addressOption   = ! empty( $this->options['modules']['aiosp_schema_local_business_options']['aiosp_schema_local_business_aioseo_postal_address'] ) ? $this->options['modules']['aiosp_schema_local_business_options']['aiosp_schema_local_business_aioseo_postal_address'] : array();
 		$filteredAddress = array_filter( $addressOption );
 		if ( ! empty( $filteredAddress ) ) {
 			$address = array(

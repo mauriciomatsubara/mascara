@@ -229,8 +229,6 @@ class All_in_One_SEO_Pack extends All_in_One_SEO_Pack_Module {
 		$blog_name          = esc_attr( get_bloginfo( 'name' ) );
 		parent::__construct();
 
-		$this->checkIfLicensed();
-
 		$this->default_options = array(
 			'license_key'                 => array(
 				/* translators: This is a setting where users can enter their license code for All in One SEO Pack Pro. */
@@ -4213,6 +4211,7 @@ class All_in_One_SEO_Pack extends All_in_One_SEO_Pack_Module {
 				if ( current_user_can( 'update_plugins' ) ) {
 					add_action( 'admin_notices', array( $aioseop_update_checker, 'key_warning' ) );
 				}
+				add_action( 'admin_init', array( $this, 'checkIfLicensed' ) );
 				add_action( 'after_plugin_row_' . AIOSEOP_PLUGIN_BASENAME, array( $aioseop_update_checker, 'add_plugin_row' ) );
 			}
 		} else {
@@ -5106,6 +5105,10 @@ class All_in_One_SEO_Pack extends All_in_One_SEO_Pack_Module {
 
 			foreach ( $optlist as $optionName ) {
 				$value = isset( $_POST[ "aiosp_$optionName" ] ) ? $_POST[ "aiosp_$optionName" ] : '';
+				
+				if ( is_string( $value) ) {
+					$value = esc_html( $value );
+				}
 				update_post_meta( $id, "_aioseop_$optionName", $value );
 			}
 		}
@@ -5396,6 +5399,10 @@ class All_in_One_SEO_Pack extends All_in_One_SEO_Pack_Module {
 			
 			foreach ( $optlist as $optionName ) {
 				$value = isset( $_POST[ "aiosp_$optionName" ] ) ? $_POST[ "aiosp_$optionName" ] : '';
+				
+				if ( is_string( $value) ) {
+					$value = esc_html( $value );
+				}
 				update_term_meta( $id, "_aioseop_$optionName", $value );
 			}
 		}
@@ -5635,19 +5642,6 @@ class All_in_One_SEO_Pack extends All_in_One_SEO_Pack_Module {
 		}
 		// Decode entities.
 		$value = $this->html_entity_decode( $value );
-		$value = preg_replace(
-			array(
-				'#<a.*?>([^>]*)</a>#i', // Remove link but keep anchor text.
-				'@(https?://([-\w\.]+[-\w])+(:\d+)?(/([\w/_\.#-]*(\?\S+)?[^\.\s])?)?)@', // Remove URLs.
-			),
-			array(
-				'$1', // Replacement link's anchor text.
-				'', // Replacement URLs.
-			),
-			$value
-		);
-		// Strip html.
-		$value = wp_strip_all_tags( $value );
 		// External trim.
 		$value = trim( $value );
 		// Internal whitespace trim.
@@ -5803,9 +5797,13 @@ class All_in_One_SEO_Pack extends All_in_One_SEO_Pack_Module {
 	 *
 	 * @return void
 	 */
-	private function checkIfLicensed() {
+	public function checkIfLicensed() {
 		global $aioseop_options;
-		if ( ! $aioseop_options['aiosp_license_key'] ) {
+		if ( ! isset( $aioseop_options['aiosp_license_key'] ) ) {
+			return;
+		}
+
+		if ( empty( $aioseop_options['aiosp_license_key'] ) ) {
 			if ( isset( $aioseop_options['addons'] ) ) {
 				$aioseop_options['addons'] = '';
 			}

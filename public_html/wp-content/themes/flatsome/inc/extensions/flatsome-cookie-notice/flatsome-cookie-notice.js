@@ -13,7 +13,7 @@ jQuery(document).ready(function () {
         e.preventDefault()
         $notice.removeClass('flatsome-cookies--active').addClass('flatsome-cookies--inactive')
         // set cookie
-        cookie(cookieId, cookieValue)
+        cookie(cookieId, cookieValue, 365)
       })
     }, 2500)
   }

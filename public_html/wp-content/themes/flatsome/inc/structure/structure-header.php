@@ -1033,7 +1033,7 @@ function flatsome_html_after_header() {
 }
 add_action( 'flatsome_after_header', 'flatsome_html_after_header', 1 );
 
-if ( get_theme_mod( 'site_loader', 0 ) ) {
+if ( get_theme_mod( 'site_loader' ) ) {
 	/**
 	 * Page loader.
 	 *

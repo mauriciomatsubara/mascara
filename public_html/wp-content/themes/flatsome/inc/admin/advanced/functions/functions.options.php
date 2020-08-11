@@ -31,15 +31,6 @@ if ( ! function_exists( 'of_options' ) ) {
 			$of_pages[ $of_page->ID ] = $of_page->post_title;
 		}
 
-		// Access the Blocks via an Array.
-		$of_blocks     = array( false => '-- None --' );
-		$of_blocks_obj = flatsome_get_post_type_items( 'blocks' );
-		if ( $of_blocks_obj ) {
-			foreach ( $of_blocks_obj as $of_block ) {
-				$of_blocks[ $of_block->post_name ] = $of_block->post_title;
-			}
-		}
-
 		// Set the Options Array.
 		global $of_options;
 		$of_options = array();
@@ -183,7 +174,7 @@ if ( ! function_exists( 'of_options' ) ) {
 			'type' => 'checkbox',
 			'id'   => 'jquery_migrate',
 			'std'  => 0,
-			'desc' => 'Remove jQuery Migrate. Most up-to-date front-end code and plugins don’t require jquery-migrate.min.js. More often than not, keeping this - simply adds unnecessary load to your site.',
+			'desc' => 'Remove jQuery Migrate. Most up-to-date front-end code and plugins don’t require jquery-migrate.min.js. More often than not, keeping this - simply adds unnecessary load to your site. (for < WP 5.5)',
 		);
 
 		$of_options[] = array(
@@ -196,9 +187,9 @@ if ( ! function_exists( 'of_options' ) ) {
 			'id'      => 'site_loader',
 			'desc'    => 'Enable Site Loader overlay when loading the site.',
 			'type'    => 'select',
-			'std'     => 0,
+			'std'     => '',
 			'options' => array(
-				0      => 'Disabled',
+				''     => 'Disabled',
 				'home' => 'Enable on homepage',
 				'all'  => 'Enable on all pages',
 			),
@@ -368,7 +359,7 @@ if ( ! function_exists( 'of_options' ) ) {
 			'desc'    => 'Replace 404 page content with a Custom Block that you can edit in the Page Builder.',
 			'std'     => 0,
 			'type'    => 'select',
-			'options' => $of_blocks,
+			'options' => flatsome_get_block_list_by_id( array( 'option_none' => '-- None --' ) ),
 		);
 
 		if ( is_woocommerce_activated() ) {

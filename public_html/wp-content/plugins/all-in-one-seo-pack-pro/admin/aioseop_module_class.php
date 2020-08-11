@@ -2340,6 +2340,11 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Module' ) ) {
 						}
 						$prefix  = $this->get_prefix( $k );
 						$options = apply_filters( $prefix . 'filter_metabox_options', $options, $k, $post_id );
+						foreach ( $options as $option ) {
+							if ( is_string( $option ) ) {
+								$option = esc_html( $option );
+							}
+						}
 						update_post_meta( $post_id, '_' . $prefix . $k, $options );
 					}
 				}
@@ -2530,7 +2535,7 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Module' ) ) {
 					break;
 				case 'textarea':
 					// #1363: prevent characters like ampersand in title and description (in social meta module) from getting changed to &amp;
-					if ( in_array( $name, array( 'aiosp_opengraph_hometitle', 'aiosp_opengraph_description' ), true ) ) {
+					if ( in_array( $name, array( 'aiosp_description', 'aiosp_opengraph_hometitle', 'aiosp_opengraph_description' ), true ) ) {
 						$value = htmlspecialchars_decode( $value, ENT_QUOTES );
 					}
 					$buf .= "<textarea name='$name' $attr>$value</textarea>";
@@ -2586,7 +2591,7 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Module' ) ) {
 					wp_enqueue_script( 'jquery-ui-datepicker' );
 					// fall through.
 				default:
-					$buf .= "<input name='" . esc_attr( $name ) . "' type='" . esc_attr( $options['type'] ) . "' " . wp_kses( $attr, wp_kses_allowed_html( 'data' ) ) . " value='" . esc_attr( $value ) . "' autocomplete='aioseop-" . time() . "'>\n";
+					$buf .= "<input name='" . esc_attr( $name ) . "' type='" . esc_attr( $options['type'] ) . "' " . wp_kses( $attr, wp_kses_allowed_html( 'data' ) ) . " value='" . htmlspecialchars_decode( $value ) . "' autocomplete='aioseop-" . time() . "'>\n";
 			}
 
 			// TODO Maybe Change/Add a function for SEO character count.

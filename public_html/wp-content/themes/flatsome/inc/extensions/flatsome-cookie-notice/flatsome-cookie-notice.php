@@ -36,7 +36,7 @@ function flatsome_cookie_notice_template() {
 	$text = get_theme_mod( 'cookie_notice_text' );
 	$id   = get_theme_mod( 'privacy_policy_page' );
 	$page = $id ? get_post( $id ) : false;
-	$text = $text ? $text : __( 'This site uses cookies to improve your browse experience. By browsing this website, you agree to our use of cookies.', 'flatsome' );
+	$text = $text ? $text : __( 'This site uses cookies to offer you a better browsing experience. By browsing this website, you agree to our use of cookies.', 'flatsome' );
 	?>
 	<div class="flatsome-cookies <?php echo esc_attr( implode( ' ', $classes ) ); ?>">
 		<div class="flatsome-cookies__inner">
@@ -59,6 +59,7 @@ function flatsome_cookie_notice_template() {
 				echo flatsome_apply_shortcode( 'button', array(
 					'text'  => _x( 'Accept', 'cookie notice', 'flatsome' ),
 					'style' => get_theme_mod( 'cookie_notice_button_style', '' ),
+					'link'  => '#',
 					'color' => 'primary',
 					'class' => 'flatsome-cookies__accept-btn',
 				) );

@@ -406,7 +406,9 @@ if ( ! class_exists( 'All_in_One_SEO_Pack_Image_SEO' ) ) {
 			}
 
 			$attachment = get_post( $image_id );
-			$image_title = $attachment->post_title;
+			if ( $attachment ) {
+				$image_title = $attachment->post_title;
+			}
 
 			$site_title            = get_bloginfo( 'name' );
 			$site_description      = get_bloginfo( 'description' );
