@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Product Input Fields
  *
- * @version 4.6.0
+ * @version 5.2.0
  * @author  Pluggabl LLC.
  */
 
@@ -15,14 +15,15 @@ class WCJ_Product_Input_Fields extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 4.5.0
+	 * @version 5.2.0
 	 * @todo    (maybe) option to change local and global fields order (i.e. output local fields before the global)
 	 */
 	function __construct() {
 
 		$this->id         = 'product_input_fields';
 		$this->short_desc = __( 'Product Input Fields', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Add input fields to the products.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Add input fields to the products (1 input field allowed in free version).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Add input fields to the products.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-product-input-fields';
 		parent::__construct();
 
@@ -37,7 +38,7 @@ class WCJ_Product_Input_Fields extends WCJ_Module {
 			$this->global_product_fields = new WCJ_Product_Input_Fields_Core( 'global' );
 			$this->local_product_fields  = new WCJ_Product_Input_Fields_Core( 'local' );
 
-			if ( 'yes' === get_option( 'wcj_product_input_fields_global_enabled', 'no' ) || 'yes' === get_option( 'wcj_product_input_fields_local_enabled', 'no' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_product_input_fields_global_enabled', 'no' ) || 'yes' === wcj_get_option( 'wcj_product_input_fields_local_enabled', 'no' ) ) {
 				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 				add_action( 'init',               array( $this, 'register_scripts' ) );
 			}
@@ -54,7 +55,7 @@ class WCJ_Product_Input_Fields extends WCJ_Module {
 	 * @since   4.5.0
 	 */
 	function preserve_linebreaks_admin() {
-		if ( 'yes' !== get_option( 'wcj_product_input_fields_admin_linebreaks', 'no' ) ) {
+		if ( 'yes' !== wcj_get_option( 'wcj_product_input_fields_admin_linebreaks', 'no' ) ) {
 			return;
 		}
 		?>
@@ -73,7 +74,7 @@ class WCJ_Product_Input_Fields extends WCJ_Module {
 	 * @since   4.5.0
 	 */
 	function preserve_linebreaks_frontend() {
-		if ( 'yes' !== get_option( 'wcj_product_input_fields_frontend_linebreaks', 'no' ) ) {
+		if ( 'yes' !== wcj_get_option( 'wcj_product_input_fields_frontend_linebreaks', 'no' ) ) {
 			return;
 		}
 		?>

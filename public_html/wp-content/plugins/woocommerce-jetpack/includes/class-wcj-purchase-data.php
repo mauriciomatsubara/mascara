@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Cost of Goods (formerly Product Cost Price)
  *
- * @version 4.5.0
+ * @version 5.2.0
  * @since   2.2.0
  * @author  Pluggabl LLC.
  */
@@ -16,7 +16,7 @@ class WCJ_Purchase_Data extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 2.9.0
+	 * @version 5.2.0
 	 * @todo    (maybe) pre-calculate profit for orders
 	 * @todo    (maybe) "Apply costs to orders that do not have costs set"
 	 * @todo    (maybe) "Apply costs to all orders, overriding previous costs"
@@ -26,7 +26,8 @@ class WCJ_Purchase_Data extends WCJ_Module {
 
 		$this->id         = 'purchase_data';
 		$this->short_desc = __( 'Cost of Goods', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Save product purchase costs data for admin reports.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Save product purchase costs data for admin reports (1 custom field allowed in free version).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Save product purchase costs data for admin reports.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-cost-of-goods';
 		parent::__construct();
 
@@ -45,8 +46,8 @@ class WCJ_Purchase_Data extends WCJ_Module {
 
 			// Orders columns
 			if (
-				'yes' === get_option( 'wcj_purchase_data_custom_columns_profit', 'yes' ) ||
-				'yes' === get_option( 'wcj_purchase_data_custom_columns_purchase_cost', 'no' )
+				'yes' === wcj_get_option( 'wcj_purchase_data_custom_columns_profit', 'yes' ) ||
+				'yes' === wcj_get_option( 'wcj_purchase_data_custom_columns_purchase_cost', 'no' )
 			) {
 				add_filter( 'manage_edit-shop_order_columns',        array( $this, 'add_order_columns' ),    PHP_INT_MAX - 2 );
 				add_action( 'manage_shop_order_posts_custom_column', array( $this, 'render_order_columns' ), PHP_INT_MAX );
@@ -54,8 +55,8 @@ class WCJ_Purchase_Data extends WCJ_Module {
 
 			// Products columns
 			if (
-				'yes' === apply_filters( 'booster_option', 'no', get_option( 'wcj_purchase_data_custom_products_columns_purchase_cost', 'no' ) ) ||
-				'yes' === apply_filters( 'booster_option', 'no', get_option( 'wcj_purchase_data_custom_products_columns_profit', 'no' ) )
+				'yes' === apply_filters( 'booster_option', 'no', wcj_get_option( 'wcj_purchase_data_custom_products_columns_purchase_cost', 'no' ) ) ||
+				'yes' === apply_filters( 'booster_option', 'no', wcj_get_option( 'wcj_purchase_data_custom_products_columns_profit', 'no' ) )
 			) {
 				add_filter( 'manage_edit-product_columns',        array( $this, 'add_product_columns' ),    PHP_INT_MAX );
 				add_action( 'manage_product_posts_custom_column', array( $this, 'render_product_columns' ), PHP_INT_MAX );
@@ -111,10 +112,10 @@ class WCJ_Purchase_Data extends WCJ_Module {
 	 * @todo    (maybe) output columns immediately after standard "Price"
 	 */
 	function add_product_columns( $columns ) {
-		if ( 'yes' === apply_filters( 'booster_option', 'no', get_option( 'wcj_purchase_data_custom_products_columns_purchase_cost', 'no' ) ) ) {
+		if ( 'yes' === apply_filters( 'booster_option', 'no', wcj_get_option( 'wcj_purchase_data_custom_products_columns_purchase_cost', 'no' ) ) ) {
 			$columns['purchase_cost'] = __( 'Cost', 'woocommerce-jetpack' );
 		}
-		if ( 'yes' === apply_filters( 'booster_option', 'no', get_option( 'wcj_purchase_data_custom_products_columns_profit', 'no' ) ) ) {
+		if ( 'yes' === apply_filters( 'booster_option', 'no', wcj_get_option( 'wcj_purchase_data_custom_products_columns_profit', 'no' ) ) ) {
 			$columns['profit'] = __( 'Profit', 'woocommerce-jetpack' );
 		}
 		return $columns;
@@ -130,7 +131,7 @@ class WCJ_Purchase_Data extends WCJ_Module {
 		if ( 'profit' === $column || 'purchase_cost' === $column ) {
 			$product_id = get_the_ID();
 			$_product   = wc_get_product( $product_id );
-			if ( $_product->is_type( 'variable' ) && 'no' === get_option( 'wcj_purchase_data_variable_as_simple_enabled', 'no' ) ) {
+			if ( $_product->is_type( 'variable' ) && 'no' === wcj_get_option( 'wcj_purchase_data_variable_as_simple_enabled', 'no' ) ) {
 				$purchase_costs       = array();
 				$profits              = array();
 				$available_variations = $_product->get_available_variations();
@@ -177,10 +178,10 @@ class WCJ_Purchase_Data extends WCJ_Module {
 	 * @since   2.2.4
 	 */
 	function add_order_columns( $columns ) {
-		if ( 'yes' === get_option( 'wcj_purchase_data_custom_columns_profit', 'yes' ) ) {
+		if ( 'yes' === wcj_get_option( 'wcj_purchase_data_custom_columns_profit', 'yes' ) ) {
 			$columns['profit'] = __( 'Profit', 'woocommerce-jetpack' );
 		}
-		if ( 'yes' === get_option( 'wcj_purchase_data_custom_columns_purchase_cost', 'no' ) ) {
+		if ( 'yes' === wcj_get_option( 'wcj_purchase_data_custom_columns_purchase_cost', 'no' ) ) {
 			$columns['purchase_cost'] = __( 'Purchase Cost', 'woocommerce-jetpack' );
 		}
 		return $columns;
@@ -203,7 +204,7 @@ class WCJ_Purchase_Data extends WCJ_Module {
 				$is_forecasted = false;
 				foreach ( $the_order->get_items() as $item_id => $item ) {
 					$value = 0;
-					$product_id = ( isset( $item['variation_id'] ) && 0 != $item['variation_id'] && 'no' === get_option( 'wcj_purchase_data_variable_as_simple_enabled', 'no' )
+					$product_id = ( isset( $item['variation_id'] ) && 0 != $item['variation_id'] && 'no' === wcj_get_option( 'wcj_purchase_data_variable_as_simple_enabled', 'no' )
 						? $item['variation_id'] : $item['product_id'] );
 					if ( 0 != ( $purchase_price = wc_get_product_purchase_price( $product_id ) ) ) {
 						if ( 'profit' === $column ) {
@@ -246,7 +247,7 @@ class WCJ_Purchase_Data extends WCJ_Module {
 		$main_product_id = get_the_ID();
 		$_product = wc_get_product( $main_product_id );
 		$products = array();
-		if ( $_product->is_type( 'variable' ) && 'no' === get_option( 'wcj_purchase_data_variable_as_simple_enabled', 'no' ) ) {
+		if ( $_product->is_type( 'variable' ) && 'no' === wcj_get_option( 'wcj_purchase_data_variable_as_simple_enabled', 'no' ) ) {
 			$available_variations = $_product->get_available_variations();
 			foreach ( $available_variations as $variation ) {
 				$variation_product = wc_get_product( $variation['variation_id'] );
@@ -297,7 +298,7 @@ class WCJ_Purchase_Data extends WCJ_Module {
 	 */
 	function get_profit_percentage( $args = array() ) {
 		$args  = wp_parse_args( $args, array(
-			'percentage_type' => get_option( 'wcj_purchase_price_profit_percentage_type', 'markup' ),
+			'percentage_type' => wcj_get_option( 'wcj_purchase_price_profit_percentage_type', 'markup' ),
 			'profit'          => null,
 			'selling_price'   => null,
 			'purchase_price'  => null,

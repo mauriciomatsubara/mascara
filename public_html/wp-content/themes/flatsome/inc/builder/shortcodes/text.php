@@ -6,8 +6,11 @@ add_ux_builder_shortcode( 'text', array(
     'category' => __( 'Content' ),
     'compile' => false,
     'thumbnail' =>  flatsome_ux_builder_thumbnail( 'text' ),
-    'template_shortcode' => function ( $element, $parent = null ) {
-        if ( ! empty( $parent ) && 'ux_stack' === $parent['tag'] ) {
+    'template_shortcode' => function ( $element, $options, $content, $parent = null ) {
+        if (
+            ! empty( $options ) ||
+            ( ! empty( $parent ) && 'ux_stack' === $parent['tag'] )
+        ) {
             return "[ux_text{options}]\n\n{content}\n[/ux_text]\n";
         }
         return "{content}\n";
@@ -63,6 +66,8 @@ add_ux_builder_shortcode( 'text', array(
       '$content' => array(
         'type' => 'text-editor',
         'full_width' => true,
-      )
+      ),
+      'typography_options' => require( __DIR__ . '/commons/typography.php'),
+      'advanced_options'   => require( __DIR__ . '/commons/advanced.php'),
     )
 ) );

@@ -25,7 +25,8 @@ class WCJ_Currencies extends WCJ_Module {
 
 		$this->id         = 'currency';
 		$this->short_desc = __( 'Currencies', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Add all world currencies and cryptocurrencies to your store; change currency symbol.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Add all world currencies and cryptocurrencies to your store; change currency symbol (Plus); add custom currencies (1 allowed in free version).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Add all world currencies and cryptocurrencies to your store; change currency symbol; add custom currencies.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-all-currencies';
 		parent::__construct();
 
@@ -44,9 +45,9 @@ class WCJ_Currencies extends WCJ_Module {
 	 */
 	function get_custom_currencies() {
 		$custom_currencies = array();
-		for ( $i = 1; $i <= apply_filters( 'booster_option', 1, get_option( 'wcj_currency_custom_currency_total_number', 1 ) ); $i++ ) {
-			$custom_currency_code = get_option( 'wcj_currency_custom_currency_code_'   . $i, '' );
-			$custom_currency_name = get_option( 'wcj_currency_custom_currency_name_'   . $i, '' );
+		for ( $i = 1; $i <= apply_filters( 'booster_option', 1, wcj_get_option( 'wcj_currency_custom_currency_total_number', 1 ) ); $i++ ) {
+			$custom_currency_code = wcj_get_option( 'wcj_currency_custom_currency_code_'   . $i, '' );
+			$custom_currency_name = wcj_get_option( 'wcj_currency_custom_currency_name_'   . $i, '' );
 			if ( '' != $custom_currency_code && '' != $custom_currency_name ) {
 				$custom_currencies[ $custom_currency_code ] = $custom_currency_name;
 			}
@@ -125,7 +126,7 @@ class WCJ_Currencies extends WCJ_Module {
 	 * @since   3.9.0
 	 */
 	function get_saved_currency_symbol( $currency, $default_symbol ) {
-		if ( false === ( $saved_currency_symbol = get_option( 'wcj_currency_' . $currency, false ) ) ) {
+		if ( false === ( $saved_currency_symbol = wcj_get_option( 'wcj_currency_' . $currency, false ) ) ) {
 			return ( in_array( $currency, array_keys( $this->get_additional_currencies() ) ) ? $this->get_additional_currency_symbol( $currency ) : $default_symbol );
 		} else {
 			return $saved_currency_symbol;
@@ -143,15 +144,15 @@ class WCJ_Currencies extends WCJ_Module {
 			return $this->saved_symbol[ $currency ];
 		}
 		// Maybe hide symbol
-		if ( 'yes' === get_option( 'wcj_currency_hide_symbol', 'no' ) ) {
+		if ( 'yes' === wcj_get_option( 'wcj_currency_hide_symbol', 'no' ) ) {
 			return '';
 		}
 		// Custom currencies
-		for ( $i = 1; $i <= apply_filters( 'booster_option', 1, get_option( 'wcj_currency_custom_currency_total_number', 1 ) ); $i++ ) {
-			$custom_currency_code = get_option( 'wcj_currency_custom_currency_code_' . $i, '' );
-			$custom_currency_name = get_option( 'wcj_currency_custom_currency_name_' . $i, '' );
+		for ( $i = 1; $i <= apply_filters( 'booster_option', 1, wcj_get_option( 'wcj_currency_custom_currency_total_number', 1 ) ); $i++ ) {
+			$custom_currency_code = wcj_get_option( 'wcj_currency_custom_currency_code_' . $i, '' );
+			$custom_currency_name = wcj_get_option( 'wcj_currency_custom_currency_name_' . $i, '' );
 			if ( '' != $custom_currency_code && '' != $custom_currency_name && $currency === $custom_currency_code ) {
-				$this->saved_symbol[ $currency ] = do_shortcode( get_option( 'wcj_currency_custom_currency_symbol_' . $i, '' ) );
+				$this->saved_symbol[ $currency ] = do_shortcode( wcj_get_option( 'wcj_currency_custom_currency_symbol_' . $i, '' ) );
 				return $this->saved_symbol[ $currency ];
 			}
 		}

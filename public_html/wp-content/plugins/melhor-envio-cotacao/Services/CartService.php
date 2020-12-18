@@ -1,8 +1,9 @@
-<?php 
+<?php
 
 namespace Services;
 
-use Models\Agency;
+use Models\Option;
+use Models\Payload;
 
 class CartService
 {
@@ -13,106 +14,148 @@ class CartService
     /**
      * Function to add item on Cart Melhor Envio
      *
-     * @param int $order_id
+     * @param int $orderId
      * @param array $products
-     * @param array $to
-     * @param integer $shipping_method_id
+     * @param array $dataBuyer
+     * @param int $shippingMethodId
      * @return void
      */
-    public function add($order_id, $products, $to, $shipping_method_id)
+    public function add($orderId, $products, $dataBuyer, $shippingMethodId)
     {
-        $from = (new SellerService())->getData();
+        $payloadSaved = (new Payload())->get($orderId);
 
-        $quotation = (new QuotationService())->calculateQuotationByOrderId($order_id);
+        $products = (!empty($payloadSaved->products))
+            ? $payloadSaved->products
+            : $products;
+
+        $dataBuyer = (!empty($payloadSaved->buyer))
+            ? $payloadSaved->buyer
+            : $dataBuyer;
+
+        $dataFrom =  (new SellerService())->getData();
+
+        $quotation = (new QuotationService())->calculateQuotationByPostId($orderId);
+
+        $orderInvoiceService = new OrderInvoicesService();
+
+        $methodService = new CalculateShippingMethodService();
+
+        $options = (!empty($payloadSaved->options))
+            ? $payloadSaved->options
+            : (new Option())->getOptions();
+
+        $insuranceRequired = ($methodService->isCorreios($shippingMethodId))
+            ? $methodService->insuranceValueIsRequired($options->insurance_value, $shippingMethodId)
+            : true;
+
+        $insuranceValue = ($insuranceRequired)
+            ? (new ProductsService())->getInsuranceValue($products)
+            : 0;
 
         $body = array(
-            'from' => $from,
-            'to' => $to,
-            'agency' => (new Agency())->getCodeAgencySelected(),
-            'service' => $shipping_method_id,
+            'from' => $dataFrom,
+            'to' => $dataBuyer,
+            'agency' => (new AgenciesJadlogService())->getSelectedAgencyOrAnyByCityUser(),
+            'service' => $shippingMethodId,
             'products' => $products,
-            'volumes' => $this->getVolumes($quotation, $shipping_method_id), 
+            'volumes' => $this->getVolumes($quotation, $shippingMethodId),
             'options' => array(
-                "insurance_value" => $this->getInsuranceValueByProducts($products),
-                "receipt" => (get_option('melhorenvio_ar') == 'true') ? true : false,
-                "own_hand" => (get_option('melhorenvio_mp') == 'true') ? true : false,
+                "insurance_value" => $insuranceValue,
+                "receipt" => $options->receipt,
+                "own_hand" => $options->own_hand,
                 "collect" => false,
-                "reverse" => false, 
-                "non_commercial" => true, 
+                "reverse" => false,
+                "non_commercial" => $orderInvoiceService->isNonCommercial($orderId),
+                "invoice" => $orderInvoiceService->getInvoiceOrder($orderId),
                 'platform' => self::PLATAFORM,
                 'reminder' => null
             )
         );
 
-        $isValid = $this->paramsValid($body, $order_id);
+        $errors = $this->checkParamsBody($body, $orderId);
 
-        if (!empty($isValid)) {
-
+        if (!empty($errors)) {
             return [
                 'success' => false,
-                'errors' => $isValid
+                'errors' => $errors
             ];
         }
 
         $result = (new RequestService())->request(
-            self::ROUTE_MELHOR_ENVIO_ADD_CART, 
-            'POST', 
+            self::ROUTE_MELHOR_ENVIO_ADD_CART,
+            'POST',
             $body,
             true
-        );      
+        );
 
-        if ( array_key_exists('errors', $result) ) {
-            return $result;
+        if (!empty($result->errors)) {
+            return [
+                'success' => false,
+                'errors' => end($result->errors)
+            ];
+        }
+
+        if (empty($result->id)) {
+            return [
+                'success' => false,
+                'errors' => 'Não foi possível enviar o pedido para o carrinho de compras'
+            ];
         }
 
         return (new OrderQuotationService())->updateDataQuotation(
-            $order_id, 
-            $result->id, 
-            $result->protocol, 
-            'pending', 
-            $shipping_method_id,
+            $orderId,
+            $result->id,
+            $result->protocol,
+            'pending',
+            $shippingMethodId,
             null,
             $result->self_tracking
         );
     }
 
-    public function remove($order_id)
+    /**
+     * Function to remove order in cart by Melhor Envio.
+     *
+     * @param int $postId
+     * @param string $orderId
+     * @return bool
+     */
+    public function remove($postId, $orderId)
     {
-        $data = (new OrderQuotationService())->getData($order_id);
+        (new OrderQuotationService())->removeDataQuotation($postId);
 
-        if (!isset($data['order_id'])) {
-            return [
-                'success' => false,
-                'errors' => 'Pedido não encontrado.'
-            ];
-        }
-
-        (new OrderQuotationService())->removeDataQuotation($order_id);
-
-        return (new RequestService())->request(
-            self::ROUTE_MELHOR_ENVIO_ADD_CART . '/' . $data['order_id'], 
-            'DELETE', 
+        (new RequestService())->request(
+            self::ROUTE_MELHOR_ENVIO_ADD_CART . '/' . $orderId,
+            'DELETE',
             []
         );
+
+        $orderInCart = (new OrderService())->info($orderId);
+
+        if (!$orderInCart['success']) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * Mount array with volumes by products.
      *
      * @param array $quotation
-     * @param int $method_id
+     * @param int $methodid
      * @return array $volumes
      */
-    private function getVolumes($quotation, $method_id)
+    private function getVolumes($quotation, $methodId)
     {
         $volumes = [];
 
         foreach ($quotation as $item) {
-    
-            if ($item->id == $method_id) {
-
+            if (!isset($item->id)) {
+                continue;
+            }
+            if ($item->id == $methodId) {
                 foreach ($item->packages as $package) {
-
                     $volumes[] = [
                         'height' => $package->dimensions->height,
                         'width'  => $package->dimensions->width,
@@ -123,29 +166,11 @@ class CartService
             }
         }
 
-        //TODO remover volumes se for correios e tratar o erro.
-        if (in_array($method_id, [1,2,13,17])) {
+        if ((new CalculateShippingMethodService())->isCorreios($methodId)) {
             return $volumes[0];
         }
 
         return $volumes;
-    }
-
-    /**
-     * Sum values of products.
-     *
-     * @param array $products
-     * @return float $value
-     */
-    private function getInsuranceValueByProducts($products)
-    {
-        $value = 0;
-
-        foreach ($products as $product) {
-            $value += ($product['unitary_value'] * $product['quantity']);
-        }
-
-        return $value;
     }
 
     /**
@@ -154,34 +179,34 @@ class CartService
      * @param array $body
      * @return void
      */
-    private function paramsValid($body, $order_id)
+    private function checkParamsBody($body, $orderId)
     {
         $errors = [];
 
+        if ((new CalculateShippingMethodService())->isJadlog($body['service']) && empty($body['agency'])) {
+            $errors[] = sprintf("Informar a agência Jadlog do envio %s", $orderId);
+        }
+
         if (!array_key_exists("from", $body)) {
-            $errors[] = sprintf("Informar origem do envio do pedido %s", $order_id);
+            $errors[] = sprintf("Informar origem do envio do pedido %s", $orderId);
         }
 
         if (!array_key_exists("to", $body)) {
-            $errors[] = sprintf("Informar destino do envio do pedido %s", $order_id);
+            $errors[] = sprintf("Informar destino do envio do pedido %s", $orderId);
         }
 
         if (!array_key_exists("service", $body)) {
-            $errors[] = sprintf("Informar o serviço do envio do pedido %s", $order_id);
+            $errors[] = sprintf("Informar o serviço do envio do pedido %s", $orderId);
         }
 
         if (!array_key_exists("products", $body)) {
-            $errors[] = sprintf("Informar o produtos do envio do pedido %s", $order_id);
+            $errors[] = sprintf("Informar o produtos do envio do pedido %s", $orderId);
         }
 
-        if (isset($body['service']) && $body['service'] >= 3 && !array_key_exists("agency", $body)) {
-            $errors[] = sprintf("Informar a agência do envio do pedido %s", $order_id);
-        }
-
-        if (!isset($body['volumes']) ) {
-            $errors[] = sprintf("Informar os volumes do envio do pedido %s", $order_id);
+        if (!isset($body['volumes'])) {
+            $errors[] = sprintf("Informar os volumes do envio do pedido %s", $orderId);
         }
 
         return $errors;
-    }   
+    }
 }

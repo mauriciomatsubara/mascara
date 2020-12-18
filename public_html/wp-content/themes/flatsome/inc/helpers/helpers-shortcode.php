@@ -262,12 +262,19 @@ function flatsome_get_image($id, $size = 'large', $alt = 'bg_image', $inline = f
         return '<img src="'.$id.'" alt="'.$alt.'" />';
     } else {
         $meta = get_post_mime_type($id);
-        if($meta == 'image/svg+xml' && $inline){
-          $image = wp_get_attachment_image_src($id);
-          return wp_remote_fopen($image[0]);
-        } else {
-          return wp_get_attachment_image($id, $size);
+
+        if ( $meta == 'image/svg+xml' && $inline ){
+          $file = get_attached_file( $id );
+          if ( $file && file_exists( $file ) ) {
+            return preg_replace(
+              '#<script(.*?)>(.*?)</script>#is',
+              '',
+              file_get_contents( $file )
+            );
+          }
         }
+
+        return wp_get_attachment_image( $id, $size );
     }
 }
 
@@ -525,4 +532,16 @@ function flatsome_box_item_toggle_end( $items ) {
 			add_action( $item['tag'], $item['function'], $item['priority'] );
 		}
 	}
+}
+
+/**
+ * Inserts items at offset in an associative array.
+ *
+ * @param array $array
+ * @param array $values
+ * @param int $offset
+ * @return array
+ */
+function flatsome_array_insert( array $array, array $values, $offset ) {
+  return array_slice( $array, 0, $offset, true ) + $values + array_slice( $array, $offset, null, true );
 }

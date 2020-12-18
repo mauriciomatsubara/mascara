@@ -97,6 +97,7 @@ class NextendSocialProviderGoogle extends NextendSocialProvider {
             'select_account' => 1,
             'skin'           => 'light',
             'login_label'    => 'Continue with <b>Google</b>',
+            'register_label' => 'Sign up with <b>Google</b>',
             'link_label'     => 'Link account with <b>Google</b>',
             'unlink_label'   => 'Unlink account from <b>Google</b>'
         ));
@@ -104,6 +105,7 @@ class NextendSocialProviderGoogle extends NextendSocialProvider {
 
     protected function forTranslation() {
         __('Continue with <b>Google</b>', 'nextend-facebook-connect');
+        __('Sign up with <b>Google</b>', 'nextend-facebook-connect');
         __('Link account with <b>Google</b>', 'nextend-facebook-connect');
         __('Unlink account from <b>Google</b>', 'nextend-facebook-connect');
     }
@@ -128,7 +130,23 @@ class NextendSocialProviderGoogle extends NextendSocialProvider {
     }
 
     public function getRawIconButton() {
-        return '<div class="nsl-button nsl-button-icon nsl-button-' . $this->id . '" style="background-color:' . $this->colorUniform . ';"><div class="nsl-button-svg-container">' . $this->svgUniform . '</div></div>';
+        $skin = $this->settings->get('skin');
+        switch ($skin) {
+            case 'dark':
+                $color = $this->color;
+                $svg   = $this->svg;
+                break;
+            case 'light':
+                $color = '#fff';
+                $svg   = $this->svg;
+                break;
+            default:
+                $color = $this->colorUniform;
+                $svg   = $this->svgUniform;
+        }
+
+        return '<div class="nsl-button nsl-button-icon nsl-button-' . $this->id . '" data-skin="' . $skin . '" style="background-color:' . $color . ';"><div class="nsl-button-svg-container">' . $svg . '</div></div>';
+
     }
 
     public function validateSettings($newData, $postedData) {

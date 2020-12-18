@@ -91,28 +91,73 @@ class Woo_Payment_Discounts_Admin {
 					<p class="wpd_pro">
 						<a href="https://codecanyon.net/item/woocommerce-advanced-discounts-and-fees/19009855?s_rank=1" target="_blank"><h3>WooCommerce Advanced Discounts and Fees</h3></a>
 
-					<h4><strong> Key Features of WooCommerce Advanced Discounts and Fees</strong></h4>
-					<ul>
-						<li>
-							<strong>Set discounts based on payment method selected </strong>
-							- For example you want to give your customer 5% discounts if they buy your product using PayPal then you can set using this feature.
-						</li>
-						<li><strong>Set extra fee based on payment method selected </strong>
-							- For example you want to add extra charge when customer choose specific payment method on checkout page then you can set using this feature.
-						</li>
-						<li><strong>Set discounts based on shipping method selected </strong>
-							- For example you want to give your customer 20$ discounts if they choose specific shipping method on checkout page then you can set using this feature.
-						</li>
-						<li><strong>Set extra fee based on shipping method selected </strong>
-							- For example you want to add extra charge when customer choose shipping method on checkout page then you can set using this feature.
-						</li>
-						<li><strong>Set fee or discount in fixed amount or in percentage</strong>
-							- Set discount or fee in fixed amount or in percentage.
-						</li>
-						<li><strong>Set label for each payment method and shipping method discount or fee</strong></li>
+					<p>With WooCommerce Advanced Discounts and Fees, you can charge additional fees or give discount to encourage customers to increase the order value.</p>
 
 
+					<strong> Benefits of WooCommerce Advanced Discounts and Fees </strong>
+					<strong>Boost site revenue</strong>
+					<p>You can earn additional revenue by adding customer fees.</p>
+
+					<strong>Incentivize use of specific payment gateway(s)</strong>
+					<p>To encourage customers to use your preferred payment gateway, you can charge a payment gateway fee or give discount
+						on specific payment gateways.
+					</p>
+
+					<strong>Increase cart total value</strong>
+					<p>Encourage your customers to make X amount of order value and get discount or avoid additional fees.
+					</p>
+
+					<strong>Usere role specific fees and discounts </strong>
+					<p>Give a special discount or charge fees to specific user role.
+					</p>
+
+					<strong>Categories specific fees and discounts </strong>
+					<p>Encourage your customers to purchase products from specific categories to get massive discount. Either you can also charge an additional fees for special categories product in cart.
+
+					</p>
+
+
+					<strong>Shipping method specific fees and discounts </strong>
+					<p>You can earn additional revenue by adding shipping method fees when customer choose a particular shipping method during checkout.
+					</p>
+
+					<p><strong>Key featutes WooCommerce Advanced Discounts and Fees</strong>
+					</p><ul>
+						<li>Option to set fees or discount based on payment gateway.</li>
+						<li>Option to set fees or discount based on shipping method</li>
+						<li>Option to set fees or discount based on cart total value</li>
+						<li>Option to set fees or discount based on user role</li>
+						<li>Option to set fees or discount based on products from specific categories in the cart. </li>
+						<li>Option to set fees or discount based either fixed amount of percentage base. </li>
+						<li>Option to set label for each fees or discounts. </li>
 					</ul>
+					<br /><br />
+
+
+					<p><strong>1. Payment gateway based fees and discounts. </strong>
+						<img src="https://res.cloudinary.com/dpip9b6hi/image/upload/v1600913011/wadf/01preview11_pfmysm.jpg" />
+						<br /><br />
+					<p><strong>2. Shipping method based fees and discounts. </strong>
+						<img src="https://res.cloudinary.com/dpip9b6hi/image/upload/v1600913011/wadf/02preview22_qijz7c.jpg" />
+						<br /><br />
+					<p><strong>3. User role based fees and discounts. </strong>
+						<img src="https://res.cloudinary.com/dpip9b6hi/image/upload/v1600913011/wadf/03preview33_c5uf4o.jpg" />
+						<br /><br />
+					<p><strong>4. Cart total based fees and discounts. </strong>
+						<img src="https://res.cloudinary.com/dpip9b6hi/image/upload/v1600913011/wadf/04preview44_ekowxu.jpg" />
+						<br /><br />
+
+					<p><strong>5. Categories based fees and discounts. </strong>
+						<img src="https://res.cloudinary.com/dpip9b6hi/image/upload/v1600913011/wadf/05preview55_erzden.jpg" />
+						<br /><br />
+						<strong>Plugin in action</strong>
+						<img src="https://res.cloudinary.com/dpip9b6hi/image/upload/v1600913012/wadf/06_preview66_lzinvw.jpg" /></p>
+
+
+					<p><strong> Support Contact </strong><br />
+						<strong>Email:</strong> <a href="mailto:wpcodelibrary@gmail.com">wpcodelibrary@gmail.com</a><br />
+						<strong>Skype:</strong> wpcodelibrary</p>
+					<strong>Website:</strong> <a href="https://wpcodelibrary.com">https://wpcodelibrary.com</a><br />
 					<a href="https://codecanyon.net/item/woocommerce-advanced-discounts-and-fees/19009855?s_rank=1" target="_blank"><h4> Download WooCommerce Advanced Discounts and Fees Plugin</h4>
 					</a>
 			</fieldset>

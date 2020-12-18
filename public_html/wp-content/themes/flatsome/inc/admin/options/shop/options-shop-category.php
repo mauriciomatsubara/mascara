@@ -56,7 +56,7 @@ Flatsome_Option::add_field( 'option', array(
 Flatsome_Option::add_field( 'option', array(
 	'type'            => 'checkbox',
 	'settings'        => 'category_sticky_sidebar',
-	'label'           => __( 'Sticky sidebar', 'flatsome-admin' ) . ' (NEW)',
+	'label'           => __( 'Sticky sidebar', 'flatsome-admin' ),
 	'section'         => 'woocommerce_product_catalog',
 	'active_callback' => array(
 		array(

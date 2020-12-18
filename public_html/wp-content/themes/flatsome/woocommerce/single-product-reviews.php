@@ -24,7 +24,7 @@ if ( ! comments_open() ) {
 }
 
 $tab_style              = get_theme_mod( 'product_display' );
-$review_ratings_enabled = fl_woocommerce_version_check( '3.6.0' ) ? wc_review_ratings_enabled() : get_option( 'woocommerce_enable_review_rating' ) === 'yes';
+$review_ratings_enabled = wc_review_ratings_enabled();
 ?>
 <div id="reviews" class="woocommerce-Reviews row">
 	<div id="comments" class="col large-<?php if ( get_comment_pages_count() == 0 || $tab_style == 'sections' || $tab_style == 'tabs_vertical' ) { echo '12'; } else { echo '7'; } ?>">
@@ -129,7 +129,7 @@ $review_ratings_enabled = fl_woocommerce_version_check( '3.6.0' ) ? wc_review_ra
 				}
 
 				if ( $review_ratings_enabled ) {
-					$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating">' . esc_html__( 'Your rating', 'woocommerce' ) . ( fl_woocommerce_version_check( '3.6.0' ) && wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) . '</label><select name="rating" id="rating" required>
+					$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating">' . esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) . '</label><select name="rating" id="rating" required>
 						<option value="">' . esc_html__( 'Rate&hellip;', 'woocommerce' ) . '</option>
 						<option value="5">' . esc_html__( 'Perfect', 'woocommerce' ) . '</option>
 						<option value="4">' . esc_html__( 'Good', 'woocommerce' ) . '</option>

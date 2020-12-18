@@ -18,6 +18,7 @@ require get_template_directory() . '/inc/admin/panel/panel.php';
 if (!is_customize_preview()  && is_admin() ) {
   require get_template_directory() . '/inc/admin/envato_setup/envato_setup.php';
   require get_template_directory() . '/inc/admin/advanced/index.php';
+  require get_template_directory() . '/inc/admin/backend/menu/class-menu.php';
 }
 
 // Add Admin Bar helper

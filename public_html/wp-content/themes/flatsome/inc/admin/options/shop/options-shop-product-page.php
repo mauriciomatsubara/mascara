@@ -451,7 +451,7 @@ function flatsome_customizer_shop_product_page_options() {
 	Flatsome_Option::add_field( 'option', array(
 		'type'     => 'slider',
 		'settings' => 'related_products_pr_row_tablet',
-		'label'    => __( 'Products per row - Tablet', 'flatsome-admin' ) . ' (NEW)',
+		'label'    => __( 'Products per row - Tablet', 'flatsome-admin' ),
 		'section'  => 'product-page',
 		'default'  => 3,
 		'choices'  => array(
@@ -464,7 +464,7 @@ function flatsome_customizer_shop_product_page_options() {
 	Flatsome_Option::add_field( 'option', array(
 		'type'     => 'slider',
 		'settings' => 'related_products_pr_row_mobile',
-		'label'    => __( 'Products per row - Mobile', 'flatsome-admin' ) . ' (NEW)',
+		'label'    => __( 'Products per row - Mobile', 'flatsome-admin' ),
 		'section'  => 'product-page',
 		'default'  => 2,
 		'choices'  => array(

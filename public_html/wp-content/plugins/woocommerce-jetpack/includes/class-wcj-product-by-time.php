@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Product Availability by Time
  *
- * @version 2.9.1
+ * @version 5.2.0
  * @since   2.8.0
  * @author  Pluggabl LLC.
  */
@@ -16,7 +16,7 @@ class WCJ_Product_By_Time extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 2.9.1
+	 * @version 5.2.0
 	 * @since   2.8.0
 	 * @todo    per category
 	 * @todo    per tag
@@ -27,7 +27,8 @@ class WCJ_Product_By_Time extends WCJ_Module {
 
 		$this->id         = 'product_by_time';
 		$this->short_desc = __( 'Product Availability by Time', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Set product availability by time.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Set product availability by time (Custom frontend messages available in Plus).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Set product availability by time.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-product-availability-by-time';
 		parent::__construct();
 
@@ -35,14 +36,14 @@ class WCJ_Product_By_Time extends WCJ_Module {
 
 		if ( $this->is_enabled() ) {
 			// Per product meta box
-			if ( 'yes' === get_option( 'wcj_product_by_time_per_product_enabled', 'no' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_product_by_time_per_product_enabled', 'no' ) ) {
 				add_action( 'add_meta_boxes',          array( $this, 'add_meta_box' ) );
 				add_action( 'save_post_product',       array( $this, 'save_meta_box' ), PHP_INT_MAX, 2 );
 				add_filter( 'wcj_save_meta_box_value', array( $this, 'save_meta_box_validate_value' ), PHP_INT_MAX, 3 );
 				add_action( 'admin_notices',           array( $this, 'validate_value_admin_notices' ) );
 				$this->meta_box_validate_value = 'wcj_product_by_time_enabled';
 			}
-			if ( 'yes' === get_option( 'wcj_product_by_time_per_product_enabled', 'no' ) || 'yes' === get_option( 'wcj_product_by_time_section_enabled', 'no' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_product_by_time_per_product_enabled', 'no' ) || 'yes' === wcj_get_option( 'wcj_product_by_time_section_enabled', 'no' ) ) {
 				// Time now
 				$this->day_of_week_now = intval( date( 'w', $this->time_now ) );
 				$this->hours_now       = intval( date( 'H', $this->time_now ) );
@@ -111,10 +112,10 @@ class WCJ_Product_By_Time extends WCJ_Module {
 	 */
 	function get_product_availability_this_day( $_product ) {
 		$product_id = wcj_get_product_id_or_variation_parent_id( $_product );
-		if ( 'yes' === get_option( 'wcj_product_by_time_per_product_enabled', 'no' ) && 'yes' === get_post_meta( $product_id, '_' . 'wcj_product_by_time_enabled', true ) ) {
+		if ( 'yes' === wcj_get_option( 'wcj_product_by_time_per_product_enabled', 'no' ) && 'yes' === get_post_meta( $product_id, '_' . 'wcj_product_by_time_enabled', true ) ) {
 			return get_post_meta( $product_id, '_' . 'wcj_product_by_time_' . $this->day_of_week_now, true );
-		} elseif ( 'yes' === get_option( 'wcj_product_by_time_section_enabled', 'no' ) ) {
-			return get_option( 'wcj_product_by_time_' . $this->day_of_week_now, $this->get_default_time( $this->day_of_week_now ) );
+		} elseif ( 'yes' === wcj_get_option( 'wcj_product_by_time_section_enabled', 'no' ) ) {
+			return wcj_get_option( 'wcj_product_by_time_' . $this->day_of_week_now, $this->get_default_time( $this->day_of_week_now ) );
 		} else {
 			return '';
 		}

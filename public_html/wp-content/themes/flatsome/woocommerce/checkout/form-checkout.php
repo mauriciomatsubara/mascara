@@ -39,11 +39,6 @@ $row_classes     = implode( ' ', $row_classes );
 $main_classes    = implode( ' ', $main_classes );
 $sidebar_classes = implode( ' ', $sidebar_classes );
 
-
-if ( ! fl_woocommerce_version_check( '3.5.0' ) ) {
-	wc_print_notices();
-}
-
 do_action( 'woocommerce_before_checkout_form', $checkout );
 
 // If checkout registration is disabled and not logged in, the user cannot checkout.
@@ -87,6 +82,9 @@ if ( flatsome_option( 'facebook_login_checkout' ) && get_option( 'woocommerce_en
 
 					<div class="col-inner <?php echo esc_attr( $sidebar_classes ); ?>">
 						<div class="checkout-sidebar sm-touch-scroll">
+
+							<?php do_action( 'woocommerce_checkout_before_order_review_heading' ); ?>
+
 							<h3 id="order_review_heading"><?php esc_html_e( 'Your order', 'woocommerce' ); ?></h3>
 
 							<?php do_action( 'woocommerce_checkout_before_order_review' ); ?>

@@ -19,7 +19,7 @@ if ( ! function_exists( 'wc_custom_product_data_fields' ) ) {
 			array(
 				'id'          => '_product_block',
 				'type'        => 'select',
-				'label'       => __( 'Custom product layout', 'flatsome' ) . ' (NEW)',
+				'label'       => __( 'Custom product layout', 'flatsome' ),
 				'style'       => 'width:100%;height:140px;',
 				'description' => __( 'Choose a custom product block layout for this product.', 'flatsome' ),
 				'desc_tip'    => true,

@@ -1,4 +1,36 @@
 ### Changelog
+### [2.9.4]
+- Correção do problema de loop infinito na aba de configurações.
+
+### [2.9.3]
+- Correção de caracteres quebrados no endereço de destino na etiqueta Melhor Envio.
+
+### [2.9.2]
+- Criação de função de usuário para suporte do Melhor Envio (Acesso restrito).
+- Removendo requisiçoes desnecessárias para rota shipping/services na API do Melhor Envio.
+- Enviando a versão do plugin do Melhor Envio no cabeçalho nas requisições para a API do melhor envio.
+- Serviço de notificação de erros no plugin.
+- Exibindo valor segurado na listagem de pedidos.
+
+### [2.9.1]
+- Correção error fatal ao enviar produto para o carrinho de compras
+
+### [2.9.0]
+- Correção da exibição de frete grátis e taxa fixa.
+- Ajuste cálculo de produto com variação na tela do produto.
+- Adicionando percentual extra sobre o valor do frete.
+- Adicionando função para cancelar etiquetas.
+- Opção de ativar/desativar valor segurado
+- Ajuste para salvar dados do vendedor nos options do Wordpress.
+- Correções de warnings
+
+### [2.8.1] - 2020-08
+- Retorno do botão de enviar pedido para o carrinho de compras do Melhor Envio.
+- Correção de problemas com valores diferentes entre plugin e Melhor Envio.
+- Correções de pequenos problemas em versões antigas do PHP.
+- Ordenação de cotação pelo preço.
+- Ajuste nos dados do remetente na etiqueta, exibindo dados e endereço da loja selecionada.
+- Solução do problema de lentidão da calculadora do produto.
 
 ## [2.4.7] - 2019-08-26
 ## Fixed

@@ -1,7 +1,7 @@
 <?php
 
 // [featured_items_slider]
-function flatsome_portfolio_shortcode($atts, $content = null, $tag) {
+function flatsome_portfolio_shortcode($atts, $content = null, $tag = '' ) {
 
   extract(shortcode_atts(array(
         // meta

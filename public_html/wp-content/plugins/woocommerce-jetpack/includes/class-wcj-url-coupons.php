@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - URL Coupons
  *
- * @version 3.6.0
+ * @version 5.2.0
  * @since   2.9.1
  * @author  Pluggabl LLC.
  */
@@ -16,14 +16,14 @@ class WCJ_URL_Coupons extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 2.9.1
+	 * @version 5.2.0
 	 * @since   2.9.1
 	 */
 	function __construct() {
 
 		$this->id         = 'url_coupons';
 		$this->short_desc = __( 'URL Coupons', 'woocommerce-jetpack' );
-		$this->desc       = __( 'WooCommerce URL coupons.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'WooCommerce URL coupons. Redirect after coupon has been applied (Plus).', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-url-coupons';
 		parent::__construct();
 
@@ -39,13 +39,13 @@ class WCJ_URL_Coupons extends WCJ_Module {
 	 * @since   2.9.1
 	 */
 	function get_redirect_url( $arg_key ) {
-		switch ( apply_filters( 'booster_option', 'no', get_option( 'wcj_url_coupons_redirect', 'no' ) ) ) {
+		switch ( apply_filters( 'booster_option', 'no', wcj_get_option( 'wcj_url_coupons_redirect', 'no' ) ) ) {
 			case 'cart':
 				return wc_get_cart_url();
 			case 'checkout':
 				return wc_get_checkout_url();
 			case 'custom':
-				return get_option( 'wcj_url_coupons_redirect_custom_url', '' );
+				return wcj_get_option( 'wcj_url_coupons_redirect_custom_url', '' );
 			default: // 'no'
 				return remove_query_arg( $arg_key );
 		}
@@ -59,7 +59,7 @@ class WCJ_URL_Coupons extends WCJ_Module {
 	 * @todo    (maybe) check if coupon is valid
 	 */
 	function maybe_add_products_to_cart( $coupon_code ) {
-		if ( 'no' === apply_filters( 'booster_option', 'no', get_option( 'wcj_url_coupons_fixed_product_discount_add_products', 'no' ) ) ) {
+		if ( 'no' === apply_filters( 'booster_option', 'no', wcj_get_option( 'wcj_url_coupons_fixed_product_discount_add_products', 'no' ) ) ) {
 			return false;
 		}
 		// Coupons are globally disabled.
@@ -91,7 +91,7 @@ class WCJ_URL_Coupons extends WCJ_Module {
 	 * @todo    (maybe) if ( ! WC()->cart->has_discount( $coupon_code ) ) {}
 	 */
 	function maybe_apply_url_coupon() {
-		$arg_key = get_option( 'wcj_url_coupons_key', 'wcj_apply_coupon' );
+		$arg_key = wcj_get_option( 'wcj_url_coupons_key', 'wcj_apply_coupon' );
 		if ( isset( $_GET[ $arg_key ] ) && '' != $_GET[ $arg_key ] ) {
 			$coupon_code = sanitize_text_field( $_GET[ $arg_key ] );
 			$this->maybe_add_products_to_cart( $coupon_code );

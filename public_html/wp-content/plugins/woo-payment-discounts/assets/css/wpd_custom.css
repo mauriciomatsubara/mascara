@@ -19,3 +19,11 @@
 .wpd_lite {
     line-height:25px;
 }
+
+.wrap.wpd_welcome_wrap img {
+    width: 80%;
+}
+.wpd_welcom_div p {
+    font-size: 15px;
+    line-height: 1.5em;
+}

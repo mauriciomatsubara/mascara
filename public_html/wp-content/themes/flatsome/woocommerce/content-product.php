@@ -43,7 +43,7 @@ if ( $out_of_stock ) $classes[] = 'out-of-stock';
 
 ?>
 
-<div <?php fl_woocommerce_version_check( '3.4.0' ) ? wc_product_class( $classes, $product ) : post_class( $classes ); ?>>
+<div <?php wc_product_class( $classes, $product ); ?>>
 	<div class="col-inner">
 	<?php do_action( 'woocommerce_before_shop_loop_item' ); ?>
 	<div class="product-small box <?php echo flatsome_product_box_class(); ?>">

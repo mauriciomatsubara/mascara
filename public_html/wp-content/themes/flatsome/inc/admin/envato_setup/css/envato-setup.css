@@ -90,6 +90,16 @@ body {
     color: #111
 }
 
+.envato-setup-content .notice {
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 15px;
+}
+
+.envato-setup-content .notice p:last-child {
+    margin-bottom: 0;
+}
+
 .envato-setup-content .form-table th {
     width: 35%;
     vertical-align: top;

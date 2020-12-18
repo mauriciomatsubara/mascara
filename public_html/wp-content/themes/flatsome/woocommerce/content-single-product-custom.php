@@ -30,7 +30,7 @@ global $product;
 	}
 	?>
 </div>
-<div id="product-<?php the_ID(); ?>" <?php fl_woocommerce_version_check( '3.4.0' ) ? wc_product_class( '', $product ) : post_class(); ?>>
+<div id="product-<?php the_ID(); ?>" <?php wc_product_class( '', $product ); ?>>
 
 	<div class="custom-product-page">
 

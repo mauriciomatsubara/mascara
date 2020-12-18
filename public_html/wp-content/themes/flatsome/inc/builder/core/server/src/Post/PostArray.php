@@ -21,9 +21,13 @@ class PostArray {
     $self = $this;
     $post_content = $this->post->post_content;
 
-    // Remove HTML block wrappers in UX Builder.
+    // Remove block wrappers in UX Builder.
     // They will be added by ArrayToString.php when saved.
-    $post_content = preg_replace( '/<!-- \/?wp:html -->/', '', $post_content );
+    if ( has_block( 'flatsome/uxbuilder', $post_content ) ) {
+      $post_content = preg_replace( '/<!-- \/?wp:flatsome\/uxbuilder -->/', '', $post_content );
+    } else {
+      $post_content = preg_replace( '/<!-- \/?wp:html -->/', '', $post_content );
+    }
 
     $this->post_array = ux_builder( 'to-array' )->transform( "[_root]{$post_content}[/_root]" );
 

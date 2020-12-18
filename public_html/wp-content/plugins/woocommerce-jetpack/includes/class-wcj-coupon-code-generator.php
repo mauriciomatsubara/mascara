@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Coupon Code Generator
  *
- * @version 3.2.3
+ * @version 5.2.0
  * @since   3.2.3
  * @author  Pluggabl LLC.
  */
@@ -16,7 +16,7 @@ class WCJ_Coupon_Code_Generator extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 3.2.3
+	 * @version 5.2.0
 	 * @since   3.2.3
 	 * @todo    user ID in coupon code
 	 * @todo    add option to generate code only on button (in meta box) pressed
@@ -26,12 +26,13 @@ class WCJ_Coupon_Code_Generator extends WCJ_Module {
 
 		$this->id         = 'coupon_code_generator';
 		$this->short_desc = __( 'Coupon Code Generator', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Coupon code generator.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Coupon code generator (Multiple generation algorithms available in Plus).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Coupon code generator.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-coupon-code-generator';
 		parent::__construct();
 
 		if ( $this->is_enabled() ) {
-			if ( 'yes' === get_option( 'wcj_coupons_code_generator_enabled', 'no' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_coupons_code_generator_enabled', 'no' ) ) {
 				add_action( 'wp_ajax_wcj_generate_coupon_code', array( $this, 'ajax_generate_coupon_code' ) );
 				add_action( 'admin_enqueue_scripts',            array( $this, 'enqueue_generate_coupon_code_script' ) );
 			}
@@ -80,7 +81,7 @@ class WCJ_Coupon_Code_Generator extends WCJ_Module {
 			$str = time();
 		}
 		if ( '' === $algorithm ) {
-			$algorithm = apply_filters( 'booster_option', 'crc32', get_option( 'wcj_coupons_code_generator_algorithm', 'crc32' ) );
+			$algorithm = apply_filters( 'booster_option', 'crc32', wcj_get_option( 'wcj_coupons_code_generator_algorithm', 'crc32' ) );
 		}
 		switch ( $algorithm ) {
 			case 'random_letters_and_numbers':
@@ -103,7 +104,7 @@ class WCJ_Coupon_Code_Generator extends WCJ_Module {
 				break;
 		}
 		if ( '' === $length ) {
-			$length = apply_filters( 'booster_option', 0, get_option( 'wcj_coupons_code_generator_length', 0 ) );
+			$length = apply_filters( 'booster_option', 0, wcj_get_option( 'wcj_coupons_code_generator_length', 0 ) );
 		}
 		if ( $length > 0 && strlen( $code ) > $length ) {
 			$code = substr( $code, 0, $length );

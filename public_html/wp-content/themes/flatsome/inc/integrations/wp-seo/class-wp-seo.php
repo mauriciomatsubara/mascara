@@ -9,6 +9,8 @@
 
 namespace Flatsome\Inc\Integrations;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Class WP_Seo
  *

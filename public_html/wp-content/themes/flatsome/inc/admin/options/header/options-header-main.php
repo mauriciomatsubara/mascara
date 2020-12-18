@@ -37,7 +37,7 @@ Flatsome_Option::add_field( 'option',  array(
 	'settings'     => 'header_height',
 	'label'       => __( 'Height', 'flatsome-admin' ),
 	'section'     => 'main_bar',
-	'default'     => 100,
+	'default'     => 90,
 	'choices'     => array(
 		'min'  => 30,
 		'max'  => 500,
@@ -177,6 +177,14 @@ Flatsome_Option::add_field( 'option',  array(
 		'default'     => 1,
 ));
 
+Flatsome_Option::add_field( 'option', array(
+	'type'     => 'checkbox',
+	'settings' => 'nav_body_overlay',
+	'label'    => __( 'Add overlay on hover', 'flatsome-admin' ),
+	'section'  => 'main_bar',
+	'default'  => 0,
+) );
+
 
 Flatsome_Option::add_field( 'option',  array(
 	'type'        => 'slider',
@@ -186,7 +194,7 @@ Flatsome_Option::add_field( 'option',  array(
 	'default' => 16,
 	'choices'     => array(
 		'min'  => 0,
-		'max'  => 100,
+		'max'  => 500,
 		'step' => 1
 	),
 	'transport' => 'postMessage',
@@ -258,7 +266,7 @@ Flatsome_Option::add_field( 'option',  array(
 	'settings'     => 'header_height_transparent',
 	'label'       => __( 'Height - Transparent Header', 'flatsome-admin' ),
 	'section'     => 'main_bar',
-	'default'     => '',
+	'default'     => 90,
 	'transport' => 'postMessage',
 	'choices'     => array(
 		'min'  => 30,

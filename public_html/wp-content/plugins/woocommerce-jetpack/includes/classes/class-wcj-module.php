@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce Module
  *
- * @version 5.1.0
+ * @version 5.3.3
  * @since   2.2.0
  * @author  Pluggabl LLC.
  * @todo    [dev] maybe should be `abstract` ?
@@ -17,28 +17,13 @@ class WCJ_Module {
 	public $id;
 	public $short_desc;
 	public $desc;
+	public $desc_pro;
+	public $extra_desc;
+	public $extra_desc_pro;
 	public $parent_id; // for `submodule` only
 	public $type;      // `module` or `submodule`
 	public $link;
 	public $options = array();
-
-	/**
-	 * Gets an option from database or from the class itself for performance reasons.
-	 *
-	 * @version 4.5.0
-	 * @since   4.5.0
-	 *
-	 * @param $option_name
-	 * @param null $default
-	 *
-	 * @return mixed
-	 */
-	function get_option( $option_name, $default = null ){
-		if ( ! isset( $this->options[ $option_name ] ) ) {
-			$this->options[ $option_name ] = get_option( $option_name, $default );
-		}
-		return $this->options[ $option_name ];
-	}
 
 	/**
 	 * Constructor.
@@ -53,7 +38,7 @@ class WCJ_Module {
 			$this->parent_id = '';
 		}
 
-		if ( 'no' === get_option( 'wcj_load_modules_on_init', 'no' ) ) {
+		if ( 'no' === wcj_get_option( 'wcj_load_modules_on_init', 'no' ) ) {
 			add_action( 'init', array( $this, 'add_settings' ) );
 			add_action( 'init', array( $this, 'reset_settings' ), PHP_INT_MAX );
 		} else {
@@ -103,7 +88,7 @@ class WCJ_Module {
 	 * @since   4.7.0
 	 */
 	function remove_wpml_hooks() {
-		if ( 'no' === get_option( 'wcj_' . $this->id . '_wpml_get_products_all_lang', 'no' ) ) {
+		if ( 'no' === wcj_get_option( 'wcj_' . $this->id . '_wpml_get_products_all_lang', 'no' ) ) {
 			return;
 		}
 
@@ -120,7 +105,7 @@ class WCJ_Module {
 	 * @param null $module_id
 	 */
 	function restore_wpml_args_on_get_products( $module_id = null ){
-		if ( 'no' === get_option( 'wcj_' . $this->id . '_wpml_get_products_all_lang', 'no' ) ) {
+		if ( 'no' === wcj_get_option( 'wcj_' . $this->id . '_wpml_get_products_all_lang', 'no' ) ) {
 			return;
 		}
 		remove_action( 'pre_get_posts', array( $this, 'suppress_filters' ) );
@@ -139,7 +124,7 @@ class WCJ_Module {
 	 * @param null $module_id
 	 */
 	function add_wpml_args_on_get_products( $module_id = null ) {
-		if ( 'no' === get_option( 'wcj_' . $this->id . '_wpml_get_products_all_lang', 'no' ) ) {
+		if ( 'no' === wcj_get_option( 'wcj_' . $this->id . '_wpml_get_products_all_lang', 'no' ) ) {
 			return;
 		}
 		add_action( 'pre_get_posts', array( $this, 'suppress_filters' ) );
@@ -213,7 +198,7 @@ class WCJ_Module {
 	 * @since   4.6.0
 	 */
 	function remove_wpml_functions_before_get_terms( $module_id = null ) {
-		if ( 'no' === get_option( 'wcj_' . $this->id . '_wpml_get_terms_all_lang', 'no' ) ) {
+		if ( 'no' === wcj_get_option( 'wcj_' . $this->id . '_wpml_get_terms_all_lang', 'no' ) ) {
 			return;
 		}
 		wcj_remove_wpml_terms_filters();
@@ -232,7 +217,7 @@ class WCJ_Module {
 	 * @since   4.6.0
 	 */
 	function restore_wpml_functions_after_get_terms( $module_id = null ) {
-		if ( 'no' === get_option( 'wcj_' . $this->id . '_wpml_get_terms_all_lang', 'no' ) ) {
+		if ( 'no' === wcj_get_option( 'wcj_' . $this->id . '_wpml_get_terms_all_lang', 'no' ) ) {
 			return;
 		}
 		wcj_add_wpml_terms_filters();
@@ -257,9 +242,9 @@ class WCJ_Module {
 	function handle_deprecated_options() {
 		if ( $deprecated_options = $this->get_deprecated_options() ) {
 			foreach ( $deprecated_options as $new_option => $old_options ) {
-				$new_value = get_option( $new_option, array() );
+				$new_value = wcj_get_option( $new_option, array() );
 				foreach ( $old_options as $new_key => $old_option ) {
-					if ( null !== ( $old_value = get_option( $old_option, null ) ) ) {
+					if ( null !== ( $old_value = wcj_get_option( $old_option, null ) ) ) {
 						$new_value[ $new_key ] = $old_value;
 						delete_option( $old_option );
 					}
@@ -487,7 +472,28 @@ class WCJ_Module {
 			$settings = $this->add_tools_list( $settings );
 		}
 		$settings = $this->add_reset_settings_button( $settings );
+		$settings = $this->setup_default_autoload( $settings );
 		return $this->add_enable_module_setting( $settings, $module_desc );
+	}
+
+	/**
+	 * setup_default_autoload.
+	 *
+	 * @version 5.3.3
+	 * @since   5.3.3
+	 *
+	 * @param $settings
+	 *
+	 * @return array
+	 */
+	function setup_default_autoload( $settings ) {
+		$settings = array_map( function ( $item ) {
+			if ( ! isset( $item['autoload'] ) ) {
+				$item['autoload'] = false;
+			}
+			return $item;
+		}, $settings );
+		return $settings;
 	}
 
 	/**
@@ -876,14 +882,14 @@ class WCJ_Module {
 	 * settings_section.
 	 * only for `module`
 	 *
-	 * @version 4.0.0
+	 * @version 5.2.1
 	 */
 	function add_enable_module_setting( $settings, $module_desc = '' ) {
 		if ( 'module' != $this->type ) {
 			return $settings;
 		}
-		if ( '' === $module_desc && isset( $this->extra_desc ) ) {
-			$module_desc = '<div style="padding: 15px; background-color: #ffffff; color: #000000;">' . $this->extra_desc . '</div>';
+		if ( '' === $module_desc && ! empty( $this->get_extra_desc() ) ) {
+			$module_desc = '<div style="padding: 15px; background-color: #ffffff; color: #000000;">' . $this->get_extra_desc() . '</div>';
 		}
 		if ( ! isset( $this->link ) && isset( $this->link_slug ) && '' != $this->link_slug ) {
 			$this->link = 'https://booster.io/features/' . $this->link_slug . '/';
@@ -904,11 +910,11 @@ class WCJ_Module {
 			array(
 				'title'    => $this->short_desc,
 				'desc'     => '<strong>' . __( 'Enable Module', 'woocommerce-jetpack' ) . '</strong>',
-				'desc_tip' => $this->desc . $the_link,
+				'desc_tip' => $this->get_desc() . $the_link,
 				'id'       => 'wcj_' . $this->id . '_enabled',
 				'default'  => 'no',
 				'type'     => 'checkbox',
-				'wcj_desc' => $this->desc,
+				'wcj_desc' => $this->get_desc(),
 				'wcj_link' => ( isset( $this->link ) ? $this->link : '' ),
 			),
 			array(
@@ -917,6 +923,42 @@ class WCJ_Module {
 			),
 		);
 		return array_merge( $enable_module_setting, $settings );
+	}
+
+	/**
+	 * get_desc.
+	 *
+	 * @version 5.2.0
+	 * @since   5.2.0
+	 *
+	 * @return mixed
+	 */
+	function get_desc() {
+		if (
+			empty( $this->desc_pro )
+			|| ! class_exists( 'WCJ_Plus' )
+		) {
+			return $this->desc;
+		}
+		return $this->desc_pro;
+	}
+
+	/**
+	 * get_extra_desc.
+	 *
+	 * @version 5.2.0
+	 * @since   5.2.0
+	 *
+	 * @return mixed
+	 */
+	function get_extra_desc() {
+		if (
+			empty( $this->extra_desc_pro )
+			|| ! class_exists( 'WCJ_Plus' )
+		) {
+			return $this->extra_desc;
+		}
+		return $this->extra_desc_pro;
 	}
 }
 

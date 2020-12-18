@@ -6,7 +6,7 @@
  */
 
 $layout = get_theme_mod( 'category_sidebar', 'left-sidebar' );
-if ( 'none' === $layout || ( get_theme_mod( 'html_shop_page_content' ) && ! is_product_category() ) ) {
+if ( 'none' === $layout || ( get_theme_mod( 'html_shop_page_content' ) && ! is_product_category() && ! is_product_tag() ) ) {
 	return;
 }
 

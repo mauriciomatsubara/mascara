@@ -10,6 +10,8 @@ class OrderService
 
     const ROUTE_MELHOR_ENVIO_CANCEL = '/shipment/cancel';
 
+    const ROUTE_MELHOR_ENVIO_CANCELLABLE = '/shipment/cancellable';
+
     const ROUTE_MELHOR_ENVIO_TRACKING = '/shipment/tracking';
 
     const ROUTE_MELHOR_ENVIO_CART = '/cart';
@@ -25,32 +27,32 @@ class OrderService
     /**
      * Function to cancel order on api Melhor Envio.
      *
-     * @param int $post_id
+     * @param int $postId
      * @return array $response
      */
-    public function cancel($post_id)
+    public function cancel($postId)
     {
-        $order_id = $this->getOrderIdByPostId($post_id);
+        $orderId = $this->getOrderIdByPostId($postId);
 
-        if (is_null($order_id)) {
+        if (is_null($orderId)) {
             return [
                 'success' => false,
                 'message' => 'Pedido não encontrado'
             ];
         }
 
-        $orders[] = [
-            'id'          => $order_id,
+        $body['order'] = [
+            'id'          => $orderId,
             'reason_id'   => self::REASON_CANCELED_USER,
             'description' => 'Cancelado pelo usuário'
         ];
-        
-        (new OrderQuotationService())->removeDataQuotation($order_id);
-        
+
+        (new OrderQuotationService())->removeDataQuotation($postId);
+
         return (new RequestService())->request(
-            self::ROUTE_MELHOR_ENVIO_CANCEL, 
-            'POST', 
-            ['orders' => $orders], 
+            self::ROUTE_MELHOR_ENVIO_CANCEL,
+            'POST',
+            json_encode($body),
             false
         );
     }
@@ -58,14 +60,14 @@ class OrderService
     /**
      * Function to get info about order in api Melhor Envio.
      *
-     * @param int $order_id
+     * @param int $orderId
      * @return array $response
      */
-    public function info($post_id)
-    {   
-        $data = (new OrderQuotationService())->getData($post_id);
+    public function info($postId)
+    {
+        $data = (new OrderQuotationService())->getData($postId);
 
-        if(!$data) {
+        if (!$data) {
             return [
                 'success' => false,
                 'message' => 'Ordem não encontrada no Melhor Envio'
@@ -84,24 +86,31 @@ class OrderService
     /**
      * Function to get details about order in api Melhor Envio.
      *
-     * @param int $order_id
+     * @param int $postId
      * @return array $response
      */
-    public function detail($post_id)
-    {   
-        $data = (new OrderQuotationService())->getData($post_id);
+    public function detail($postId)
+    {
+        $data = (new OrderQuotationService())->getData($postId);
+
+        if (empty($data['order_id'])) {
+            return [
+                'success' => false,
+                'message' => 'Pedido não possui etiqueta do Melhor Envio'
+            ];
+        }
 
         $body = [
             'orders' => (array) $data['order_id']
         ];
 
-        if(!$data) {
+        if (!$data) {
             return [
                 'success' => false,
                 'message' => 'Ordem não encontrada no Melhor Envio'
             ];
         }
-        
+
         return (new RequestService())->request(
             self::ROUTE_MELHOR_ENVIO_TRACKING,
             'POST',
@@ -113,24 +122,23 @@ class OrderService
     /**
      * Function to create a label on Melhor Envio.
      *
-     * @param array $posts_id
+     * @param array $postsId
      * @return array $response
      */
-    public function pay($posts_id)
+    public function pay($postsId)
     {
         $wallet = 0;
         $orders = [];
 
-        foreach ($posts_id as $post_id) {
+        foreach ($postsId as $postId) {
+            $orderId = $this->getOrderIdByPostId($postId);
 
-            $order_id = $this->getOrderIdByPostId($post_id);
-
-            if (is_null($order_id)) {
+            if (is_null($orderId)) {
                 continue;
             }
 
-            $orders[] = $order_id;
-            $ticket = $this->infoOrderCart($order_id);
+            $orders[] = $orderId;
+            $ticket = $this->infoOrderCart($orderId);
             $wallet = $wallet + $ticket->price;
         }
 
@@ -153,37 +161,37 @@ class OrderService
             true
         );
 
-        if ( array_key_exists('errors', $result) ) {
+        if (array_key_exists('errors', $result)) {
             return $result;
         }
 
         return (new OrderQuotationService())->updateDataQuotation(
-            end($posts_id), //post_id
-            end($result->purchase->orders)->id, //order_id
-            end($result->purchase->orders)->protocol, //protocol
-            $result->purchase->status, //status
-            end($result->purchase->orders)->service_id,//choose_method
-            $result->purchase->id, //purchase_id,
+            end($postsId),
+            end($result->purchase->orders)->id,
+            end($result->purchase->orders)->protocol,
+            $result->purchase->status,
+            end($result->purchase->orders)->service_id,
+            $result->purchase->id,
             end($result->purchase->orders)->self_tracking
         );
     }
 
-        /**
+    /**
      * Function to create a label on Melhor Envio.
      *
-     * @param array $post_id
-     * @param $order_id
+     * @param array $postId
+     * @param $orderId
      * @return array $response
      */
-    public function payByOrderId($post_id, $order_id)
+    public function payByOrderId($postId, $orderId)
     {
         $wallet = 0;
         $orders = [];
 
-        $orders[] = $order_id;
-        $ticket = $this->infoOrderCart($order_id);
+        $orders[] = $orderId;
+        $ticket = $this->infoOrderCart($orderId);
         $wallet = $wallet + $ticket->price;
-    
+
 
         if ($wallet == 0) {
             return [
@@ -204,36 +212,39 @@ class OrderService
             true
         );
 
-        if ( array_key_exists('errors', $result) ) {
-            return $result;
+        if (!empty($result->errors)) {
+            return [
+                'success' => false,
+                'errors' => $result->errors
+            ];
         }
 
         $response = (new OrderQuotationService())->updateDataQuotation(
-            $post_id, //post_id
-            end($result->purchase->orders)->id, //order_id
-            end($result->purchase->orders)->protocol, //protocol
-            $result->purchase->status, //status
-            end($result->purchase->orders)->service_id,//choose_method
-            $result->purchase->id, //purchase_id
+            $postId,
+            end($result->purchase->orders)->id,
+            end($result->purchase->orders)->protocol,
+            $result->purchase->status,
+            end($result->purchase->orders)->service_id,
+            $result->purchase->id,
             end($result->purchase->orders)->self_tracking
         );
 
         $response['result'] = $result;
 
-        return $response;   
+        return $response;
     }
     /**
      * Function to create a label printble on melhor envio.
      *
-     * @param int $post_id
+     * @param int $postId
      * @return void
      */
-    public function createLabel($post_id)
+    public function createLabel($postId)
     {
-        $order_id = $this->getOrderIdByPostId($post_id);
+        $orderId = $this->getOrderIdByPostId($postId);
 
         $body = [
-            'orders' => (array) $order_id,
+            'orders' => (array) $orderId,
             'mode' => 'public'
         ];
 
@@ -244,14 +255,17 @@ class OrderService
             true
         );
 
-        if ( array_key_exists('errors', $result) ) {
-            return $result;
+        if (!empty($result->errors)) {
+            return [
+                'success' => false,
+                'errors' => $result->errors
+            ];
         }
 
-        $data = (new OrderQuotationService())->getData($post_id);
+        $data = (new OrderQuotationService())->getData($postId);
 
         $data = (new OrderQuotationService())->updateDataQuotation(
-            $post_id,
+            $postId,
             $data['order_id'],
             $data['protocol'],
             'generated',
@@ -263,12 +277,12 @@ class OrderService
         return $data;
     }
 
-    public function printLabel($post_id)
+    public function printLabel($postId)
     {
-        $order_id = $this->getOrderIdByPostId($post_id);
+        $orderId = $this->getOrderIdByPostId($postId);
 
         $body = [
-            'orders' => (array) $order_id
+            'orders' => (array) $orderId
         ];
 
         $result = (new RequestService())->request(
@@ -285,10 +299,10 @@ class OrderService
             ];
         }
 
-        $data = (new OrderQuotationService())->getData($post_id);
+        $data = (new OrderQuotationService())->getData($postId);
 
         $data = (new OrderQuotationService())->updateDataQuotation(
-            $post_id,
+            $postId,
             $data['order_id'],
             $data['protocol'],
             'released',
@@ -306,10 +320,10 @@ class OrderService
      * @param int $order_id
      * @return array $response
      */
-    public function infoOrderCart($order_id)
-    {   
+    public function infoOrderCart($orderId)
+    {
         return (new RequestService())->request(
-            self::ROUTE_MELHOR_ENVIO_CART . '/' . $order_id,
+            self::ROUTE_MELHOR_ENVIO_CART . '/' . $orderId,
             'GET',
             [],
             false
@@ -322,10 +336,10 @@ class OrderService
      * @param string $order_id
      * @return array $response
      */
-    public function getInfoOrder($order_id)
+    public function getInfoOrder($orderId)
     {
         return (new RequestService())->request(
-            self::ROUTE_MELHOR_ENVIO_SEARCH . $order_id,
+            self::ROUTE_MELHOR_ENVIO_SEARCH . $orderId,
             'GET',
             [],
             false
@@ -335,12 +349,12 @@ class OrderService
     /**
      * Function to get order_id by post_id.
      *
-     * @param int $post_id
+     * @param int $postId
      * @return string $order_id
      */
-    public function getOrderIdByPostId($post_id)
+    public function getOrderIdByPostId($postId)
     {
-        $data = (new OrderQuotationService())->getData($post_id);
+        $data = (new OrderQuotationService())->getData($postId);
 
         if (!isset($data['order_id'])) {
             return null;
@@ -360,126 +374,118 @@ class OrderService
         $response = [];
 
         foreach ($posts as $post) {
-
-            $status = null;
-            $protocol = null;
-            $tracking = null;
-
             $data = (new OrderQuotationService())->getData($post->ID);
 
             if (empty($data)) {
-
                 $response[$post->ID] = [
                     'order_id' => null,
                     'status' => null,
                     'protocol' => null,
-                    'tracking' => null
+                    'tracking' => null,
+                    'service_id' => null
                 ];
                 continue;
             }
 
-            $info = $this->getInfoOrder($data['order_id']);
+            $dataOrder = $this->getInfoOrder($data['order_id']);
 
-            if (isset(end($info)->tracking)) {
-                $tracking = end($info)->tracking;
-            }
+            $info = end($dataOrder);
 
-            if(isset(end($info)->status)) {
-                $status   =  end($info)->status;
-                $protocol = end($info)->protocol;
-                $tracking = $tracking;
+            if (!is_object($info) && $info[0] == 'Not Found') {
+                $response[$post->ID] = [
+                    'order_id' => null,
+                    'status' => null,
+                    'protocol' => null,
+                    'tracking' => null,
+                    'service_id' => null
+                ];
+                continue;
             }
-
-            if (isset($data['status'])) {
-                $status = $data['status'];
-            }
-
-            if (isset($data['protocol'])) {
-                $protocol = $data['protocol'];
-            }
-            
 
             $response[$post->ID] = [
                 'order_id' => $data['order_id'],
-                'status' => $status,
-                'protocol' => $protocol,
-                'tracking' => $tracking
+                'status' => $info->status,
+                'protocol' => $info->protocol,
+                'tracking' => $info->tracking,
+                'service_id' => (!empty($data['choose_method'])) ? $data['choose_method'] : null
             ];
 
-            (new TrackingService())->addTrackingOrder($post->ID, $tracking);
+            if (!is_null($info->tracking)) {
+                (new TrackingService())->addTrackingOrder(
+                    $post->ID,
+                    $info->tracking
+                );
+            }
         }
 
         return $response;
     }
 
-
+    /**
+     * Multi-label purchase function in a single click
+     *
+     * @param array $posts
+     * @return array
+     */
     public function buyOnClick($posts)
     {
         $orders = [];
 
         $errors = [];
 
-        $valueTotal = 0;
-
-        foreach ($posts as $post_id) {
-
-            $data = (new OrderQuotationService())->getData($post_id);
+        foreach ($posts as $postId) {
+            $data = (new OrderQuotationService())->getData($postId);
 
             if (empty($data) || is_null($data['order_id'])) {
-        
-                $products = (new OrdersProductsService())->getProductsOrder($post_id);
+                $products = (new OrdersProductsService())->getProductsOrder($postId);
 
-                $to = (new BuyerService())->getDataBuyerByOrderId($post_id);
+                $to = (new BuyerService())->getDataBuyerByOrderId($postId);
 
-                $choose_method = (new Method())->getMethodShipmentSelected($post_id);
+                $chooseMethod = (new Method())->getMethodShipmentSelected($postId);
 
-                $data = (new cartService())->add($post_id, $products, $to, $choose_method);
+                $data = (new cartService())->add($postId, $products, $to, $chooseMethod);
 
                 if (isset($data['message'])) {
-                    $errors[$post_id][] = $data['message'];
+                    $errors[$postId][] = $data['message'];
                 }
             }
 
             if ($data['status'] == 'pending') {
-
-                $data = $this->payByOrderId($post_id, $data['order_id'] );
+                $data = $this->payByOrderId($postId, $data['order_id']);
 
                 if (isset($data['message'])) {
-                    $errors[$post_id][] = $data['message'];
+                    $errors[$postId][] = $data['message'];
                 }
             }
 
             if ($data['status'] == 'paid') {
-
-                $data = $this->createLabel($post_id);
+                $data = $this->createLabel($postId);
 
                 if (isset($data['message'])) {
-                    $errors[$post_id][] = $data['message'];
+                    $errors[$postId][] = $data['message'];
                 }
 
                 if (isset($data['message'])) {
-                    $errors[$post_id][] = $data['message'];
+                    $errors[$postId][] = $data['message'];
                 }
 
-                $orders[$post_id] = $data['order_id'];
+                $orders[$postId] = $data['order_id'];
             }
 
             if ($data['status'] == 'generated' || $data['status'] == 'released') {
-
                 if (isset($data['message'])) {
-                    $errors[$post_id][] = $data['message'];
+                    $errors[$postId][] = $data['message'];
                 }
 
-                $orders[$post_id] = $data['order_id'];
+                $orders[$postId] = $data['order_id'];
             }
         }
 
         if (!empty($orders)) {
-            
             $body = [
                 'orders' => $orders
             ];
-    
+
             $result = (new RequestService())->request(
                 self::ROUTE_MELHOR_ENVIO_PRINT_LABEL,
                 'POST',

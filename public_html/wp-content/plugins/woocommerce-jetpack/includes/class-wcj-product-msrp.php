@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Product MSRP
  *
- * @version 5.1.1
+ * @version 5.2.0
  * @since   3.6.0
  * @author  Pluggabl LLC.
  */
@@ -18,7 +18,7 @@ class WCJ_Product_MSRP extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 5.1.1
+	 * @version 5.2.0
 	 * @since   3.6.0
 	 * @todo    (maybe) option to change `_wcj_msrp` meta key
 	 * @todo    (maybe) REST API
@@ -31,12 +31,13 @@ class WCJ_Product_MSRP extends WCJ_Module {
 		$this->short_desc = __( 'Product MSRP', 'woocommerce-jetpack' );
 		$this->extra_desc = __( 'The <strong>manufacturer\'s suggested retail price</strong> (<strong>MSRP</strong>), also known as the <strong>list price</strong>, or the <strong>recommended retail price</strong> (<strong>RRP</strong>), or the <strong>suggested retail price</strong> (<strong>SRP</strong>), of a product is the price at which the manufacturer recommends that the retailer sell the product.', 'woocommerce-jetpack' ) . '<br>' .
 			sprintf( __( 'Booster stores MSRP as product meta with %s key.', 'woocommerce-jetpack' ), '<code>_wcj_msrp</code>' );
-		$this->desc       = __( 'Save and display product MSRP in WooCommerce.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Save and display product MSRP in WooCommerce (Custom template available in Plus).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Save and display product MSRP in WooCommerce.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-msrp';
 		parent::__construct();
 
 		if ( $this->is_enabled() ) {
-			if ( 'inline' === get_option( 'wcj_product_msrp_admin_view', 'inline' ) ) {
+			if ( 'inline' === wcj_get_option( 'wcj_product_msrp_admin_view', 'inline' ) ) {
 				// MSRP input on admin product page (simple product)
 				add_action( 'woocommerce_product_options_pricing', array( $this, 'add_msrp_input' ) );
 				add_action( 'save_post_product',                   array( $this, 'save_msrp_input' ), PHP_INT_MAX, 2 );
@@ -88,7 +89,7 @@ class WCJ_Product_MSRP extends WCJ_Module {
 	 * @return mixed
 	 */
 	function make_wcj_msrp_price_compatible_with_3rd_party( $price, $product ) {
-		if ( 'yes' !== get_option( 'wcj_payment_msrp_comp_mc', 'no' ) ) {
+		if ( 'yes' !== wcj_get_option( 'wcj_payment_msrp_comp_mc', 'no' ) ) {
 			return $price;
 		}
 		$module = 'multicurrency';
@@ -167,7 +168,7 @@ class WCJ_Product_MSRP extends WCJ_Module {
 	 * @return string
 	 */
 	function get_section_id_by_template_path( $template ) {
-		$archive_detection_method = $this->get_option( 'wcj_product_msrp_archive_detection_method', 'loop' );
+		$archive_detection_method = wcj_get_option( 'wcj_product_msrp_archive_detection_method', 'loop' );
 		$archive_detection_method = array_values( array_filter( explode( PHP_EOL, $archive_detection_method ) ) );
 		return count( array_filter( $archive_detection_method, function ( $item ) use ( $template ) {
 			return strpos( $template, $item ) !== false;
@@ -177,20 +178,20 @@ class WCJ_Product_MSRP extends WCJ_Module {
 	/**
 	 * display.
 	 *
-	 * @version 5.1.0
+	 * @version 5.2.0
 	 * @since   3.6.0
 	 * @todo    (maybe) multicurrency
 	 * @todo    (feature) (maybe) variable product's msrp: add another option to enter MSRP directly for the whole variable product, instead of taking first variation's MSRP
 	 */
 	function display( $price_html, $product ) {
 		$section_id = $this->get_section_id_by_template_path( $this->current_template_path );
-		$display    = get_option( 'wcj_product_msrp_display_on_' . $section_id, 'show' );
+		$display    = wcj_get_option( 'wcj_product_msrp_display_on_' . $section_id, 'show' );
 		if ( 'hide' == $display ) {
 			return $price_html;
 		}
 		$product_id = false;
 		if ( $product->is_type( 'variable' ) && $product->get_variation_price( 'min' ) === $product->get_variation_price( 'max' ) ) {
-			if ( 'yes' === get_option( 'wcj_product_msrp_variable_as_simple_enabled', 'no' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_product_msrp_variable_as_simple_enabled', 'no' ) ) {
 				$product_id = wcj_get_product_id( $product );
 			} else {
 				foreach ( $product->get_available_variations() as $variation ) {
@@ -199,7 +200,7 @@ class WCJ_Product_MSRP extends WCJ_Module {
 					break;
 				}
 			}
-		} elseif ( $product->is_type( 'variation' ) && 'yes' === get_option( 'wcj_product_msrp_variable_as_simple_enabled', 'no' ) ) {
+		} elseif ( $product->is_type( 'variation' ) && 'yes' === wcj_get_option( 'wcj_product_msrp_variable_as_simple_enabled', 'no' ) ) {
 			return $price_html;
 		}
 
@@ -210,7 +211,7 @@ class WCJ_Product_MSRP extends WCJ_Module {
 		// MSRP
 		$msrp_product_meta_name = '_wcj_msrp';
 		if (
-			'yes' === get_option( 'wcj_product_msrp_archive_page_field', 'no' ) &&
+			'yes' === wcj_get_option( 'wcj_product_msrp_archive_page_field', 'no' ) &&
 			'archives' === $section_id
 		) {
 			$product_id = wcj_get_product_id( $product );
@@ -223,6 +224,10 @@ class WCJ_Product_MSRP extends WCJ_Module {
 		}
 
 		$price = $product->get_price();
+		if ( empty( $price ) ) {
+			return $price_html;
+		}
+
 		if ( ( 'show_if_diff' == $display && $msrp == $price ) || ( 'show_if_higher' == $display && $msrp <= $price ) ) {
 			return $price_html;
 		}
@@ -232,20 +237,20 @@ class WCJ_Product_MSRP extends WCJ_Module {
 		$math = new WCJ_Math();
 
 		// You Save Formula
-		$you_save_option = get_option( 'wcj_product_msrp_formula_you_save', '%msrp% - %product_price%' );
+		$you_save_option = wcj_get_option( 'wcj_product_msrp_formula_you_save', '%msrp% - %product_price%' );
 		$you_save_formula_result = $math->evaluate( str_replace( array( '%msrp%', '%product_price%' ), array( $msrp, $price ), $you_save_option ) );
 
 		// You Save Percent Formula
-		$you_save_percent_option = get_option( 'wcj_product_msrp_formula_you_save_percent', '(%msrp% - %product_price%) / %msrp% * 100' );
+		$you_save_percent_option = wcj_get_option( 'wcj_product_msrp_formula_you_save_percent', '(%msrp% - %product_price%) / %msrp% * 100' );
 		$you_save_percent_formula_result = $math->evaluate( str_replace( array( '%msrp%', '%product_price%' ), array( $msrp, $price ), $you_save_percent_option ) );
 
-		$position         = get_option( 'wcj_product_msrp_display_on_' . $section_id . '_position', 'after_price' );
+		$position         = wcj_get_option( 'wcj_product_msrp_display_on_' . $section_id . '_position', 'after_price' );
 		$default_template = '<div class="price"><label for="wcj_product_msrp">MSRP</label>: <span id="wcj_product_msrp"><del>%msrp%</del>%you_save%</span></div>';
-		$template         = apply_filters( 'booster_option', $default_template, get_option( 'wcj_product_msrp_display_on_' . $section_id . '_template', $default_template ) );
+		$template         = apply_filters( 'booster_option', $default_template, wcj_get_option( 'wcj_product_msrp_display_on_' . $section_id . '_template', $default_template ) );
 		$diff             = $msrp - ( float ) $price;
-		$you_save         = ( $diff > 0 ? get_option( 'wcj_product_msrp_display_on_' . $section_id . '_you_save',         ' (%you_save_raw%)' )           : '' );
-		$you_save_percent = ( $diff > 0 ? get_option( 'wcj_product_msrp_display_on_' . $section_id . '_you_save_percent', ' (%you_save_percent_raw% %)' ) : '' );
-		$you_save_round   = get_option( 'wcj_product_msrp_display_on_' . $section_id . '_you_save_percent_round', 0 );
+		$you_save         = ( $diff > 0 ? wcj_get_option( 'wcj_product_msrp_display_on_' . $section_id . '_you_save',         ' (%you_save_raw%)' )           : '' );
+		$you_save_percent = ( $diff > 0 ? wcj_get_option( 'wcj_product_msrp_display_on_' . $section_id . '_you_save_percent', ' (%you_save_percent_raw% %)' ) : '' );
+		$you_save_round   = wcj_get_option( 'wcj_product_msrp_display_on_' . $section_id . '_you_save_percent_round', 0 );
 		$replaced_values  = array(
 			'%msrp%'             => wc_price( $msrp ),
 			'%you_save%'         => str_replace( '%you_save_raw%',         wc_price( $you_save_formula_result ),                             $you_save ),

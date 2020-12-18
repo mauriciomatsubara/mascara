@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use SkyVerge\WooCommerce\PluginFramework\v5_5_4 as Framework;
+use SkyVerge\WooCommerce\PluginFramework\v5_10_0 as Framework;
 
 if ( ! class_exists( 'WC_Facebookcommerce_Graph_API' ) ) :
 
@@ -526,6 +526,42 @@ if ( ! class_exists( 'WC_Facebookcommerce_Graph_API' ) ) :
 			// failure API will return {error: <error message>}
 			return self::_get( $url );
 		}
+
+
+		/**
+		 * Gets the connected asset IDs.
+		 *
+		 * These will be things like pixel & page ID.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param string $external_business_id the connected external business ID
+		 * @return array
+		 * @throws Framework\SV_WC_API_Exception
+		 */
+		public function get_asset_ids( $external_business_id ) {
+
+			$url = $this->build_url( 'fbe_business/fbe_installs?fbe_external_business_id=', $external_business_id );
+
+			$response = $this->perform_request( $url );
+
+			$data = wp_remote_retrieve_body( $response );
+			$data = json_decode( $data, true );
+
+			if ( ! is_array( $data ) || empty( $data['data'][0] ) ) {
+				throw new Framework\SV_WC_API_Exception( 'Data is missing' );
+			}
+
+			$ids = $data['data'][0];
+
+			// normalize the page ID to match the others
+			if ( ! empty( $ids['profiles'] ) && is_array( $ids['profiles'] ) ) {
+				$ids['page_id'] = current( $ids['profiles'] );
+			}
+
+			return $ids;
+		}
+
 
 		public function set_default_variant( $product_group_id, $data ) {
 			$url = $this->build_url( $product_group_id );

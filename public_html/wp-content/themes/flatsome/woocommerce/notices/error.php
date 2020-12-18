@@ -50,7 +50,7 @@ else : // Below 3.9.0.
 			<li>
 				<div class="message-container container alert-color medium-text-center">
 					<span class="message-icon icon-close"></span>
-					<?php echo fl_woocommerce_version_check( '3.5.0' ) ? wc_kses_notice( $message ) : wp_kses_post( $message ); ?>
+					<?php echo wc_kses_notice( $message ); ?>
 				</div>
 			</li>
 		<?php endforeach; ?>

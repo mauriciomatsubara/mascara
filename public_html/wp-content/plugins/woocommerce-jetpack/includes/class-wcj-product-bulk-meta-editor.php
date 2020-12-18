@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Product Bulk Meta Editor
  *
- * @version 3.0.0
+ * @version 5.2.0
  * @since   2.8.0
  * @author  Pluggabl LLC.
  */
@@ -16,14 +16,15 @@ class WCJ_Product_Bulk_Meta_Editor extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 2.8.0
+	 * @version 5.2.0
 	 * @since   2.8.0
 	 */
 	function __construct() {
 
 		$this->id         = 'product_bulk_meta_editor';
 		$this->short_desc = __( 'Product Bulk Meta Editor', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Set products meta with bulk editor.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Set products meta with bulk editor (Variations available in Plus).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Set products meta with bulk editor.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-product-bulk-meta-editor';
 		parent::__construct();
 
@@ -55,7 +56,7 @@ class WCJ_Product_Bulk_Meta_Editor extends WCJ_Module {
 		// Actions
 		$result = $this->perform_actions();
 		// Preparing products data
-		$_products = wcj_get_products( array(), 'any', 512, ( 'yes' === apply_filters( 'booster_option', 'no', get_option( 'wcj_product_bulk_meta_editor_add_variations', 'no' ) ) ) );
+		$_products = wcj_get_products( array(), 'any', 512, ( 'yes' === apply_filters( 'booster_option', 'no', wcj_get_option( 'wcj_product_bulk_meta_editor_add_variations', 'no' ) ) ) );
 		$selected_products = isset( $_POST['wcj_product_bulk_meta_editor_products'] ) ? $_POST['wcj_product_bulk_meta_editor_products'] : array();
 		// Output
 		echo $this->get_tool_html( $result['meta_name'], $result['result_message'], $_products, $selected_products, $result['set_meta'] );
@@ -340,14 +341,14 @@ class WCJ_Product_Bulk_Meta_Editor extends WCJ_Module {
 			__( 'Meta', 'woocommerce-jetpack' ) . ': <code>' . $meta_name . '</code>',
 			'',
 		);
-		$additional_columns = get_option( 'wcj_product_bulk_meta_editor_additional_columns', '' );
+		$additional_columns = wcj_get_option( 'wcj_product_bulk_meta_editor_additional_columns', '' );
 		$table_headings = $this->maybe_add_additional_columns_headings( $table_headings, $additional_columns );
 		$table_data[] = $table_headings;
 		foreach ( $_products as $product_id => $product_title ) {
 			if ( ! in_array( $product_id, $selected_products ) ) {
 				continue;
 			}
-			if ( ! metadata_exists( 'post', $product_id, $meta_name ) && 'yes' === get_option( 'wcj_product_bulk_meta_editor_check_if_exists', 'no' ) ) {
+			if ( ! metadata_exists( 'post', $product_id, $meta_name ) && 'yes' === wcj_get_option( 'wcj_product_bulk_meta_editor_check_if_exists', 'no' ) ) {
 				$_post_meta = '<em>' . 'N/A' . '</em>';
 				$save_button = '';
 				$delete_button = '';

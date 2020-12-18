@@ -42,7 +42,7 @@ if ( $max_value && $min_value === $max_value ) {
 		<input
 			type="number"
 			id="<?php echo esc_attr( $input_id ); ?>"
-			class="<?php echo fl_woocommerce_version_check( '3.6.0' ) ? esc_attr( join( ' ', (array) $classes ) ) : 'input-text qty text'; ?>"
+			class="<?php echo esc_attr( join( ' ', (array) $classes ) ); ?>"
 			step="<?php echo esc_attr( $step ); ?>"
 			min="<?php echo esc_attr( $min_value ); ?>"
 			max="<?php echo esc_attr( 0 < $max_value ? $max_value : '' ); ?>"

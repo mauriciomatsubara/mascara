@@ -6,7 +6,7 @@ use Models\Agency;
 use Controllers\TokenController;
 use Services\RequestService;
 
-class Address 
+class Address
 {
     const URL = 'https://api.melhorenvio.com';
 
@@ -19,65 +19,46 @@ class Address
     const SESSION_ADDRESS_SELECTED = 'melhorenvio_address_selected_v2';
 
     const ROUTE_MELHOR_ENVIO_ADDRESS = '/addresses';
-    
+
     /**
      *
      * @return void
      */
-    public function getAddressesShopping() 
+    public function getAddressesShopping()
     {
-        // Get info on session
-        $codeStore = md5(get_option('home'));
-
-        if (isset($_SESSION[$codeStore][self::OPTION_ADDRESS])) {
-
-            return array(
-                'success'   => true,
-                'origin'    => 'session',
-                'addresses' => $_SESSION[$codeStore][self::OPTION_ADDRESS]
-            );
-        } 
-
-        // Get info on API Melhor Envio
         $response = (new RequestService())->request(
             self::ROUTE_MELHOR_ENVIO_ADDRESS,
             'GET',
             [],
             false
         );
-        
-        $selectedAddress = get_option(self::OPTION_ADDRESS_SELECTED);
 
-        $_SESSION[$codeStore][self::OPTION_ADDRESS_SELECTED] = get_option(self::OPTION_ADDRESS_SELECTED);
-
-        if (!isset($response->data)) {
-            return array(
-                'success'   => false,
-                'addresses' => null
-            );
+        if (empty($response->data)) {
+            return [
+                'success' => false,
+                'message' => 'Não foi possível obter endereços da API do Melhor Envio'
+            ];
         }
 
-        $addresses = array();
-        foreach ($response->data as $address) {
+        $selectedAddress = get_option(self::OPTION_ADDRESS_SELECTED);
 
+        $addresses = array();
+
+        foreach ($response->data as $address) {
             $addresses[] = array(
                 'id'          => $address->id,
                 'address'     => $address->address,
                 'complement'  => $address->complement,
                 'label'       => $address->label,
-                'postal_code' => str_pad($address->postal_code ,8, 0,STR_PAD_LEFT),
+                'postal_code' => str_pad($address->postal_code, 8, 0, STR_PAD_LEFT),
                 'number'      => $address->number,
                 'district'    => $address->district,
                 'city'        => $address->city->city,
                 'state'       => $address->city->state->state_abbr,
                 'country'     => $address->city->state->country->id,
-                'selected'    => ($selectedAddress == $address->id) ? true : false
+                'selected'    => ($selectedAddress == $address->id)
             );
         }
-
-        $_SESSION[$codeStore][self::OPTION_ADDRESS] = $addresses;
-
-        add_option(self::OPTION_ADDRESSES, $address, true);
 
         return array(
             'success' => true,
@@ -86,29 +67,26 @@ class Address
         );
     }
 
-    public function setAddressShopping($id) 
-    {    
+    public function setAddressShopping($addressId)
+    {
         $codeStore = md5(get_option('home'));
 
-        $_SESSION[$codeStore][self::SESSION_ADDRESS_SELECTED] = $id;
+        $_SESSION[$codeStore][self::SESSION_ADDRESS_SELECTED] = $addressId;
 
         $addressDefault = get_option(self::OPTION_ADDRESS_SELECTED);
 
-        // Clear agencies list in session to load with new address
-        unset($_SESSION['melhor_envio']['agencies']);
-
-        if  (!$addressDefault) {
-            add_option(self::OPTION_ADDRESS_SELECTED, $id);
+        if (empty($addressDefault)) {
+            add_option(self::OPTION_ADDRESS_SELECTED, $addressId);
             return array(
                 'success' => true,
-                'id' => $id
+                'id' => $addressId
             );
         }
 
-        update_option(self::OPTION_ADDRESS_SELECTED, $id);
+        update_option(self::OPTION_ADDRESS_SELECTED, $addressId);
         return array(
             'success' => true,
-            'id' => $id
+            'id' => $addressId
         );
     }
 
@@ -134,7 +112,7 @@ class Address
         return null;
     }
 
-    public function getAddressFrom() 
+    public function getAddressFrom()
     {
         $addresses = $this->getAddressesShopping();
 
@@ -144,9 +122,9 @@ class Address
             return null;
         }
 
-        foreach($addresses['addresses'] as $item) {
+        foreach ($addresses['addresses'] as $item) {
 
-            if($item['id'] == floatval($idAddressSelected)) {
+            if ($item['id'] == floatval($idAddressSelected)) {
                 return array(
                     'success' => true,
                     'origin'  => 'session/database',
@@ -168,20 +146,5 @@ class Address
             'success' => false,
             'address' => []
         );
-    }
-
-    public function resetData()
-    {
-        $codeStore = md5(get_option('home'));
-
-        // delete_option(self::OPTION_ADDRESS);
-
-        // delete_option(self::OPTION_ADDRESSES);
-
-        // delete_option(self::OPTION_ADDRESS_SELECTED);
-
-        // unset($_SESSION[$codeStore][self::OPTION_ADDRESS_SELECTED]);
-
-        // unset($_SESSION[$codeStore][self::OPTION_ADDRESS]);
     }
 }

@@ -108,6 +108,14 @@ Flatsome_Option::add_field( 'option',  array(
 		'default'     => 1,
 ));
 
+Flatsome_Option::add_field( 'option', array(
+	'type'     => 'checkbox',
+	'settings' => 'nav_bottom_body_overlay',
+	'label'    => __( 'Add overlay on hover', 'flatsome-admin' ),
+	'section'  => 'bottom_bar',
+	'default'  => 0,
+) );
+
 Flatsome_Option::add_field( 'option',  array(
 	'type'        => 'radio-image',
 	'settings'     => 'nav_position_color',

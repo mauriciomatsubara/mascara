@@ -1,7 +1,7 @@
 <?php
 
 // [ux_product_categories]
-function ux_product_categories($atts, $content = null, $tag) {
+function ux_product_categories($atts, $content = null, $tag = '' ) {
   $sliderrandomid = rand();
   extract( shortcode_atts( array (
 

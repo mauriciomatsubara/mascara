@@ -82,7 +82,7 @@ Flatsome_Option::add_field( 'option', array(
 Flatsome_Option::add_field( 'option', array(
 	'type'        => 'radio',
 	'settings'    => 'mobile_submenu_parent_behavior',
-	'label'       => __( 'Menu item behavior', 'flatsome' )  . ' (NEW)',
+	'label'       => __( 'Menu item behavior', 'flatsome' ),
 	'description' => __( 'Click behavior for menu items with a submenu', 'flatsome' ),
 	'section'     => 'header_mobile',
 	'transport'   => 'refresh',
@@ -96,7 +96,7 @@ Flatsome_Option::add_field( 'option', array(
 Flatsome_Option::add_field( 'option', array(
 	'type'            => 'radio',
 	'settings'        => 'mobile_submenu_effect',
-	'label'           => __( 'Submenu effect', 'flatsome' ) . ' (NEW)',
+	'label'           => __( 'Submenu effect', 'flatsome' ),
 	'section'         => 'header_mobile',
 	'transport'       => 'refresh',
 	'default'         => 'accordion',
@@ -116,7 +116,7 @@ Flatsome_Option::add_field( 'option', array(
 Flatsome_Option::add_field( 'option', array(
 	'type'            => 'select',
 	'settings'        => 'mobile_submenu_levels',
-	'label'           => __( 'Submenu levels', 'flatsome' ) . ' (NEW)',
+	'label'           => __( 'Submenu levels', 'flatsome' ),
 	'section'         => 'header_mobile',
 	'transport'       => 'refresh',
 	'default'         => '1',

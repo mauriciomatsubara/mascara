@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Settings - Prices and Currencies by Country
  *
- * @version 5.1.0
+ * @version 5.3.0
  * @since   2.8.0
  * @author  Pluggabl LLC.
  */
@@ -69,6 +69,13 @@ $settings = array(
 		'title'    => __( 'Revert Currency to Default on Checkout', 'woocommerce-jetpack' ),
 		'desc'     => __( 'Enable', 'woocommerce-jetpack' ),
 		'id'       => 'wcj_price_by_country_revert',
+		'default'  => 'no',
+		'type'     => 'checkbox',
+	),
+	array(
+		'title'    => __( 'Auto set default checkout billing country', 'woocommerce-jetpack' ),
+		'desc'     => __( 'Enable', 'woocommerce-jetpack' ),
+		'id'       => 'wcj_price_by_country_set_dft_checkout_billing_country',
 		'default'  => 'no',
 		'type'     => 'checkbox',
 	),
@@ -143,6 +150,14 @@ $settings = array(
 		'default'  => 'no',
 		'type'     => 'checkbox',
 	),
+	/*array(
+		'title'    => __( 'Currency Code on Admin', 'woocommerce-jetpack' ),
+		'desc'     => __( 'Enable', 'woocommerce-jetpack' ),
+		'desc_tip' => __( 'Changes the currency code on admin based on the current country group id.', 'woocommerce-jetpack' ),
+		'id'       => 'wcj_price_by_country_curr_code_admin',
+		'default'  => 'no',
+		'type'     => 'checkbox',
+	),*/
 	array(
 		'type'     => 'sectionend',
 		'id'       => 'wcj_price_by_country_options',
@@ -185,6 +200,15 @@ $settings = array(
 		'desc'              => empty( $message = apply_filters( 'booster_message', '', 'desc' ) ) ? __( 'Enable', 'woocommerce-jetpack' ) : $message,
 		'desc_tip'          => sprintf( __( 'Adds compatibility with <a href="%s" target="_blank">Woo Discount Rules</a> plugin.', 'woocommerce-jetpack' ), 'https://www.flycart.org/products/wordpress/woocommerce-discount-rules' ).'<br />'. sprintf( __( 'If it doesn\'t work properly try to enable <a href="%s">redirect to the cart page after successful addition</a> option.', 'woocommerce-jetpack' ), admin_url( 'admin.php?page=wc-settings&tab=products' ) ),
 		'id'                => 'wcj_price_by_country_compatibility_woo_discount_rules',
+		'default'           => 'no',
+		'type'              => 'checkbox',
+	),
+	array(
+		'title'             => __( 'WooCommerce Points and Rewards', 'woocommerce-jetpack' ),
+		'custom_attributes' => apply_filters( 'booster_message', '', 'disabled' ),
+		'desc'              => empty( $message = apply_filters( 'booster_message', '', 'desc' ) ) ? __( 'Enable', 'woocommerce-jetpack' ) : $message,
+		'desc_tip'          => sprintf( __( 'Adds compatibility with <a href="%s" target="_blank">WooCommerce Points and Rewards</a> plugin.', 'woocommerce-jetpack' ), 'https://woocommerce.com/products/woocommerce-points-and-rewards/' ),
+		'id'                => 'wcj_price_by_country_comp_woo_points_rewards',
 		'default'           => 'no',
 		'type'              => 'checkbox',
 	),
@@ -234,6 +258,14 @@ $settings = array(
 		'type'     => 'checkbox',
 	),
 	array(
+		'title'    => __( 'Save Country Group ID', 'woocommerce-jetpack' ),
+		'desc_tip' => __( 'Try to disable it if the country detection is not correct, most probably if "Override Country Options" is enabled.', 'woocommerce-jetpack' ),
+		'desc'     => __( 'Enable', 'woocommerce-jetpack' ),
+		'id'       => 'wcj_price_by_country_save_country_group_id',
+		'default'  => 'yes',
+		'type'     => 'checkbox',
+	),
+	array(
 		'type'     => 'sectionend',
 		'id'       => 'wcj_price_by_country_country_advanced',
 	),
@@ -272,19 +304,19 @@ $settings = array(
 		'css'      => 'width:100px;',
 	),
 );
-for ( $i = 1; $i <= apply_filters( 'booster_option', 1, get_option( 'wcj_price_by_country_total_groups_number', 1 ) ); $i++ ) {
-	$admin_title = get_option( 'wcj_price_by_country_countries_group_admin_title_' . $i, __( 'Group', 'woocommerce-jetpack' ) . ' #' . $i );
+for ( $i = 1; $i <= apply_filters( 'booster_option', 1, wcj_get_option( 'wcj_price_by_country_total_groups_number', 1 ) ); $i++ ) {
+	$admin_title = wcj_get_option( 'wcj_price_by_country_countries_group_admin_title_' . $i, __( 'Group', 'woocommerce-jetpack' ) . ' #' . $i );
 	if ( __( 'Group', 'woocommerce-jetpack' ) . ' #' . $i == $admin_title ) {
 		$admin_title = '';
 	} else {
 		$admin_title = ': ' . $admin_title;
 	}
 	$admin_title = __( 'Group', 'woocommerce-jetpack' ) . ' #' . $i . $admin_title;
-	switch ( get_option( 'wcj_price_by_country_selection', 'comma_list' ) ) {
+	switch ( wcj_get_option( 'wcj_price_by_country_selection', 'comma_list' ) ) {
 		case 'comma_list':
 			$settings[] = array(
-				'title'    => $admin_title . ( '' != get_option( 'wcj_price_by_country_exchange_rate_countries_group_' . $i, '' ) ?
-					' (' . count( explode( ',', get_option( 'wcj_price_by_country_exchange_rate_countries_group_' . $i, '' ) ) ) . ')' : '' ),
+				'title'    => $admin_title . ( '' != wcj_get_option( 'wcj_price_by_country_exchange_rate_countries_group_' . $i, '' ) ?
+					' (' . count( explode( ',', wcj_get_option( 'wcj_price_by_country_exchange_rate_countries_group_' . $i, '' ) ) ) . ')' : '' ),
 				'desc'     => __( 'Countries. List of comma separated country codes.<br>For country codes and predefined sets visit <a href="https://booster.io/country-codes/" target="_blank">https://booster.io/country-codes/</a>', 'woocommerce-jetpack' ),
 				'id'       => 'wcj_price_by_country_exchange_rate_countries_group_' . $i,
 				'default'  => '',
@@ -294,8 +326,8 @@ for ( $i = 1; $i <= apply_filters( 'booster_option', 1, get_option( 'wcj_price_b
 			break;
 		case 'multiselect':
 			$settings[] = array(
-				'title'    => $admin_title . ( is_array( get_option( 'wcj_price_by_country_countries_group_' . $i, '' ) ) ?
-					' (' . count( get_option( 'wcj_price_by_country_countries_group_' . $i, '' ) ) . ')' : '' ),
+				'title'    => $admin_title . ( is_array( wcj_get_option( 'wcj_price_by_country_countries_group_' . $i, '' ) ) ?
+					' (' . count( wcj_get_option( 'wcj_price_by_country_countries_group_' . $i, '' ) ) . ')' : '' ),
 				'id'       => 'wcj_price_by_country_countries_group_' . $i,
 				'default'  => '',
 				'type'     => 'multiselect',
@@ -305,8 +337,8 @@ for ( $i = 1; $i <= apply_filters( 'booster_option', 1, get_option( 'wcj_price_b
 			break;
 		case 'chosen_select':
 			$settings[] = array(
-				'title'    => $admin_title . ( is_array( get_option( 'wcj_price_by_country_countries_group_chosen_select_' . $i, '' ) ) ?
-					' (' . count( get_option( 'wcj_price_by_country_countries_group_chosen_select_' . $i, '' ) ) . ')' : '' ),
+				'title'    => $admin_title . ( is_array( wcj_get_option( 'wcj_price_by_country_countries_group_chosen_select_' . $i, '' ) ) ?
+					' (' . count( wcj_get_option( 'wcj_price_by_country_countries_group_chosen_select_' . $i, '' ) ) . ')' : '' ),
 				'id'       => 'wcj_price_by_country_countries_group_chosen_select_' . $i,
 				'default'  => '',
 				'type'     => 'multiselect',
@@ -357,9 +389,9 @@ $settings = array_merge( $settings, array(
 		'custom_attributes' => apply_filters( 'booster_message', '', 'disabled' ),
 	),
 ) );
-$currency_from = apply_filters( 'woocommerce_currency', get_option('woocommerce_currency') );
-for ( $i = 1; $i <= apply_filters( 'booster_option', 1, get_option( 'wcj_price_by_country_total_groups_number', 1 ) ); $i++ ) {
-	$currency_to = get_option( 'wcj_price_by_country_exchange_rate_currency_group_' . $i );
+$currency_from = apply_filters( 'woocommerce_currency', wcj_get_option('woocommerce_currency') );
+for ( $i = 1; $i <= apply_filters( 'booster_option', 1, wcj_get_option( 'wcj_price_by_country_total_groups_number', 1 ) ); $i++ ) {
+	$currency_to = wcj_get_option( 'wcj_price_by_country_exchange_rate_currency_group_' . $i );
 	$custom_attributes = array(
 		'currency_from' => $currency_from,
 		'currency_to'   => $currency_to,

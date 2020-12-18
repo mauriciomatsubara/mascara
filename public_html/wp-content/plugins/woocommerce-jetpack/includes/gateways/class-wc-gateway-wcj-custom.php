@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Custom Payment Gateway
  *
- * @version 4.9.0
+ * @version 5.3.4
  * @author  Pluggabl LLC.
  */
 
@@ -15,7 +15,7 @@ if ( ! function_exists( 'init_wc_gateway_wcj_custom_class' ) ) {
 			/**
 			 * WC_Gateway_WCJ_Custom_Template class.
 			 *
-			 * @version 3.9.0
+			 * @version 5.3.4
 			 */
 			class WC_Gateway_WCJ_Custom_Template extends WC_Payment_Gateway {
 
@@ -61,7 +61,7 @@ if ( ! function_exists( 'init_wc_gateway_wcj_custom_class' ) ) {
 							'title'             => __( 'Description', 'woocommerce' ),
 							'type'              => 'textarea',
 							'description'       => __( 'Payment method description that the customer will see on your checkout.', 'woocommerce' ) . ' ' .
-								__( 'You can add input fields with [wcj_input_field] shortcode.', 'woocommerce' ),
+							                       __( 'You can add input fields with [wcj_input_field] shortcode.', 'woocommerce' ),
 							'default'           => __( 'Custom Payment Description.', 'woocommerce' ),
 							'desc_tip'          => true,
 						),
@@ -172,7 +172,7 @@ if ( ! function_exists( 'init_wc_gateway_wcj_custom_class' ) ) {
 				/**
 				 * Check If The Gateway Is Available For Use
 				 *
-				 * @version 2.5.6
+				 * @version 5.3.0
 				 * @return  bool
 				 */
 				function is_available() {
@@ -202,7 +202,7 @@ if ( ! function_exists( 'init_wc_gateway_wcj_custom_class' ) ) {
 
 							if ( 0 < sizeof( $order->get_items() ) ) {
 								foreach ( $order->get_items() as $item ) {
-									$_product = $order->get_product_from_item( $item );
+									$_product = $item->get_product();
 
 									if ( $_product->needs_shipping() ) {
 										$needs_shipping = true;
@@ -339,7 +339,7 @@ if ( ! function_exists( 'init_wc_gateway_wcj_custom_class' ) ) {
 				/**
 				 * init.
 				 *
-				 * @version 4.7.0
+				 * @version 5.3.4
 				 */
 				function init( $id_count ) {
 					$this->id                       = ( 1 === $id_count ) ? 'jetpack_custom_gateway' : 'jetpack_custom_gateway_' . $id_count;
@@ -385,7 +385,7 @@ if ( ! function_exists( 'init_wc_gateway_wcj_custom_class' ) ) {
 			 * @version 2.5.6
 			 */
 			function add_wc_gateway_wcj_custom_classes( $methods ) {
-				$the_number = apply_filters( 'booster_option', 1, get_option( 'wcj_custom_payment_gateways_number', 1 ) );
+				$the_number = apply_filters( 'booster_option', 1, wcj_get_option( 'wcj_custom_payment_gateways_number', 1 ) );
 				for ( $i = 1; $i <= $the_number; $i++ ) {
 					$the_method = new WC_Gateway_WCJ_Custom_Template();
 					$the_method->init( $i );
@@ -398,7 +398,7 @@ if ( ! function_exists( 'init_wc_gateway_wcj_custom_class' ) ) {
 	}
 }
 
-if ( 'no' === get_option( 'wcj_load_modules_on_init', 'no' ) ) {
+if ( 'no' === wcj_get_option( 'wcj_load_modules_on_init', 'no' ) ) {
 	add_action( 'plugins_loaded', 'init_wc_gateway_wcj_custom_class' );
 } else {
 	init_wc_gateway_wcj_custom_class();

@@ -19,9 +19,9 @@ require_once(NSL_PATH . '/compat.php');
 
 class NextendSocialLogin {
 
-    public static $version = '3.0.24';
+    public static $version = '3.0.26';
 
-    public static $nslPROMinVersion = '3.0.23';
+    public static $nslPROMinVersion = '3.0.26';
 
     public static $proxyPage = false;
 
@@ -123,6 +123,11 @@ class NextendSocialLogin {
 
     public static $WPLoginCurrentFlow = 'login';
 
+    private static $allowedPostStates = array(
+        'classic-editor-plugin',
+        'elementor'
+    );
+
     public static function init() {
         add_action('plugins_loaded', 'NextendSocialLogin::plugins_loaded');
         register_activation_hook(NSL_PATH_FILE, 'NextendSocialLogin::install');
@@ -186,19 +191,23 @@ class NextendSocialLogin {
             'woocommerce_cfw'                  => 'show',
             'woocommerce_cfw_layout'           => 'below',
 
-            'memberpress_form_button_align'        => 'left',
-            'memberpress_login_form_button_style'  => 'default',
-            'memberpress_login_form_layout'        => 'below-separator',
-            'memberpress_signup'                   => 'before',
-            'memberpress_signup_form_button_style' => 'default',
-            'memberpress_signup_form_layout'       => 'below-separator',
-            'memberpress_account_details'          => 'after',
-            'registration_notification_notify'     => '0',
-            'debug'                                => '0',
-            'login_restriction'                    => '0',
-            'avatars_in_all_media'                 => '0',
-            'review_state'                         => -1,
-            'woocommerce_dismissed'                => 0,
+            'memberpress_login'                        => 'before',
+            'memberpress_form_button_align'            => 'left',
+            'memberpress_login_form_button_style'      => 'default',
+            'memberpress_login_form_layout'            => 'below-separator',
+            'memberpress_signup'                       => 'before',
+            'memberpress_signup_form_button_style'     => 'default',
+            'memberpress_signup_form_layout'           => 'below-separator',
+            'memberpress_account_details'              => 'after',
+            'registration_notification_notify'         => '0',
+            'debug'                                    => '0',
+            'show_linked_providers'                    => '0',
+            'login_restriction'                        => '0',
+            'avatars_in_all_media'                     => '0',
+            'custom_register_label'                    => '0',
+            'review_state'                             => -1,
+            'woocommerce_dismissed'                    => 0,
+            'woocoommerce_registration_email_template' => 'woocommerce',
 
             'userpro_show_login_form'            => 'show',
             'userpro_show_register_form'         => 'show',
@@ -318,7 +327,7 @@ class NextendSocialLogin {
             if (NextendSocialLogin::$settings->get('show_registration_form') == 'hide') {
                 add_action('login_form_register', 'NextendSocialLogin::removeLoginFormAssets');
             } else {
-                add_action('register_form', 'NextendSocialLogin::addLoginFormButtons');
+                add_action('register_form', 'NextendSocialLogin::addRegisterFormButtons');
                 add_action('login_form_register', 'NextendSocialLogin::jQuery');
             }
 
@@ -348,6 +357,12 @@ class NextendSocialLogin {
 
 
             add_action('wp_head', 'NextendSocialLogin::styles', 100);
+
+            /*
+             * AMP plugin does not call wp_head in Reader mode.
+             */
+            add_action('wp', 'NextendSocialLogin::amp_post_template_head');
+
 
             add_action('admin_head', 'NextendSocialLogin::styles', 100);
             add_action('login_head', 'NextendSocialLogin::loginHead', 100);
@@ -466,7 +481,8 @@ class NextendSocialLogin {
         `register_date` datetime NOT NULL default '0000-00-00 00:00:00',
         `login_date` datetime NOT NULL default '0000-00-00 00:00:00',
         `link_date` datetime NOT NULL default '0000-00-00 00:00:00',
-        KEY `ID` (`ID`,`type`)
+        KEY `ID` (`ID`,`type`),
+        KEY `identifier` (`identifier`)
         ) " . $charset_collate . ";";
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
@@ -664,7 +680,7 @@ class NextendSocialLogin {
         return $ret . self::getEmbeddedLoginForm();
     }
 
-    private static function getEmbeddedLoginForm() {
+    private static function getEmbeddedLoginForm($labelType = 'login') {
         ob_start();
         self::styles();
 
@@ -672,7 +688,7 @@ class NextendSocialLogin {
 
         $containerID = 'nsl-custom-login-form-' . $index;
 
-        echo '<div id="' . $containerID . '">' . self::renderButtonsWithContainer(self::$settings->get('embedded_login_form_button_style'), false, false, false, self::$settings->get('embedded_login_form_button_align')) . '</div>';
+        echo '<div id="' . $containerID . '">' . self::renderButtonsWithContainer(self::$settings->get('embedded_login_form_button_style'), false, false, false, self::$settings->get('embedded_login_form_button_align'), $labelType) . '</div>';
 
         $template = self::get_template_part('embedded-login/' . sanitize_file_name(self::$settings->get('embedded_login_form_layout')) . '.php');
         if (!empty($template) && file_exists($template)) {
@@ -690,26 +706,30 @@ class NextendSocialLogin {
         echo self::getRenderedLoginButtons();
     }
 
+    public static function addRegisterFormButtons() {
+        echo self::getRenderedLoginButtons('register');
+    }
+
     public static function remove_action_login_form_buttons() {
         remove_action('login_form', 'NextendSocialLogin::addLoginFormButtons');
-        remove_action('register_form', 'NextendSocialLogin::addLoginFormButtons');
+        remove_action('register_form', 'NextendSocialLogin::addRegisterFormButtons');
     }
 
     public static function add_action_login_form_buttons() {
         add_action('login_form', 'NextendSocialLogin::addLoginFormButtons');
-        add_action('register_form', 'NextendSocialLogin::addLoginFormButtons');
+        add_action('register_form', 'NextendSocialLogin::addRegisterFormButtons');
     }
 
-    private static function getRenderedLoginButtons() {
+    private static function getRenderedLoginButtons($labelType = 'login') {
         if (!self::$loginHeadAdded || self::$loginMainButtonsAdded) {
 
-            return self::getEmbeddedLoginForm();
+            return self::getEmbeddedLoginForm($labelType);
         }
 
         self::$loginMainButtonsAdded = true;
 
         $ret = '<div id="nsl-custom-login-form-main">';
-        $ret .= self::renderButtonsWithContainer(self::$settings->get('login_form_button_style'), false, false, false, self::$settings->get('login_form_button_align'));
+        $ret .= self::renderButtonsWithContainer(self::$settings->get('login_form_button_style'), false, false, false, self::$settings->get('login_form_button_align'), $labelType);
         $ret .= '</div>';
 
 
@@ -833,10 +853,11 @@ class NextendSocialLogin {
             $atts = array_merge(array(
                 'style'       => 'default',
                 'redirect'    => false,
-                'trackerdata' => false
+                'trackerdata' => false,
+                'labeltype'   => 'login'
             ), $atts);
 
-            return self::renderButtonsWithContainerAndTitle($atts['heading'], $atts['style'], $providers, $atts['redirect'], $atts['trackerdata'], $atts['align']);
+            return self::renderButtonsWithContainerAndTitle($atts['heading'], $atts['style'], $providers, $atts['redirect'], $atts['trackerdata'], $atts['align'], $atts['labeltype']);
         }
 
         $link   = filter_var($atts['link'], FILTER_VALIDATE_BOOLEAN);
@@ -855,14 +876,15 @@ class NextendSocialLogin {
      * @param bool|string                  $redirect_to
      * @param bool                         $trackerData
      * @param string                       $align
+     * @param string                       $labelType
      *
      * @return string
      */
-    public static function renderButtonsWithContainer($style = 'default', $providers = false, $redirect_to = false, $trackerData = false, $align = "left") {
-        return self::renderButtonsWithContainerAndTitle(false, $style, $providers, $redirect_to, $trackerData, $align);
+    public static function renderButtonsWithContainer($style = 'default', $providers = false, $redirect_to = false, $trackerData = false, $align = 'left', $labelType = 'login') {
+        return self::renderButtonsWithContainerAndTitle(false, $style, $providers, $redirect_to, $trackerData, $align, $labelType);
     }
 
-    private static function renderButtonsWithContainerAndTitle($heading = false, $style = 'default', $providers = false, $redirect_to = false, $trackerData = false, $align = "left") {
+    private static function renderButtonsWithContainerAndTitle($heading = false, $style = 'default', $providers = false, $redirect_to = false, $trackerData = false, $align = 'left', $labelType = 'login') {
 
         if (!isset(self::$styles[$style])) {
             $style = 'default';
@@ -889,7 +911,7 @@ class NextendSocialLogin {
         if (count($enabledProviders)) {
             $buttons = '';
             foreach ($enabledProviders AS $provider) {
-                $buttons .= $provider->getConnectButton($style, $redirect_to, $trackerData);
+                $buttons .= $provider->getConnectButton($style, $redirect_to, $trackerData, $labelType);
             }
 
             if (!empty($heading)) {
@@ -916,7 +938,7 @@ class NextendSocialLogin {
     public static function getCurrentPageURL() {
 
         if (defined('DOING_AJAX') && DOING_AJAX) {
-            return '';
+            return false;
         }
 
         $currentUrl = set_url_scheme('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
@@ -1155,7 +1177,7 @@ class NextendSocialLogin {
         foreach ($pages as $page) {
             $post_states = array();
             $post_states = apply_filters('display_post_states', $post_states, $page);
-            if (NextendSocialLogin::getRegisterFlowPage() === $page->ID || !$post_states) {
+            if (NextendSocialLogin::getRegisterFlowPage() === $page->ID || !$post_states || (count($post_states) === 1 && array_intersect(self::$allowedPostStates, array_keys($post_states)))) {
                 $availablePages[] = $page;
             }
         }
@@ -1169,7 +1191,7 @@ class NextendSocialLogin {
         foreach ($pages as $page) {
             $post_states = array();
             $post_states = apply_filters('display_post_states', $post_states, $page);
-            if (NextendSocialLogin::getProxyPage() === $page->ID || !$post_states) {
+            if (NextendSocialLogin::getProxyPage() === $page->ID || !$post_states || (count($post_states) === 1 && array_intersect(self::$allowedPostStates, array_keys($post_states)))) {
                 $availablePages[] = $page;
             }
         }
@@ -1224,7 +1246,27 @@ class NextendSocialLogin {
         return false;
     }
 
+    public static function hasConfigurationWithNoEnabledProviders() {
+        if (count(NextendSocialLogin::$enabledProviders) === 0) {
+            foreach (NextendSocialLogin::$providers AS $provider) {
+                $state = $provider->getState();
+                // Has providers configured, but none of them are enabled
+                if ($state === 'disabled') {
+                    return true;
+                }
+            }
+        }
 
+        return false;
+    }
+
+    public static function amp_post_template_head() {
+        if (class_exists('AMP_Theme_Support') && function_exists('amp_is_request') && amp_is_request()) {
+            if (AMP_Theme_Support::READER_MODE_SLUG === AMP_Options_Manager::get_option(AmpProject\AmpWP\Option::THEME_SUPPORT)) {
+                add_action('amp_post_template_head', 'NextendSocialLogin::styles', 100);
+            }
+        }
+    }
 }
 
 NextendSocialLogin::init();

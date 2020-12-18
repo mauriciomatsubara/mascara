@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Shipping - Custom Shipping with Shipping Zones
  *
- * @version 4.6.0
+ * @version 5.3.4
  * @since   2.5.6
  * @author  Pluggabl LLC.
  */
@@ -31,14 +31,14 @@ if ( ! class_exists( 'WC_Shipping_WCJ_Custom_W_Zones' ) ) :
 		/**
 		 * Init settings
 		 *
-		 * @version 4.6.0
+		 * @version 5.3.4
 		 * @since   2.5.6
 		 * @access  public
 		 * @return  void
 		 */
 		function init( $instance_id ) {
 			$this->id                 = 'booster_custom_shipping_w_zones';
-			$this->method_title       = get_option( 'wcj_shipping_custom_shipping_w_zones_admin_title', __( 'Booster: Custom Shipping', 'woocommerce-jetpack' ) );
+			$this->method_title       = wcj_get_option( 'wcj_shipping_custom_shipping_w_zones_admin_title', __( 'Booster: Custom Shipping', 'woocommerce-jetpack' ) );
 			$this->method_description = __( 'Booster: Custom Shipping Method', 'woocommerce-jetpack' );
 
 			$this->instance_id = absint( $instance_id );
@@ -81,7 +81,7 @@ if ( ! class_exists( 'WC_Shipping_WCJ_Custom_W_Zones' ) ) :
 		/**
 		 * sanitize_settings.
 		 *
-		 * @version 4.6.0
+		 * @version 5.3.4
 		 * @since   4.5.0
 		 *
 		 * @param $settings
@@ -91,7 +91,7 @@ if ( ! class_exists( 'WC_Shipping_WCJ_Custom_W_Zones' ) ) :
 		 */
 		function sanitize_settings( $settings, $shipping_method ) {
 			$settings       = array_filter( $settings );
-			$total_rows     = $settings['weight_table_total_rows'];
+			$total_rows     = isset( $settings['weight_table_total_rows'] ) ? $settings['weight_table_total_rows'] : 0;
 			$keys_to_remove = array();
 			foreach ( $settings as $key => $value ) {
 				if (
@@ -118,7 +118,7 @@ if ( ! class_exists( 'WC_Shipping_WCJ_Custom_W_Zones' ) ) :
 			if ( $this->instance_id ) {
 				$settings_name = 'woocommerce_' . $this->id . '_' . $this->instance_id . '_settings';
 				if ( ! isset( self::$wcj_settings[ $settings_name ] ) ) {
-					$settings = get_option( $settings_name );
+					$settings = wcj_get_option( $settings_name );
 					self::$wcj_settings[ $settings_name ] = $settings;
 				} else {
 					$settings = self::$wcj_settings[ $settings_name ];
@@ -269,7 +269,7 @@ if ( ! class_exists( 'WC_Shipping_WCJ_Custom_W_Zones' ) ) :
 		/**
 		 * calculate_shipping_by_table.
 		 *
-		 * @version 2.8.0
+		 * @version 5.3.5
 		 * @since   2.5.6
 		 */
 		function calculate_shipping_by_table( $weight ) {

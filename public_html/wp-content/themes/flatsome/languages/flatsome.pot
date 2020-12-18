@@ -2,14 +2,14 @@
 # This file is distributed under the http://themeforest.net/licenses.
 msgid ""
 msgstr ""
-"Project-Id-Version: Flatsome 3.12.1\n"
+"Project-Id-Version: Flatsome 3.13.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/theme/flatsome\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2020-08-11T09:14:16+00:00\n"
+"POT-Creation-Date: 2020-12-15T19:29:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.4.0\n"
 "X-Domain: flatsome\n"
@@ -104,7 +104,117 @@ msgstr ""
 msgid "Next <span class=\"meta-nav\">&rarr;</span>"
 msgstr ""
 
-#: inc/admin/gutenberg/class-gutenberg.php:104
+#: inc/admin/advanced/functions/functions.facebook.php:138
+msgid "Connect Instagram Business accounts"
+msgstr ""
+
+#: inc/admin/advanced/functions/functions.facebook.php:145
+#: inc/admin/advanced/functions/functions.facebook.php:154
+msgid "Okay"
+msgstr ""
+
+#: inc/admin/advanced/functions/functions.facebook.php:150
+msgid "No associated Instagram Business account was found for your Facebook user."
+msgstr ""
+
+#: inc/admin/advanced/functions/functions.facebook.php:205
+msgid "Cancel"
+msgstr ""
+
+#: inc/admin/advanced/functions/functions.facebook.php:208
+msgid "Connect"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:91
+msgid "Flatsome menu item options"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:95
+msgid "Menu dropdown"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:98
+msgid "Design"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:100
+msgid "Default"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:101
+msgid "Default (custom size)"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:102
+msgid "Container width"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:103
+msgid "Full width"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:106
+msgid "Select dropdown design."
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:110
+#: inc/admin/backend/menu/class-menu.php:161
+msgid "Width"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:116
+msgid "Height (optional)"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:122
+msgid "UX Block"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:134
+msgid "Reveal"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:136
+msgid "On hover"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:137
+msgid "On click"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:143
+msgid "Menu icon"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:146
+msgid "Icon type"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:148
+msgid "Media library"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:149
+msgid "Custom content"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:165
+msgid "Height"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:168
+msgid "Icons default (empty) to 20x20."
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:173
+msgid "Markup"
+msgstr ""
+
+#: inc/admin/backend/menu/class-menu.php:176
+msgid "Add any HTML, SVG or shortcode here."
+msgstr ""
+
+#: inc/admin/gutenberg/class-gutenberg.php:109
 msgid "Edit with UX Builder"
 msgstr ""
 
@@ -171,6 +281,38 @@ msgstr ""
 msgid "Custom product layout"
 msgstr ""
 
+#: inc/classes/class-flatsome-envato-admin.php:174
+msgid "You must confirm the Envato License Terms."
+msgstr ""
+
+#. translators: 1: Create token URL
+#: inc/classes/class-flatsome-envato-admin.php:180
+msgid "The provided value seems to be a purchase code. An Envato token is required to register. <a href=\"%s\" target=\"_blank\">Generate a token here</a>."
+msgstr ""
+
+#: inc/classes/class-flatsome-envato-api.php:106
+msgid "An API token is required."
+msgstr ""
+
+#: inc/classes/class-flatsome-envato-api.php:131
+#: inc/classes/class-flatsome-envato-api.php:135
+msgid "An unknown API error occurred."
+msgstr ""
+
+#. translators: 1: Create token URL
+#: inc/classes/class-flatsome-envato-api.php:158
+msgid "Missing or invalid token. Double-check your token or try to <a href=\"%s\" target=\"_blank\">create a new one</a>."
+msgstr ""
+
+#. translators: 1: Permissions list.
+#: inc/classes/class-flatsome-envato-api.php:178
+msgid "The token is missing the following permissions: %s"
+msgstr ""
+
+#: inc/classes/class-flatsome-envato-api.php:219
+msgid "The token is valid, but the Envato user associated with it doesn't seem to have purchased Flatsome. Double-check that you were logged in with the same user that bought Flatsome when you created the token."
+msgstr ""
+
 #: inc/extensions/flatsome-cookie-notice/flatsome-cookie-notice.php:50
 msgctxt "cookie notice"
 msgid "More info"
@@ -210,37 +352,41 @@ msgstr ""
 msgid "Popular"
 msgstr ""
 
-#: inc/functions/function-setup.php:53
-#: inc/functions/function-setup.php:175
+#: inc/functions/function-setup.php:60
+#: inc/functions/function-setup.php:182
 msgid "Main Menu"
 msgstr ""
 
-#: inc/functions/function-setup.php:54
+#: inc/functions/function-setup.php:61
 msgid "Main Menu - Mobile"
 msgstr ""
 
-#: inc/functions/function-setup.php:55
+#: inc/functions/function-setup.php:62
 msgid "Footer Menu"
 msgstr ""
 
-#: inc/functions/function-setup.php:56
+#: inc/functions/function-setup.php:63
 msgid "Top Bar Menu"
 msgstr ""
 
-#: inc/functions/function-setup.php:57
+#: inc/functions/function-setup.php:64
 msgid "My Account Menu"
 msgstr ""
 
-#: inc/functions/function-setup.php:77
+#: inc/functions/function-setup.php:84
 msgid "Sidebar"
 msgstr ""
 
-#: inc/functions/function-setup.php:87
+#: inc/functions/function-setup.php:94
 msgid "Footer 1"
 msgstr ""
 
-#: inc/functions/function-setup.php:97
+#: inc/functions/function-setup.php:104
 msgid "Footer 2"
+msgstr ""
+
+#: inc/functions/function-update.php:254
+msgid "<a href=\"%s\">Please enter your Envato token</a> to activate Flatsome and get one-click updates."
 msgstr ""
 
 #: inc/integrations/wc-yith-wishlist/yith-wishlist.php:61
@@ -545,7 +691,7 @@ msgid "Select where you want to display product video."
 msgstr ""
 
 #: inc/woocommerce/structure-wc-product-page.php:73
-#: inc/woocommerce/structure-wc-product-page.php:137
+#: inc/woocommerce/structure-wc-product-page.php:139
 msgid "Video"
 msgstr ""
 
@@ -622,7 +768,30 @@ msgid "Page - Full Width - Transparent Header"
 msgstr ""
 
 #: searchform.php:17
+#: woocommerce/product-searchform.php:64
 msgid "Submit"
+msgstr ""
+
+#. translators: 1. Template
+#: template-parts/admin/envato/directory-warning.php:5
+msgid "An unusual theme directory name was detected: <em>%s</em>. The Flatsome parent theme should be installed in a directory named <em>flatsome</em> to ensure updates are handled correctly."
+msgstr ""
+
+#: template-parts/admin/envato/register-form.php:9
+msgid "Your token <strong>is valid</strong>. Thank you! Enjoy Flatsome and one-click updates."
+msgstr ""
+
+#: template-parts/admin/envato/register-form.php:60
+msgid "Are you sure you want to unregister Flatsome?"
+msgstr ""
+
+#. translators: 1: Version.
+#: template-parts/admin/envato/version-info-iframe.php:7
+msgid "Version %s"
+msgstr ""
+
+#: template-parts/admin/envato/version-info-iframe.php:10
+msgid "Read change log here"
 msgstr ""
 
 #: template-parts/header/partials/element-contact-mobile.php:29

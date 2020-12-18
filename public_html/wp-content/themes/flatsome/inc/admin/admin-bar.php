@@ -44,7 +44,7 @@ $wp_admin_bar->add_menu( array(
 $wp_admin_bar->add_menu( array(
  'parent' => 'flatsome_panel',
  'id' => 'flatsome_panel_license',
- 'title' => 'Theme License',
+ 'title' => 'Theme Registration',
  'href' => $panel_url
 ));
 

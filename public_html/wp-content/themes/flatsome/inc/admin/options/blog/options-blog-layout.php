@@ -51,7 +51,7 @@ Flatsome_Option::add_field( 'option',  array(
 Flatsome_Option::add_field( 'option', array(
 	'type'     => 'checkbox',
 	'settings' => 'blog_sticky_sidebar',
-	'label'    => __( 'Sticky sidebar', 'flatsome-admin' ) . ' (NEW)',
+	'label'    => __( 'Sticky sidebar', 'flatsome-admin' ),
 	'section'  => 'blog-layout',
 	'default'  => 0,
 ) );

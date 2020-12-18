@@ -25,7 +25,7 @@ if ( ! function_exists( 'flatsome_woocommerce_add_notice' ) ) {
 	 */
 	function flatsome_woocommerce_add_notice() {
 		if ( is_woocommerce_activated() && ! is_cart() ) {
-			wc_print_notices();
+			if ( function_exists( 'wc_print_notices' ) ) wc_print_notices();
 		}
 	}
 }
@@ -299,7 +299,7 @@ add_action('woocommerce_after_main_content','flatsome_pages_in_search_results', 
 function flatsome_presentage_bubble( $product ) {
 	$post_id = $product->get_id();
 
-	if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) ) {
+	if ( $product->is_type( 'simple' ) || $product->is_type( 'external' ) || $product->is_type( 'variation' ) ) {
 		$regular_price  = $product->get_regular_price();
 		$sale_price     = $product->get_sale_price();
 		$bubble_content = round( ( ( floatval( $regular_price ) - floatval( $sale_price ) ) / floatval( $regular_price ) ) * 100 );
@@ -555,6 +555,7 @@ function flatsome_get_payment_icons_list() {
 		'truste'          => __( 'Truste', 'flatsome-admin' ),
 		'twint'           => __( 'Twint', 'flatsome-admin' ),
 		'unionpay'        => __( 'UnionPay', 'flatsome-admin' ),
+		'venmo'           => __( 'Venmo', 'flatsome-admin' ),
 		'verisign'        => __( 'VeriSign', 'flatsome-admin' ),
 		'vipps'           => __( 'Vipps', 'flatsome-admin' ),
 		'visa'            => __( 'Visa', 'flatsome-admin' ),

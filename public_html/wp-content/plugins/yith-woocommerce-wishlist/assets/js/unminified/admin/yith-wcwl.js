@@ -6,7 +6,7 @@
  * @version 3.0.0
  */
 
-jQuery( document ).ready( function( $ ) {
+jQuery( function( $ ) {
 
     /* === CUSTOM DEPENDENCIES HANDLER === */
 
@@ -485,8 +485,7 @@ jQuery( document ).ready( function( $ ) {
             };
 
         t.select2({
-            templateResult: renderOption,
-            templateSelection: renderOption
+            templateResult: renderOption
         });
     } );
 

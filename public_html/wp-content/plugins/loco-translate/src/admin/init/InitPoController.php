@@ -74,9 +74,12 @@ class Loco_admin_init_InitPoController extends Loco_admin_bundle_BaseController 
 
 
     /**
-     * @internal 
+     * @internal
+     * @param int
+     * @param int
+     * @return int
      */
-    public static function _onSortLocationKeys( $a, $b ){
+    private static function compareLocationKeys( $a, $b ){
         static $order = array('custom' => 4, 'wplang' => 3, 'theme' => 2, 'plugin' => 2, 'other' => 1 );
         $x = $order[$a];
         $y = $order[$b];
@@ -190,6 +193,7 @@ class Loco_admin_init_InitPoController extends Loco_admin_bundle_BaseController 
         if( $potfile && $potfile->exists() ){
             $meta = Loco_gettext_Metadata::load($potfile);
             $total = $meta->getTotal();
+            // translators: 1: Number of strings; 2: Name of POT file; e.g. "100 strings found in file.pot"
             $summary = sprintf( _n('One string found in %2$s','%s strings found in %s',$total,'loco-translate'), number_format($total), $potfile->basename() );
             $this->set( 'pot', new Loco_mvc_ViewParams( array(
                 'name' => $potfile->basename(),
@@ -206,13 +210,13 @@ class Loco_admin_init_InitPoController extends Loco_admin_bundle_BaseController 
             // TODO this means another utility function in project for prefixing rules on individual location
         }
         // else no template exists, so we prompt to extract from source
-        else {
+        else if( 2 > Loco_data_Settings::get()->pot_expected ){
             $this->set( 'ext', new Loco_mvc_ViewParams( array(
                 'link' => Loco_mvc_AdminRouter::generate( $this->get('type').'-xgettext', $_GET ),
                 'text' => __('Create template','loco-translate'),
             ) ) );
-            // if forcing source extraction show brief description of source files
-            if( $this->get('extract') ){
+            // if allowing source extraction without warning show brief description of source files
+            if( $this->get('extract') || 0 === Loco_data_Settings::get()->pot_expected ){
                 // Tokenizer required for string extraction
                 if( ! loco_check_extension('tokenizer') ){
                     return $this->view('admin/errors/no-tokenizer');
@@ -240,15 +244,17 @@ class Loco_admin_init_InitPoController extends Loco_admin_bundle_BaseController 
                 return $this->view('admin/init/init-prompt');
             }
         }
+        else {
+            throw new Loco_error_Exception('Plugin settings disallow missing templates');
+        }
         $this->set( 'summary', $summary );
         
         // group established locations into types (official, etc..)
         // there is no point checking whether any of these file exist, because we don't know what language will be chosen yet.
         $sortable = array();
         $locations = array();
-        $fs_protect = Loco_data_Settings::get()->fs_protect;
         $fs_failure = null;
-        /* @var Loco_fs_File $pofile */
+        /* @var Loco_fs_LocaleFile $pofile */
         foreach( $filechoice as $pofile ){
             $parent = new Loco_fs_LocaleDirectory( $pofile->dirname() );
             $systype = $parent->getUpdateType();
@@ -270,6 +276,7 @@ class Loco_admin_init_InitPoController extends Loco_admin_bundle_BaseController 
                 $writable = false;
                 $disabled = true;
             }
+            $suffix = $pofile->getSuffix().'.po';
             $choice = new Loco_mvc_ViewParams( array (
                 'checked' => '',
                 'writable' => $writable,
@@ -277,18 +284,14 @@ class Loco_admin_init_InitPoController extends Loco_admin_bundle_BaseController 
                 'systype' => $systype,
                 'parent' => Loco_mvc_FileParams::create( $parent ),
                 'hidden' => $pofile->getRelativePath($content_dir),
-                'holder' => str_replace( (string) $locale, '<span>&lt;locale&gt;</span>', $pofile->basename() ),
+                'holder' => str_replace( $suffix, '<span>{locale}</span>.po', $pofile->basename() ),
             ) );
-            // may need to show system file warnings
-            if( $systype && $fs_protect ){
-                $choice['syswarn'] = true;
-            }
             $sortable[] = $choice;
             $locations[$typeId]['paths'][] = $choice;
         }
 
         // display locations in runtime preference order
-        uksort( $locations, array(__CLASS__,'_onSortLocationKeys') );
+        uksort( $locations, array(__CLASS__,'compareLocationKeys') );
         $this->set( 'locations', $locations );
 
         // pre-select best (safest/writable) option

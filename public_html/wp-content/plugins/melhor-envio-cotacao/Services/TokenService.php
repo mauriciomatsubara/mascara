@@ -2,14 +2,10 @@
 
 namespace Services;
 
+use Models\Token;
+
 class TokenService
 {
-    const OPTION_TOKEN = 'wpmelhorenvio_token';
-
-    const OPTION_TOKEN_SANDBOX = 'wpmelhorenvio_token_sandbox';
-
-    const OPTION_TOKEN_ENVIRONMENT = 'wpmelhorenvio_token_environment';
-
     /**
      * Get token Melhor Envio.
      *
@@ -17,45 +13,37 @@ class TokenService
      */
     public function get()
     {
-        $token = get_option(self::OPTION_TOKEN); 
-        $token_sandbox = get_option(self::OPTION_TOKEN_SANDBOX); 
-        $token_environment = get_option(self::OPTION_TOKEN_ENVIRONMENT); 
-		
-		if (is_null($token_environment) || empty($token_environment) || $token_environment == "false" || $token_environment == "undefined") {
-			$token_environment = 'production';
-		}
-			
-        return [
-            'token' => $token,
-            'token_sandbox' => $token_sandbox,
-            'token_environment' => $token_environment,
-        ];
+        $tokenData = (new Token())->get();
+
+        if (!$this->isValid($tokenData)) {
+            return false;
+        }
+
+        return $tokenData;
     }
 
     /**
      * Service to save token Melhor Envio.
      *
      * @param string $token
-     * @param string $token_sandbox
-     * @param string $token_environment
-     * @return array $response
+     * @param string $tokenSandbox
+     * @param string $tokenEnvironment
+     * @return bool
      */
-    public function save($token, $token_sandbox, $token_environment)
+    public function save($token, $tokenSandbox, $tokenEnvironment)
     {
-        delete_option(self::OPTION_TOKEN);
-        delete_option(self::OPTION_TOKEN_SANDBOX);
-        delete_option(self::OPTION_TOKEN_ENVIRONMENT);
+        $result = (new Token())->save($token, $tokenSandbox, $tokenEnvironment);
 
-        add_option(self::OPTION_TOKEN, $token, true);
-        add_option(self::OPTION_TOKEN_SANDBOX, $token_sandbox, true);
-        add_option(self::OPTION_TOKEN_ENVIRONMENT, $token_environment, true);
+        (new ClearDataStored())->clear();
 
-        return [
-            'success' => true,
-            'message' => 'Token salvo com sucesso'
-        ];
+        return (!empty($result['token']) && !empty($result['token_environment']));
     }
 
+    /**
+     * function used in test to verify if has tokens.
+     *
+     * @return array
+     */
     public function check()
     {
         $dataToken = $this->get();
@@ -65,6 +53,28 @@ class TokenService
             'production' => substr($dataToken['token'], 0, 30) . '...',
             'sandbox' => substr($dataToken['token_sandbox'], 0, 30) . '...'
         ];
+    }
 
+    /**
+     * function to check if user has token valid
+     *
+     * @param array $dataToken
+     * @return boolean
+     */
+    public function isValid($dataToken)
+    {
+        if (empty($dataToken)) {
+            return false;
+        }
+
+        $token = ($dataToken['token_environment'] == Token::SANDBOX)
+            ? $dataToken['token_sandbox']
+            : $dataToken['token'];
+
+        if (empty($token)) {
+            return false;
+        }
+
+        return true;
     }
 }

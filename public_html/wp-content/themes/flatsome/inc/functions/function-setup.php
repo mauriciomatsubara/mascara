@@ -4,7 +4,14 @@ if ( ! isset( $content_width ) ) {
 	$content_width = 1020; // Pixels.
 }
 
+/**
+ * Initialized Envato implementation.
+ */
+flatsome_envato()->init();
 
+/**
+ * Setup Flatsome.
+ */
 function flatsome_setup() {
 
 	/* add woocommerce support */

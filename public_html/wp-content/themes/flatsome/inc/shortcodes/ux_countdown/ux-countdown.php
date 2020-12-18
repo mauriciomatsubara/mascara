@@ -14,10 +14,13 @@ function ux_countdown_shortcode( $atts ){
       '_id' => 'timer-'.rand(),
       'before' => '',
       'after' => '',
-      'year' => '2016',
+      'year' => '2021',
       'month' => '12',
       'day' => '31',
       'color' => 'dark',
+      'bg_color' => '',
+      'bg_color__md' => '',
+      'bg_color__sm' => '',
       'time' => '18:00',
       'style' => 'clock',
       'size' => '300',
@@ -50,11 +53,6 @@ function ux_countdown_shortcode( $atts ){
     if($time == '24:00') $time = '23:59:59';
 
     if($time) $date = $date.' '.$time;
-
-    if($color == 'primary' && !isset($bg_color)){
-      $color = false;
-      $atts['bg_color'] = get_theme_mod('color_primary', Flatsome_Default::COLOR_PRIMARY );
-    }
 
     $args = array(
       'size' => array(

@@ -2,8 +2,8 @@
 /**
  * Booster for WooCommerce - Module - Shipping by User Role
  *
- * @version 4.9.0
- * @since   2.8.0
+ * @version 5.2.0
+ * @since   5.2.0
  * @author  Pluggabl LLC.
  */
 
@@ -16,14 +16,15 @@ class WCJ_Shipping_By_User_Role extends WCJ_Module_Shipping_By_Condition {
 	/**
 	 * Constructor.
 	 *
-	 * @version 3.2.1
+	 * @version 5.2.0
 	 * @since   2.8.0
 	 */
 	function __construct() {
 
 		$this->id         = 'shipping_by_user_role';
 		$this->short_desc = __( 'Shipping Methods by Users', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Set user roles, users or membership plans to include/exclude for shipping methods to show up.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Set user roles, users or membership plans to include/exclude for shipping methods to show up (Free shipping available in Plus).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Set user roles, users or membership plans to include/exclude for shipping methods to show up.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-shipping-methods-by-users';
 
 		$this->condition_options = array(
@@ -74,7 +75,7 @@ class WCJ_Shipping_By_User_Role extends WCJ_Module_Shipping_By_Condition {
 		switch( $options_id ) {
 			case 'user_roles':
 				if ( empty( $this->customer_roles ) ) {
-					$this->customer_roles = 'no' === ( $multi_role_check = get_option( 'wcj_' . $this->id . '_check_multiple_roles', 'no' ) ) ? array( wcj_get_current_user_first_role() ) : wcj_get_current_user_all_roles();
+					$this->customer_roles = 'no' === ( $multi_role_check = wcj_get_option( 'wcj_' . $this->id . '_check_multiple_roles', 'no' ) ) ? array( wcj_get_current_user_first_role() ) : wcj_get_current_user_all_roles();
 				}
 				return count( array_intersect( $this->customer_roles, $user_roles_or_ids_or_membership_plans ) ) > 0;
 			case 'user_id':

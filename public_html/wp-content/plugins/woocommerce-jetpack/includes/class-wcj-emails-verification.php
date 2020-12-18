@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Email Verification
  *
- * @version 4.4.0
+ * @version 5.2.0
  * @since   2.8.0
  * @author  Pluggabl LLC.
  */
@@ -16,47 +16,94 @@ class WCJ_Email_Verification extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 4.4.0
+	 * @version 5.2.0
 	 * @since   2.8.0
 	 */
 	function __construct() {
 
 		$this->id         = 'emails_verification';
 		$this->short_desc = __( 'Email Verification', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Add WooCommerce email verification.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Add WooCommerce email verification. Customize verification email subject, content and template (Plus).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Add WooCommerce email verification.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-email-verification';
 		parent::__construct();
 
 		if ( $this->is_enabled() ) {
-			add_action( 'init',                              array( $this, 'process_email_verification' ),                      PHP_INT_MAX );
-			add_filter( 'woocommerce_registration_redirect', array( $this, 'prevent_user_login_automatically_after_register' ), PHP_INT_MAX );
-			add_filter( 'wp_authenticate_user',              array( $this, 'check_if_user_email_is_verified' ),                 PHP_INT_MAX );
-			add_action( 'user_register',                     array( $this, 'reset_and_mail_activation_link' ),                  PHP_INT_MAX );
-			add_filter( 'manage_users_columns',              array( $this, 'add_verified_email_column' ) );
-			add_filter( 'manage_users_custom_column',        array( $this, 'render_verified_email_column' ), 10, 3 );
-			add_action( 'set_current_user',                  array( $this, 'prevent_user_login') );
+			add_action( 'init',                                       array( $this, 'process_email_verification' ),                      PHP_INT_MAX );
+			add_filter( 'woocommerce_registration_redirect',          array( $this, 'prevent_user_login_automatically_after_register' ), PHP_INT_MAX );
+			add_filter( 'wp_authenticate_user',                       array( $this, 'check_if_user_email_is_verified' ),                 PHP_INT_MAX );
+			add_action( 'user_register',                              array( $this, 'reset_and_mail_activation_link' ),                  PHP_INT_MAX );
+			add_filter( 'manage_users_columns',                       array( $this, 'add_verified_email_column' ) );
+			add_filter( 'manage_users_custom_column',                 array( $this, 'render_verified_email_column' ), 10, 3 );
+			add_action( 'wp',                                         array( $this, 'prevent_login' ),                      PHP_INT_MAX );
+			add_filter( 'woocommerce_registration_auth_new_customer', array( $this, 'woocommerce_registration_auth_new_customer' ) );
+			add_filter( 'authenticate',                               array( $this, 'prevent_authenticate' ), PHP_INT_MAX );
 		}
 	}
 
 	/**
-	 * Prevents user login.
+	 * prevent_login.
 	 *
-	 * @version 4.4.0
-	 * @since   4.4.0
+	 * @version 5.2.0
+	 * @since   5.2.0
 	 */
-	function prevent_user_login() {
-		global $current_user;
+	function prevent_login() {
 		if (
-			'yes' === get_option( 'wcj_emails_verification_prevent_user_login', 'no' ) &&
-			0 != $current_user->ID
+			'yes' !== wcj_get_option( 'wcj_emails_verification_prevent_user_login', 'no' )
+			|| is_admin()
+			|| ! is_user_logged_in()
+			|| empty( $user = wp_get_current_user() ) ||
+			! is_wp_error( $this->check_if_user_email_is_verified( get_userdata( $user->ID ) ) )
 		) {
-			setup_userdata( $current_user->ID );
-			$user_data = get_userdata( $current_user->ID );
-			$response  = $this->check_if_user_email_is_verified( $user_data );
-			if ( is_wp_error( $response ) ) {
-				wp_logout();
-			}
+			return;
 		}
+		wp_logout();
+	}
+
+	/**
+	 * prevent_authenticate.
+	 *
+	 * @version 5.2.0
+	 * @since   5.2.0
+	 *
+	 * @param $user
+	 *
+	 * @return WP_Error
+	 */
+	function prevent_authenticate( $user ) {
+		if (
+			'yes' !== wcj_get_option( 'wcj_emails_verification_prevent_user_login', 'no' )
+			|| is_wp_error( $user )
+			|| is_null( $user )
+			|| 0 == $user->ID
+		) {
+			return $user;
+		}
+		setup_userdata( $user->ID );
+		$user_data = get_userdata( $user->ID );
+		$response  = $this->check_if_user_email_is_verified( $user_data );
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+		return $user;
+	}
+
+	/**
+	 * woocommerce_registration_auth_new_customer.
+	 *
+	 * @version 5.2.0
+	 * @since   5.2.0
+	 *
+	 * @param $allowed
+	 *
+	 * @return bool
+	 */
+	function woocommerce_registration_auth_new_customer( $allowed ) {
+		if ( 'yes' !== wcj_get_option( 'wcj_emails_verification_prevent_user_login', 'no' ) ) {
+			return $allowed;
+		}
+		$allowed = false;
+		return $allowed;
 	}
 
 	/**
@@ -107,18 +154,18 @@ class WCJ_Email_Verification extends WCJ_Module {
 	 */
 	function check_if_user_email_is_verified( $userdata ) {
 		if (
-			( 'yes' === get_option( 'wcj_emails_verification_already_registered_enabled', 'no' ) &&       ! get_user_meta( $userdata->ID, 'wcj_is_activated', true ) ) ||
-			( 'no'  === get_option( 'wcj_emails_verification_already_registered_enabled', 'no' ) && '0' === get_user_meta( $userdata->ID, 'wcj_is_activated', true ) )
+			( 'yes' === wcj_get_option( 'wcj_emails_verification_already_registered_enabled', 'no' ) &&       ! get_user_meta( $userdata->ID, 'wcj_is_activated', true ) ) ||
+			( 'no'  === wcj_get_option( 'wcj_emails_verification_already_registered_enabled', 'no' ) && '0' === get_user_meta( $userdata->ID, 'wcj_is_activated', true ) )
 		) {
 			if ( isset( $userdata->roles ) && ! empty( $userdata->roles ) ) {
 				$userdata_roles  = wcj_get_array( $userdata->roles );
-				$skip_user_roles = wcj_get_array( get_option( 'wcj_emails_verification_skip_user_roles', array( 'administrator' ) ) );
+				$skip_user_roles = wcj_get_array( wcj_get_option( 'wcj_emails_verification_skip_user_roles', array( 'administrator' ) ) );
 				$_intersect = array_intersect( $userdata_roles, $skip_user_roles );
 				if ( ! empty( $_intersect ) ) {
 					return $userdata;
 				}
 			}
-			$error_message = do_shortcode( get_option( 'wcj_emails_verification_error_message',
+			$error_message = do_shortcode( wcj_get_option( 'wcj_emails_verification_error_message',
 				__( 'Your account has to be activated before you can login. You can resend email with verification link by clicking <a href="%resend_verification_url%">here</a>.', 'woocommerce-jetpack' )
 			) );
 			$error_message = str_replace( '%resend_verification_url%', add_query_arg( 'wcj_user_id', $userdata->ID, wc_get_page_permalink( 'myaccount' ) ), $error_message );
@@ -149,7 +196,7 @@ class WCJ_Email_Verification extends WCJ_Module {
 				__( 'Please activate your account', 'woocommerce-jetpack' ) ) ) );
 		update_user_meta( $user_id, 'wcj_is_activated', '0' );
 		update_user_meta( $user_id, 'wcj_activation_code', $code );
-		if ( 'wc' === apply_filters( 'booster_option', 'plain', get_option( 'wcj_emails_verification_email_template', 'plain' ) ) ) {
+		if ( 'wc' === apply_filters( 'booster_option', 'plain', wcj_get_option( 'wcj_emails_verification_email_template', 'plain' ) ) ) {
 			$email_content = wcj_wrap_in_wc_email_template( $email_content,
 				get_option( 'wcj_emails_verification_email_template_wc_heading', __( 'Activate your account', 'woocommerce-jetpack' ) ) );
 		}
@@ -167,7 +214,7 @@ class WCJ_Email_Verification extends WCJ_Module {
 			if ( function_exists( 'wc_add_notice' ) ) {
 				$data = json_decode( base64_decode( $_GET['wcj_verified_email'] ), true );
 				if ( ! empty( $data['id'] ) && ! empty( $data['code'] ) && get_user_meta( $data['id'], 'wcj_activation_code', true ) == $data['code'] ) {
-					wc_add_notice( do_shortcode( get_option( 'wcj_emails_verification_success_message',
+					wc_add_notice( do_shortcode( wcj_get_option( 'wcj_emails_verification_success_message',
 						__( '<strong>Success:</strong> Your account has been activated!', 'woocommerce-jetpack' ) ) ) );
 				}
 			}
@@ -175,11 +222,11 @@ class WCJ_Email_Verification extends WCJ_Module {
 			$data = json_decode( base64_decode( $_GET['wcj_verify_email'] ), true );
 			if ( ! empty( $data['id'] ) && ! empty( $data['code'] ) && get_user_meta( $data['id'], 'wcj_activation_code', true ) == $data['code'] ) {
 				update_user_meta( $data['id'], 'wcj_is_activated', '1' );
-				if ( 'yes' === get_option( 'wcj_emails_verification_redirect_on_success', 'yes' ) ) {
+				if ( 'yes' === wcj_get_option( 'wcj_emails_verification_redirect_on_success', 'yes' ) ) {
 					wp_set_current_user( $data['id'] );
 					wp_set_auth_cookie( $data['id'] );
 				}
-				$url = ( '' != ( $custom_url = get_option( 'wcj_emails_verification_redirect_on_success_custom_url', '' ) ) ? $custom_url : wc_get_page_permalink( 'myaccount' ) );
+				$url = ( '' != ( $custom_url = wcj_get_option( 'wcj_emails_verification_redirect_on_success_custom_url', '' ) ) ? $custom_url : wc_get_page_permalink( 'myaccount' ) );
 				wp_safe_redirect( add_query_arg( 'wcj_verified_email', $_GET['wcj_verify_email'], $url ) );
 				exit;
 			} elseif ( ! empty( $data['id'] ) ) {
@@ -191,16 +238,16 @@ class WCJ_Email_Verification extends WCJ_Module {
 				$_notice = str_replace( '%resend_verification_url%', add_query_arg( 'wcj_user_id', $data['id'], wc_get_page_permalink( 'myaccount' ) ), $_notice );
 				wc_add_notice( $_notice, 'error' );
 			} else {
-				$_notice = get_option( 'wcj_emails_verification_failed_message_no_user_id',
+				$_notice = wcj_get_option( 'wcj_emails_verification_failed_message_no_user_id',
 					__( '<strong>Error:</strong> Activation failed, please contact our administrator.', 'woocommerce-jetpack' ) );
 				wc_add_notice( $_notice, 'error' );
 			}
 		} elseif ( isset( $_GET['wcj_activate_account_message'] ) ) {
-			wc_add_notice( do_shortcode( get_option( 'wcj_emails_verification_activation_message',
+			wc_add_notice( do_shortcode( wcj_get_option( 'wcj_emails_verification_activation_message',
 				__( 'Thank you for your registration. Your account has to be activated before you can login. Please check your email.', 'woocommerce-jetpack' ) ) ) );
 		} elseif ( isset( $_GET['wcj_user_id'] ) ) {
 			$this->reset_and_mail_activation_link( $_GET['wcj_user_id'] );
-			wc_add_notice( do_shortcode( get_option( 'wcj_emails_verification_email_resend_message',
+			wc_add_notice( do_shortcode( wcj_get_option( 'wcj_emails_verification_email_resend_message',
 				__( '<strong>Success:</strong> Your activation email has been resent. Please check your email.', 'woocommerce-jetpack' ) ) ) );
 		}
 	}

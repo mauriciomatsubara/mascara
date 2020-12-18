@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Core - Admin
  *
- * @version 4.8.0
+ * @version 5.3.0
  * @since   3.2.4
  * @author  Pluggabl LLC.
  */
@@ -16,7 +16,7 @@ class WCJ_Admin {
 	/**
 	 * Constructor.
 	 *
-	 * @version 4.8.0
+	 * @version 5.3.0
 	 * @since   3.2.4
 	 */
 	function __construct() {
@@ -99,7 +99,7 @@ class WCJ_Admin {
 			'woocommerce',
 			__( 'Booster for WooCommerce', 'woocommerce-jetpack' ),
 			__( 'Booster Settings', 'woocommerce-jetpack' ) ,
-			( 'yes' === get_option( 'wcj_' . 'admin_tools' . '_enabled', 'no' ) && 'yes' === get_option( 'wcj_admin_tools_show_menus_to_admin_only', 'no' ) ? 'manage_options' : 'manage_woocommerce' ),
+			( 'yes' === wcj_get_option( 'wcj_' . 'admin_tools' . '_enabled', 'no' ) && 'yes' === wcj_get_option( 'wcj_admin_tools_show_menus_to_admin_only', 'no' ) ? 'manage_options' : 'manage_woocommerce' ),
 			'admin.php?page=wc-settings&tab=jetpack'
 		);
 	}
@@ -107,17 +107,19 @@ class WCJ_Admin {
 	/**
 	 * Show action links on the plugin screen
 	 *
-	 * @version 3.3.0
+	 * @version 5.2.0
 	 * @param   mixed $links
 	 * @return  array
 	 */
 	function action_links( $links ) {
 		$custom_links = array(
 			'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=jetpack' ) . '">' . __( 'Settings', 'woocommerce' ) . '</a>',
-			'<a href="' . esc_url( 'https://booster.io/' )                      . '">' . __( 'Docs', 'woocommerce-jetpack' ) . '</a>',
+			'<a href="' . esc_url( 'https://booster.io/' ) . '">' . __( 'Docs', 'woocommerce-jetpack' ) . '</a>',
 		);
 		if ( 'woocommerce-jetpack.php' === basename( WCJ_PLUGIN_FILE ) ) {
-			$custom_links[] = '<a href="' . esc_url( 'https://booster.io/plus/' ) . '">' . __( 'Unlock all', 'woocommerce-jetpack' ) . '</a>';
+			$custom_links[] = '<a target="_blank" href="' . esc_url( 'https://booster.io/plus/' ) . '">' . __( 'Unlock all', 'woocommerce-jetpack' ) . '</a>';
+		} else {
+			$custom_links[] = '<a target="_blank" href="' . esc_url( 'https://booster.io/my-account/booster-contact/' ) . '">' . __( 'Support', 'woocommerce-jetpack' ) . '</a>';
 		}
 		return array_merge( $custom_links, $links );
 	}

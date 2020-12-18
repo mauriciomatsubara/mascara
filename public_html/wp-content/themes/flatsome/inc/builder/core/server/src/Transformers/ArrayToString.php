@@ -54,7 +54,7 @@ class ArrayToString extends Transformer {
       if ( is_callable( $shortcode['template_shortcode'] ) ) {
         $template_shortcode = call_user_func_array(
           $shortcode['template_shortcode'],
-          compact( 'item', 'container' )
+          array( $item, $options, $content, $container )
         );
       }
 
@@ -82,7 +82,7 @@ class ArrayToString extends Transformer {
     $this->in_block = true;
 
     return $this->use_blocks
-      ? "\n<!-- wp:html -->\n"
+      ? "\n<!-- wp:flatsome/uxbuilder -->\n"
       : '';
   }
 
@@ -92,7 +92,7 @@ class ArrayToString extends Transformer {
     $this->in_block = false;
 
     return $this->use_blocks
-      ? "\n<!-- /wp:html -->\n"
+      ? "\n<!-- /wp:flatsome/uxbuilder -->\n"
       : '';
   }
 

@@ -1,7 +1,7 @@
 <?php
 
 // Flatsome Products
-function ux_product_flip($atts, $content = null, $tag) {
+function ux_product_flip($atts, $content = null, $tag = '' ) {
   $sliderrandomid = rand();
   extract(shortcode_atts(array(
     '_id' => 'product-flip-'.rand(),

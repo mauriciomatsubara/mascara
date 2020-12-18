@@ -1,3 +1,82 @@
+--- 3.13.1 ---
+NEW: PHP 8 support.
+
+FIXED: Menu element active link.
+FIXED: Menu element dark divider color.
+FIXED: Sticky header when top bar is enabled.
+FIXED: Custom menu item class did not output when an icon was selected.
+FIXED: Builder option styling in latest FireFox.
+FIXED: UX Builder edit button in Gutenberg.
+FIXED: Various PHP notices.
+
+ENHANCEMENT: Clarified register with token feedback messages.
+ENHANCEMENT: Support jQuery 3.5 without migrate.
+ENHANCEMENT: Increased max for layout width options.
+ENHANCEMENT: Improved sticky header with WP admin bar.
+ENHANCEMENT: Text element color option now colors direct child HTML tags.
+
+--- 3.13.0 ---
+NEW: WordPress 5.6 compatibility.
+NEW: WooCommerce 4.8.0 compatibility.
+NEW: Mega Menus - Create fully customizable dropdowns with UX Builder.
+NEW: Menu element for building custom dropdowns and footer links.
+NEW: Templates for UX Builder - Save any element or page as reusable template.
+NEW: Register/activate theme with token support.
+NEW: Responsive styling for Text element.
+NEW: Menu icons media picker or markup.
+NEW: Menu dropdown design/size options (Full Width, Container).
+NEW: Menu dropdown reveal option hover or click.
+NEW: Nav dropdown shadow option.
+NEW: Nav dropdown border option.
+NEW: Background overlay on nav hover/click per header position.
+NEW: Improved Instagram account connection flow.
+NEW: Instagram clear cache button.
+NEW: Gutenberg: builder placeholder block (previously plain HTML).
+NEW: Column background radius option from row.
+NEW: Top Bar navigation uppercase/lowercase option.
+NEW: Top Bar navigation height option.
+NEW: Header button bevel and gloss styles.
+NEW: Beacon powered "Search Documentation" (on admin panels).
+NEW: Venmo payment icon.
+
+FIXED: Instagram hashtag requests & URL scheme.
+FIXED: Customizer option framework version constant.
+FIXED: Filter button on product tag pages with custom shop page content.
+FIXED: Main header height defaults.
+FIXED: Transparent header height defaults.
+FIXED: Product video button link when pasted with extra space.
+FIXED: Global button radius affected quantity button inner radius.
+FIXED: woocommerce_template_loop_product_title filter did not take place.
+FIXED: Incorrect nested tag in cart-shipping.php template.
+FIXED: Builder: Arrows on number input on FF.
+FIXED: Builder: Incorrect + button position on option change in some cases.
+FIXED: Builder: Some element presets did not render correctly before applying.
+FIXED: Main nav and nav hover color affected the bottom bar navs.
+FIXED: Gallery: Multi gallery in tabs did not have numbering and navigation.
+
+ENHANCEMENT: Improved loading speed of inline SVG's.
+ENHANCEMENT: Improved accessibility on various elements.
+ENHANCEMENT: Improved WPML configuration.
+ENHANCEMENT: Improved support for uncommon theme directory names.
+ENHANCEMENT: Increases maximum for navigation height setting.
+ENHANCEMENT: Increases max/min for col margins.
+ENHANCEMENT: Single variation listing now has sale bubble percentage value.
+
+DEV: Added new 'flatsome_sticky_add_to_cart_enabled' filter.
+DEV: Added the 'woocommerce_checkout_before_order_review_heading' filter.
+DEV: Updated FB graph API to v8.0.
+
+Note: Minimum required WooCommerce version 3.6.0.
+Note: Mega Menu requires WP 5.4 or higher.
+
+--- 3.12.3 ---
+FIXED: Instagram API change affecting images from certain posts.
+
+--- 3.12.2 ---
+FIXED: Countdown background color.
+FIXED: Older admin assets could remain in browser cache (Advanced Options).
+FIXED: HTML not rendering in product title (reverted WC 4.4 template change).
+
 --- 3.12.1 ---
 NEW: WordPress 5.5 compatibility.
 NEW: WooCommerce 4.4 compatibility.

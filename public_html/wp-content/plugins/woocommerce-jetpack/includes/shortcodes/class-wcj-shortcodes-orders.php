@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Shortcodes - Orders
  *
- * @version 4.9.0
+ * @version 5.2.0
  * @author  Pluggabl LLC.
  */
 
@@ -15,7 +15,7 @@ class WCJ_Orders_Shortcodes extends WCJ_Shortcodes {
 	/**
 	 * Constructor.
 	 *
-	 * @version 4.2.0
+	 * @version 5.2.0
 	 */
 	function __construct() {
 
@@ -23,6 +23,7 @@ class WCJ_Orders_Shortcodes extends WCJ_Shortcodes {
 			'wcj_order_billing_address',
 			'wcj_order_billing_country_name',
 			'wcj_order_billing_phone',
+			'wcj_order_billing_email',
 			'wcj_order_checkout_field',
 			'wcj_order_coupons',
 			'wcj_order_currency',
@@ -105,8 +106,8 @@ class WCJ_Orders_Shortcodes extends WCJ_Shortcodes {
 			'order_id'                    => 0,
 			'hide_currency'               => 'no',
 			'excl_tax'                    => 'no',
-			'date_format'                 => get_option( 'date_format' ),
-			'time_format'                 => get_option( 'time_format' ),
+			'date_format'                 => wcj_get_option( 'date_format' ),
+			'time_format'                 => wcj_get_option( 'time_format' ),
 			'hide_if_zero'                => 'no',
 			'add_html_on_price'           => true,
 			'field_id'                    => '',
@@ -114,7 +115,7 @@ class WCJ_Orders_Shortcodes extends WCJ_Shortcodes {
 			'round_by_line'               => 'no',
 			'whole'                       => '',
 			'decimal'                     => '&cent;',
-			'precision'                   => get_option( 'woocommerce_price_num_decimals', 2 ),
+			'precision'                   => wcj_get_option( 'woocommerce_price_num_decimals', 2 ),
 			'lang'                        => 'EN',
 			'unique_only'                 => 'no',
 			'function_name'               => '',
@@ -214,7 +215,7 @@ class WCJ_Orders_Shortcodes extends WCJ_Shortcodes {
 			} else {
 				$convert_to_currency = $atts['currency'];
 				if ( '%shop_currency%' === $convert_to_currency ) {
-					$convert_to_currency = get_option( 'woocommerce_currency' );
+					$convert_to_currency = wcj_get_option( 'woocommerce_currency' );
 				}
 				return wcj_price( $raw_price * wcj_get_saved_exchange_rate( $order_currency, $convert_to_currency ), $convert_to_currency, $atts['hide_currency'], $atts );
 			}
@@ -241,7 +242,7 @@ class WCJ_Orders_Shortcodes extends WCJ_Shortcodes {
 	function wcj_order_profit( $atts ) {
 		$total = 0;
 		foreach ( $this->the_order->get_items() as $item_id => $item ) {
-			$product_id = ( ( isset( $item['variation_id'] ) && 0 != $item['variation_id'] && 'no' === get_option( 'wcj_purchase_data_variable_as_simple_enabled', 'no' ) )
+			$product_id = ( ( isset( $item['variation_id'] ) && 0 != $item['variation_id'] && 'no' === wcj_get_option( 'wcj_purchase_data_variable_as_simple_enabled', 'no' ) )
 				? $item['variation_id'] : $item['product_id'] );
 			$value = 0;
 			if ( 0 != ( $purchase_price = wc_get_product_purchase_price( $product_id ) ) ) {
@@ -334,11 +335,11 @@ class WCJ_Orders_Shortcodes extends WCJ_Shortcodes {
 						/* translators: 1: refund id 2: refund date */
 							esc_html__( 'Refund #%1$s - %2$s', 'woocommerce' ),
 							esc_html( $_refund->get_id() ),
-							esc_html( wc_format_datetime( $_refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) ) )
+							esc_html( wc_format_datetime( $_refund->get_date_created(), wcj_get_option( 'date_format' ) . ', ' . wcj_get_option( 'time_format' ) ) )
 						);
 						break;
 					case 'refund_date':
-						$cell = esc_html( wc_format_datetime( $_refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) ) );
+						$cell = esc_html( wc_format_datetime( $_refund->get_date_created(), wcj_get_option( 'date_format' ) . ', ' . wcj_get_option( 'time_format' ) ) );
 						break;
 					case 'refund_reason':
 						$cell = $_refund->get_reason();
@@ -725,6 +726,15 @@ class WCJ_Orders_Shortcodes extends WCJ_Shortcodes {
 	 */
 	function wcj_order_billing_address( $atts ) {
 		return apply_filters( 'wcj_order_billing_address', $this->the_order->get_formatted_billing_address(), $atts );
+	}
+
+	/**
+	 * wcj_order_billing_email.
+	 *
+	 * @version 5.2.0
+	 */
+	function wcj_order_billing_email( $atts ) {
+		return apply_filters( 'wcj_order_billing_email', $this->the_order->get_billing_email(), $atts );
 	}
 
 	/**

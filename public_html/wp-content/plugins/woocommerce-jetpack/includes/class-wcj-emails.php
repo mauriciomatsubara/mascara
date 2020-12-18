@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Custom Emails
  *
- * @version 3.2.0
+ * @version 5.2.0
  * @author  Pluggabl LLC.
  */
 
@@ -15,13 +15,14 @@ class WCJ_Emails extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 3.2.0
+	 * @version 5.2.0
 	 */
 	function __construct() {
 
 		$this->id         = 'emails';
 		$this->short_desc = __( 'Custom Emails', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Add custom emails to WooCommerce.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Add custom emails to WooCommerce (1 custom email allowed in free version).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Add custom emails to WooCommerce.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-custom-emails';
 		parent::__construct();
 
@@ -31,7 +32,7 @@ class WCJ_Emails extends WCJ_Module {
 			add_filter( 'woocommerce_resend_order_emails_available', array( $this, 'add_custom_emails_to_wc_resend_order_emails' ) );
 			if ( ! WCJ_IS_WC_VERSION_BELOW_3_2_0 ) {
 				add_filter( 'woocommerce_order_actions', array( $this, 'add_custom_emails_order_actions' ), PHP_INT_MAX, 1 );
-				for ( $i = 1; $i <= apply_filters( 'booster_option', 1, get_option( 'wcj_emails_custom_emails_total_number', 1 ) ); $i++ ) {
+				for ( $i = 1; $i <= apply_filters( 'booster_option', 1, wcj_get_option( 'wcj_emails_custom_emails_total_number', 1 ) ); $i++ ) {
 					add_action( 'woocommerce_order_action_' . 'wcj_send_email_custom' . '_' . $i,
 						array( $this, 'do_custom_emails_order_actions' ), PHP_INT_MAX, 1 );
 				}
@@ -70,7 +71,7 @@ class WCJ_Emails extends WCJ_Module {
 	 * @todo    (maybe) add "Add Custom Email(s) to Order Actions" option (in WC >= 3.2.0); same to `woocommerce_order_action_`
 	 */
 	function add_custom_emails_order_actions( $actions ) {
-		for ( $i = 1; $i <= apply_filters( 'booster_option', 1, get_option( 'wcj_emails_custom_emails_total_number', 1 ) ); $i++ ) {
+		for ( $i = 1; $i <= apply_filters( 'booster_option', 1, wcj_get_option( 'wcj_emails_custom_emails_total_number', 1 ) ); $i++ ) {
 			$actions[ 'wcj_send_email_custom' . '_' . $i ] = sprintf( apply_filters( 'wcj_emails_custom_emails_order_action_text',
 				__( 'Booster: Send Email: %s', 'woocommerce-jetpack' ), $i ),
 					get_option( 'wcj_emails_custom_emails_admin_title_' . $i, __( 'Custom', 'woocommerce-jetpack' ) . ' #' . $i )
@@ -106,7 +107,7 @@ class WCJ_Emails extends WCJ_Module {
 	 * @since   2.3.9
 	 */
 	function add_custom_emails_to_wc_resend_order_emails( $emails ) {
-		for ( $i = 1; $i <= apply_filters( 'booster_option', 1, get_option( 'wcj_emails_custom_emails_total_number', 1 ) ); $i++ ) {
+		for ( $i = 1; $i <= apply_filters( 'booster_option', 1, wcj_get_option( 'wcj_emails_custom_emails_total_number', 1 ) ); $i++ ) {
 			$emails[] =  'wcj_custom' . '_' . $i;
 		}
 		return $emails;
@@ -122,7 +123,7 @@ class WCJ_Emails extends WCJ_Module {
 		if ( ! class_exists( 'WC_Email_WCJ_Custom' ) ) {
 			require_once( 'emails/class-wc-email-wcj-custom.php' );
 		}
-		for ( $i = 1; $i <= apply_filters( 'booster_option', 1, get_option( 'wcj_emails_custom_emails_total_number', 1 ) ); $i++ ) {
+		for ( $i = 1; $i <= apply_filters( 'booster_option', 1, wcj_get_option( 'wcj_emails_custom_emails_total_number', 1 ) ); $i++ ) {
 			$emails[ 'WC_Email_WCJ_Custom_' . $i ] = new WC_Email_WCJ_Custom( $i );
 		}
 		return $emails;

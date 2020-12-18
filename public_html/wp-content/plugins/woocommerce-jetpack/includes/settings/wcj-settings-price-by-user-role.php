@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Settings - Price based on User Role
  *
- * @version 4.7.1
+ * @version 5.3.0
  * @since   2.8.0
  * @author  Pluggabl LLC.
  */
@@ -128,6 +128,24 @@ $settings = array(
 		'id'       => 'wcj_price_by_user_role_options_adv',
 	),
 	array(
+		'title'    => __( 'Compatibility', 'woocommerce-jetpack' ),
+		'type'     => 'title',
+		'id'       => 'wcj_price_by_user_role_compatibility',
+	),
+	array(
+		'title'             => __( 'WooCommerce Product Bundles', 'woocommerce-jetpack' ),
+		'custom_attributes' => apply_filters( 'booster_message', '', 'disabled' ),
+		'desc'              => empty( $message = apply_filters( 'booster_message', '', 'desc' ) ) ? __( 'Enable', 'woocommerce-jetpack' ) : $message,
+		'desc_tip'          => sprintf( __( 'Adds compatibility with <a href="%s" target="_blank">WooCommerce Product Bundles</a> plugin.', 'woocommerce-jetpack' ), 'https://woocommerce.com/products/product-bundles/' ),
+		'id'                => 'wcj_price_by_user_role_compatibility_wc_product_bundles',
+		'default'           => 'no',
+		'type'              => 'checkbox',
+	),
+	array(
+		'type'     => 'sectionend',
+		'id'       => 'wcj_price_by_user_role_compatibility',
+	),
+	array(
 		'title'    => __( 'Roles & Multipliers', 'woocommerce-jetpack' ),
 		'type'     => 'title',
 		'desc'     => sprintf( __( 'Custom roles can be added via "Add/Manage Custom Roles" tool in Booster\'s <a href="%s">General</a> module.', 'woocommerce-jetpack' ),
@@ -207,7 +225,7 @@ foreach ( $taxonomies as $taxonomy ) {
 			'custom_attributes' => apply_filters( 'booster_message', '', 'disabled' ),
 		),
 	) );
-	$_taxonomies = apply_filters( 'booster_option', '', get_option( 'wcj_price_by_user_role_' . $taxonomy['name'], '' ) );
+	$_taxonomies = apply_filters( 'booster_option', '', wcj_get_option( 'wcj_price_by_user_role_' . $taxonomy['name'], '' ) );
 	if ( ! empty( $_taxonomies ) ) {
 		foreach ( $_taxonomies as $_taxonomy ) {
 			foreach ( wcj_get_user_roles() as $role_key => $role_data ) {

@@ -52,7 +52,7 @@ else : // Below 3.9.0.
 		<div class="woocommerce-message message-wrapper" role="alert">
 			<div class="message-container container success-color medium-text-center">
 				<?php echo get_flatsome_icon( 'icon-checkmark' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-				<?php echo fl_woocommerce_version_check( '3.5.0' ) ? wc_kses_notice( $message ) : wp_kses_post( $message ); ?>
+				<?php echo wc_kses_notice( $message ); ?>
 				<?php if ( is_product() && get_theme_mod( 'cart_dropdown_show', 1 ) ) { ?>
 					<span class="added-to-cart" data-timer=""></span>
 				<?php } ?>

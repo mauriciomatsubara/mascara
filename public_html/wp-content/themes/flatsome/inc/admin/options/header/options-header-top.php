@@ -91,9 +91,40 @@ Flatsome_Option::add_field( 'option',  array(
 ));
 
 Flatsome_Option::add_field( 'option', array(
+	'type'      => 'checkbox',
+	'settings'  => 'nav_top_uppercase',
+	'label'     => __( 'Uppercase', 'flatsome-admin' ),
+	'section'   => 'top_bar',
+	'transport' => $transport,
+	'default'   => 0,
+) );
+
+Flatsome_Option::add_field( 'option', array(
+	'type'     => 'checkbox',
+	'settings' => 'nav_top_body_overlay',
+	'label'    => __( 'Add overlay on hover', 'flatsome-admin' ),
+	'section'  => 'top_bar',
+	'default'  => 0,
+) );
+
+Flatsome_Option::add_field( 'option', array(
+	'type'      => 'slider',
+	'settings'  => 'nav_height_top',
+	'label'     => __( 'Nav Height', 'flatsome-admin' ),
+	'section'   => 'top_bar',
+	'transport' => $transport,
+	'default'   => 16,
+	'choices'   => array(
+		'min'  => 0,
+		'max'  => 100,
+		'step' => 1,
+	),
+) );
+
+Flatsome_Option::add_field( 'option', array(
 	'type'        => 'color',
 	'settings'    => 'type_nav_top_color',
-	'label'       => __( 'Nav Color', 'flatsome-admin' ) . ' (NEW)',
+	'label'       => __( 'Nav Color', 'flatsome-admin' ),
 	'section'     => 'top_bar',
 	'transport'   => $transport,
 ) );
@@ -101,7 +132,7 @@ Flatsome_Option::add_field( 'option', array(
 Flatsome_Option::add_field( 'option', array(
 	'type'        => 'color',
 	'settings'    => 'type_nav_top_color_hover',
-	'label'       => __( 'Nav Color :hover', 'flatsome-admin' ) . ' (NEW)',
+	'label'       => __( 'Nav Color :hover', 'flatsome-admin' ),
 	'section'     => 'top_bar',
 	'transport'   => $transport,
 ) );

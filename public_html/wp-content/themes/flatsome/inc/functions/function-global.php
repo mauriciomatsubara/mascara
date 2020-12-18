@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * Get the Flatsome Envato instance.
+ */
+function flatsome_envato() {
+	return Flatsome_Envato::instance();
+}
+
+/**
  * Get Flatsome option
  *
  * @deprecated in favor of get_theme_mod()
@@ -17,6 +24,23 @@ if(!function_exists('flatsome_dummy_image')) {
     return get_template_directory_uri().'/assets/img/missing.jpg';
   }
 }
+
+/**
+ * Checks current WP version against a given version.
+ *
+ * @param string $version The version to check for.
+ *
+ * @return bool Returns true if WP version is equal or higher then given version.
+ */
+function flatsome_wp_version_check( $version = '5.4' ) {
+	global $wp_version;
+	if ( version_compare( $wp_version, $version, '>=' ) ) {
+		return true;
+	}
+
+	return false;
+}
+
 
 /* Check WooCommerce Version */
 if( ! function_exists('fl_woocommerce_version_check') ){
@@ -110,6 +134,17 @@ function flatsome_facebook_accounts() {
   } );
 }
 
+/**
+ * Returns the current Facebook GraphAPI version beeing used.
+ *
+ * @since 3.13
+ *
+ * @return string
+ */
+function flatsome_facebook_api_version() {
+  return 'v8.0';
+}
+
 // Get block id by ID or slug.
 function flatsome_get_block_id( $post_id ) {
   global $wpdb;
@@ -191,4 +226,22 @@ function flatsome_apply_shortcode( $tag, $atts = array(), $content = null ) {
 	if ( ! isset( $shortcode_tags[ $tag ] ) ) return false;
 
 	return call_user_func( $shortcode_tags[ $tag ], $atts, $content, $tag );
+}
+
+/**
+ * Hides characters in a string.
+ *
+ * @param string $string The token.
+ * @param int    $visible_chars How many characters to show.
+ * @return string
+ */
+function flatsome_hide_chars( $string, $visible_chars = 8 ) {
+	if ( ! is_string( $string ) ) {
+		$string = '';
+	}
+	if ( strlen( $string ) <= $visible_chars ) {
+		$visible_chars = strlen( $string ) - 2;
+	}
+	$hidden_chars = strlen( $string ) - $visible_chars;
+	return substr( $string, 0, $visible_chars ) . str_repeat( '•', $hidden_chars );
 }

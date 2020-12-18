@@ -83,7 +83,7 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 			}
 
 			// Emails.
-			if ( 'yes' === apply_filters( 'alg_orders_custom_statuses', 'no', 'value_emails' ) ) {
+			if ( 'yes' === get_option( 'alg_orders_custom_statuses_emails_enabled', 'no' ) ) {
 				add_action( 'woocommerce_order_status_changed', array( $this, 'send_email_on_order_status_changed' ), PHP_INT_MAX, 4 );
 			}
 
@@ -98,7 +98,7 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 */
 		public function get_custom_order_statuses_actions( $_order ) {
 			$status_actions        = array();
-			$custom_order_statuses = alg_get_custom_order_statuses( true );
+			$custom_order_statuses = alg_get_custom_order_statuses_from_cpt( true );
 			foreach ( $custom_order_statuses as $custom_order_status => $label ) {
 				if ( ! $_order->has_status( array( $custom_order_status ) ) ) { // if order status is not $custom_order_status.
 					$status_actions[ $custom_order_status ] = $label;
@@ -168,7 +168,7 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 * @todo    [feature] separate option for each custom status
 		 */
 		public function add_custom_order_statuses_to_order_paid( $statuses ) {
-			return array_merge( $statuses, array_keys( alg_get_custom_order_statuses( true ) ) );
+			return array_merge( $statuses, array_keys( alg_get_custom_order_statuses_from_cpt( true ) ) );
 		}
 
 		/**
@@ -189,7 +189,7 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 */
 		public function send_email_on_order_status_changed( $order_id, $status_from, $status_to, $order ) {
 
-			$alg_orders_custom_statuses_array = alg_get_custom_order_statuses();
+			$alg_orders_custom_statuses_array = alg_get_custom_order_statuses_from_cpt();
 
 			$emails_statuses = get_option( 'alg_orders_custom_statuses_emails_statuses', array() );
 			if ( in_array( 'wc-' . $status_to, $emails_statuses, true ) || ( empty( $emails_statuses ) && in_array( 'wc-' . $status_to, array_keys( $alg_orders_custom_statuses_array ), true ) ) ) {
@@ -205,10 +205,12 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 					// translators: New Order status.
 					sprintf( __( 'Order status changed to %s', 'custom-order-statuses-woocommerce' ), '{status_to}' )
 				);
-				$email_content = get_option(
-					'alg_orders_custom_statuses_emails_content',
-					// translators: WC Order Number, Old status, new status.
-					sprintf( __( 'Order #%1$s status changed from %2$s to %3$s', 'custom-order-statuses-woocommerce' ), '{order_number}', '{status_from}', '{status_to}' )
+				$email_content = nl2br(
+					get_option(
+						'alg_orders_custom_statuses_emails_content',
+						// translators: WC Order Number, Old status, new status.
+						sprintf( __( 'Order #%1$s status changed from %2$s to %3$s', 'custom-order-statuses-woocommerce' ), '{order_number}', '{status_from}', '{status_to}' )
+					)
 				);
 
 				$woo_statuses        = wc_get_order_statuses();
@@ -308,7 +310,7 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 * @todo    [feature] separate option for each custom status
 		 */
 		public function add_custom_order_statuses_to_order_editable( $is_editable, $_order ) {
-			return ( in_array( 'wc-' . $_order->get_status(), array_keys( alg_get_custom_order_statuses() ), true ) ? true : $is_editable );
+			return ( in_array( 'wc-' . $_order->get_status(), array_keys( alg_get_custom_order_statuses_from_cpt() ), true ) ? true : $is_editable );
 		}
 
 		/**
@@ -318,18 +320,38 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 * @since   1.3.2
 		 */
 		public function add_custom_status_column_css() {
-			$statuses = alg_get_custom_order_statuses();
-			foreach ( $statuses as $slug => $label ) {
-				$custom_order_status = substr( $slug, 3 );
-				$icon_data           = get_option( 'alg_orders_custom_status_icon_data_' . $custom_order_status, '' );
-				if ( '' !== $icon ) {
-					$color      = $icon_data['color'];
-					$text_color = ( isset( $icon_data['text_color'] ) ? $icon_data['text_color'] : '#000000' );
-				} else {
-					$color      = '#999999';
+			$statuses = alg_get_custom_order_statuses_from_cpt( true, true );
+			if ( empty( $statuses ) ) {
+				$statuses = alg_get_custom_order_statuses();
+			}
+			foreach ( $statuses as $status => $status_id ) {
+				$content    = get_post_meta( $status_id, 'content', true );
+				$icon_color = get_post_meta( $status_id, 'color', true );
+				$text_color = get_post_meta( $status_id, 'text_color', true );
+				if ( ! $content ) {
+					$content = 'e011';
+				}
+				if ( ! $text_color ) {
 					$text_color = '#000000';
 				}
-				echo '<style>mark.order-status.status-' . esc_attr( $custom_order_status ) . ' { color: ' . esc_attr( $text_color ) . '; background-color: ' . esc_attr( $color ) . ' }</style>';
+				if ( ! $icon_color ) {
+					$icon_color = '#999999';
+				}
+
+				if ( strpos( $status, 'wc-' ) > -1 && ! empty( alg_get_custom_order_statuses() ) ) {
+					$status      = substr( $status, 3 );
+					$status_data = get_option( 'alg_orders_custom_status_icon_data_' . $status );
+					if ( $status_data['content'] ) {
+						$content = $status_data['content'];
+					}
+					if ( $status_data['color'] ) {
+						$icon_color = $status_data['color'];
+					}
+					if ( $status_data['text_color'] ) {
+						$text_color = $status_data['text_color'];
+					}
+				}
+				echo '<style>mark.order-status.status-' . esc_attr( $status ) . ' { color: ' . esc_attr( $text_color ) . '; background-color: ' . esc_attr( $icon_color ) . ' }</style>';
 			}
 		}
 
@@ -343,11 +365,22 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 * @since   1.2.0
 		 */
 		public function add_custom_status_actions_buttons( $actions, $_order ) {
-			$statuses = alg_get_custom_order_statuses();
+			$statuses = alg_get_custom_order_statuses_from_cpt();
+
+			$_order_id = ( version_compare( get_option( 'woocommerce_version', null ), '3.0.0', '<' ) ? $_order->id : $_order->get_id() );
+
+			// if the complete order action is not present in the array, add it (happens when the order is set to a custom status).
+			if ( ! in_array( 'complete', $actions, true ) ) {
+				$actions['complete'] = array(
+					'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=completed&order_id=' . $_order_id ), 'woocommerce-mark-order-status' ),
+					'name'   => __( 'Complete', 'woocommerce' ),
+					'action' => 'complete',
+				);
+			}
+
 			foreach ( $statuses as $slug => $label ) {
 				$custom_order_status = substr( $slug, 3 );
 				if ( ! $_order->has_status( array( $custom_order_status ) ) ) { // if order status is not $custom_order_status.
-					$_order_id                       = ( version_compare( get_option( 'woocommerce_version', null ), '3.0.0', '<' ) ? $_order->id : $_order->get_id() );
 					$actions[ $custom_order_status ] = array(
 						'url'    => $this->get_custom_order_statuses_action_url( $custom_order_status, $_order_id ),
 						'name'   => $label,
@@ -365,19 +398,39 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 * @since   1.2.0
 		 */
 		public function add_custom_status_actions_buttons_css() {
-			$statuses = alg_get_custom_order_statuses();
-			foreach ( $statuses as $slug => $label ) {
-				$custom_order_status = substr( $slug, 3 );
-				$icon_data           = get_option( 'alg_orders_custom_status_icon_data_' . $custom_order_status, '' );
-				if ( '' !== $icon_data ) {
-					$content = $icon_data['content'];
-					$color   = $icon_data['color'];
-				} else {
+			$statuses = alg_get_custom_order_statuses_from_cpt( true, true );
+			if ( empty( $statuses ) ) {
+				$statuses = alg_get_custom_order_statuses();
+			}
+			foreach ( $statuses as $status => $status_id ) {
+				$content    = get_post_meta( $status_id, 'content', true );
+				$icon_color = get_post_meta( $status_id, 'color', true );
+				$text_color = get_post_meta( $status_id, 'text_color', true );
+				if ( ! $content ) {
 					$content = 'e011';
-					$color   = '#999999';
 				}
-				$color_style = ( 'yes' === apply_filters( 'alg_orders_custom_statuses', 'no', 'value_order_list_actions_colored' ) ) ? ' color: ' . $color . ' !important;' : '';
-				echo '<style>.view.' . esc_attr( $custom_order_status ) . '::after { font-family: WooCommerce !important;' . esc_attr( $color_style ) . ' content: "\\' . esc_attr( $content ) . '" !important; }</style>';
+				if ( ! $text_color ) {
+					$text_color = '#000000';
+				}
+				if ( ! $icon_color ) {
+					$icon_color = '#999999';
+				}
+
+				if ( strpos( $status, 'wc-' ) > -1 && ! empty( alg_get_custom_order_statuses() ) ) {
+					$status      = substr( $status, 3 );
+					$status_data = get_option( 'alg_orders_custom_status_icon_data_' . $status );
+					if ( $status_data['content'] ) {
+						$content = $status_data['content'];
+					}
+					if ( $status_data['color'] ) {
+						$icon_color = $status_data['color'];
+					}
+					if ( $status_data['text_color'] ) {
+						$text_color = $status_data['text_color'];
+					}
+				}
+				$color_style = ( 'yes' === apply_filters( 'alg_orders_custom_statuses', 'no', 'value_order_list_actions_colored' ) ) ? ' color: ' . esc_attr( $icon_color ) . ' !important;' : '';
+				echo '<style>.view.' . esc_attr( $status ) . '::after { font-family: WooCommerce !important;' . esc_attr( $color_style ) . ' content: "\\' . esc_attr( $content ) . '" !important; }</style>';
 			}
 		}
 
@@ -391,7 +444,7 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 */
 		public function add_custom_order_statuses_to_reports( $order_statuses ) {
 			if ( is_array( $order_statuses ) && in_array( 'completed', $order_statuses, true ) ) {
-				return array_merge( $order_statuses, array_keys( alg_get_custom_order_statuses( true ) ) );
+				return array_merge( $order_statuses, array_keys( alg_get_custom_order_statuses_from_cpt( true ) ) );
 			}
 			return $order_statuses;
 		}
@@ -424,7 +477,7 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 * @since   1.0.0
 		 */
 		public function register_custom_post_statuses() {
-			$alg_orders_custom_statuses_array = alg_get_custom_order_statuses();
+			$alg_orders_custom_statuses_array = alg_get_custom_order_statuses_from_cpt();
 			foreach ( $alg_orders_custom_statuses_array as $slug => $label ) {
 				register_post_status(
 					$slug,
@@ -450,7 +503,7 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 * @since   1.0.0
 		 */
 		public function add_custom_statuses_to_filter( $order_statuses ) {
-			$alg_orders_custom_statuses_array = alg_get_custom_order_statuses();
+			$alg_orders_custom_statuses_array = alg_get_custom_order_statuses_from_cpt();
 			$order_statuses                   = ( '' === $order_statuses ) ? array() : $order_statuses;
 			return array_merge( $order_statuses, $alg_orders_custom_statuses_array );
 		}
@@ -462,26 +515,45 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 * @since   1.0.0
 		 */
 		public function hook_statuses_icons_css() {
-			global $post_type;
-			if ( isset( $post_type ) && 'shop_order' === $post_type ) {
-				$output   = '<style>';
+			$output   = '<style>';
+			$statuses = alg_get_custom_order_statuses_from_cpt( true, true );
+			if ( empty( $statuses ) ) {
 				$statuses = alg_get_custom_order_statuses();
-				foreach ( $statuses as $status => $status_name ) {
-					$icon_data = get_option( 'alg_orders_custom_status_icon_data_' . substr( $status, 3 ), '' );
-					if ( '' !== $icon_data ) {
-						$content = $icon_data['content'];
-						$color   = $icon_data['color'];
-					} else {
-						$content = 'e011';
-						$color   = '#999999';
-					}
-					$output .= '.status-' . substr( $status, 3 ) . ' { position: relative; }';
-					$output .= 'mark.status-' . substr( $status, 3 ) . '::after { content: "\\' . $content . '"; color: ' . $color . '; }';
-					$output .= 'mark.status-' . substr( $status, 3 ) . ':after {font-family:WooCommerce;speak:none;font-weight:400;font-variant:normal;text-transform:none;line-height:1;-webkit-font-smoothing:antialiased;margin:0;text-indent:0;position:absolute;top:0;left:0;width:100%;height:100%;text-align:center}';
-				}
-				$output .= '</style>';
-				echo wp_kses( $output, array( 'style' => array() ) );
 			}
+			foreach ( $statuses as $status => $status_id ) {
+				$content    = get_post_meta( $status_id, 'content', true );
+				$icon_color = get_post_meta( $status_id, 'color', true );
+				$text_color = get_post_meta( $status_id, 'text_color', true );
+				if ( ! $content ) {
+					$content = 'e011';
+				}
+				if ( ! $text_color ) {
+					$text_color = '#000000';
+				}
+				if ( ! $icon_color ) {
+					$icon_color = '#999999';
+				}
+
+				if ( strpos( $status, 'wc-' ) > -1 && ! empty( alg_get_custom_order_statuses() ) ) {
+					$status      = substr( $status, 3 );
+					$status_data = get_option( 'alg_orders_custom_status_icon_data_' . $status );
+					if ( $status_data['content'] ) {
+						$content = $status_data['content'];
+					}
+					if ( $status_data['color'] ) {
+						$icon_color = $status_data['color'];
+					}
+					if ( $status_data['text_color'] ) {
+						$text_color = $status_data['text_color'];
+					}
+				}
+
+				$output .= '.status-' . $status . ' { position: relative; color: ' . $text_color . '; }';
+				$output .= 'mark.status-' . $status . ':after { content: "\\' . $content . '"; color: ' . $text_color . '; }';
+				$output .= 'mark.status-' . $status . ':after { font-family: WooCommerce; speak: none; font-weight: 400; font-variant: normal; text-transform: none; line-height: 1; -webkit-font-smoothing: antialiased; margin: 0; text-indent: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; text-align: center }';
+			}
+			$output .= '</style>';
+			echo wp_kses( $output, array( 'style' => array() ) );
 		}
 
 		/**
@@ -494,7 +566,7 @@ if ( ! class_exists( 'Alg_WC_Custom_Order_Statuses_Core' ) ) :
 		 * @see     https://make.wordpress.org/core/2016/10/04/custom-bulk-actions/
 		 */
 		public function register_order_custom_status_bulk_actions( $bulk_actions ) {
-			$custom_order_statuses = alg_get_custom_order_statuses( true );
+			$custom_order_statuses = alg_get_custom_order_statuses_from_cpt( true );
 			foreach ( $custom_order_statuses as $slug => $label ) {
 				// translators: New Status.
 				$bulk_actions[ 'mark_' . $slug ] = sprintf( __( 'Change status to %s', 'custom-order-statuses-woocommerce' ), $label );

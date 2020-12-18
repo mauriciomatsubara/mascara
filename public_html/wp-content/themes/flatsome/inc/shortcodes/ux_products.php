@@ -1,7 +1,7 @@
 <?php
 
 // Flatsome Products
-function ux_products($atts, $content = null, $tag) {
+function ux_products($atts, $content = null, $tag = '' ) {
 	$sliderrandomid = rand();
 
   if ( ! is_array( $atts ) ) {

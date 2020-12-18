@@ -65,6 +65,7 @@ abstract class NextendSocialProvider extends NextendSocialProviderDummy {
             'custom_default_button' => '',
             'custom_icon_button'    => '',
             'login_label'           => '',
+            'register_label'        => '',
             'link_label'            => '',
             'unlink_label'          => '',
             'user_prefix'           => '',
@@ -78,6 +79,13 @@ abstract class NextendSocialProvider extends NextendSocialProviderDummy {
 
         $this->admin = new NextendSocialProviderAdmin($this);
 
+    }
+
+    /**
+     * @return string
+     */
+    public function getDbID() {
+        return $this->dbID;
     }
 
     public function getOptionKey() {
@@ -359,7 +367,9 @@ abstract class NextendSocialProvider extends NextendSocialProviderDummy {
                                     }
 
                                 } catch (e) {
-                                    // Blocked cross origin
+                                    /**
+                                     * Blocked cross origin
+                                     */
                                     sameOrigin = false;
                                 }
                                 if (sameOrigin) {
@@ -573,20 +583,29 @@ abstract class NextendSocialProvider extends NextendSocialProviderDummy {
         return $this->getAuthUserData('id');
     }
 
-    public function getConnectButton($buttonStyle = 'default', $redirectTo = null, $trackerData = false) {
+    public function getConnectButton($buttonStyle = 'default', $redirectTo = null, $trackerData = false, $labelType = 'login') {
         $arg = array();
         if (!empty($redirectTo)) {
             $arg['redirect'] = urlencode($redirectTo);
         } else if (!empty($_GET['redirect_to'])) {
             $arg['redirect'] = urlencode($_GET['redirect_to']);
         } else {
-            $arg['redirect'] = NextendSocialLogin::getCurrentPageURL();
+            $currentPageUrl = NextendSocialLogin::getCurrentPageURL();
+            if ($currentPageUrl !== false) {
+                $arg['redirect'] = urlencode($currentPageUrl);
+            }
         }
 
         if ($trackerData !== false) {
             $arg['trackerdata']      = urlencode($trackerData);
             $arg['trackerdata_hash'] = urlencode(wp_hash($trackerData));
 
+        }
+
+        $label                     = $this->settings->get('login_label');
+        $useCustomRegisterLabel = NextendSocialLogin::$settings->get('custom_register_label');
+        if ($labelType == 'register' && $useCustomRegisterLabel) {
+            $label = $this->settings->get('register_label');;
         }
 
         switch ($buttonStyle) {
@@ -596,11 +615,11 @@ abstract class NextendSocialProvider extends NextendSocialProviderDummy {
                 break;
             default:
 
-                $button = $this->getDefaultButton($this->settings->get('login_label'));
+                $button = $this->getDefaultButton($label);
                 break;
         }
 
-        return '<a href="' . esc_url(add_query_arg($arg, $this->getLoginUrl())) . '" rel="nofollow" aria-label="' . esc_attr__($this->settings->get('login_label')) . '" data-plugin="nsl" data-action="connect" data-provider="' . esc_attr($this->getId()) . '" data-popupwidth="' . $this->getPopupWidth() . '" data-popupheight="' . $this->getPopupHeight() . '">' . $button . '</a>';
+        return '<a href="' . esc_url(add_query_arg($arg, $this->getLoginUrl())) . '" rel="nofollow" aria-label="' . esc_attr__($label) . '" data-plugin="nsl" data-action="connect" data-provider="' . esc_attr($this->getId()) . '" data-popupwidth="' . $this->getPopupWidth() . '" data-popupheight="' . $this->getPopupHeight() . '">' . $button . '</a>';
     }
 
     public function getLinkButton() {
@@ -918,7 +937,9 @@ abstract class NextendSocialProvider extends NextendSocialProviderDummy {
                                 }
 
                             } catch (e) {
-                                // Blocked cross origin
+                                /**
+                                 * Blocked cross origin
+                                 */
                                 sameOrigin = false;
                             }
                             if (sameOrigin) {
@@ -1007,7 +1028,9 @@ abstract class NextendSocialProvider extends NextendSocialProviderDummy {
                             }
 
                         } catch (e) {
-                            // Blocked cross origin
+                            /**
+                             * Blocked cross origin
+                             */
                             sameOrigin = false;
                         }
                         if (sameOrigin) {

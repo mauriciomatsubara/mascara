@@ -33,7 +33,7 @@ if ( ! class_exists( 'YITH_WCWL_Frontend' ) ) {
 		 * @var string
 		 * @since 1.0.0
 		 */
-		public $version = '3.0.11';
+		public $version = '3.0.17';
 
 		/**
 		 * Plugin database version
@@ -85,7 +85,7 @@ if ( ! class_exists( 'YITH_WCWL_Frontend' ) ) {
 			add_action( 'init', array( $this, 'init' ), 0 );
 
 			// templates
-			add_action( 'wp_head', array( $this, 'add_button' ) );
+			add_action( 'init', array( $this, 'add_button' ) );
 			add_filter( 'body_class', array( $this, 'add_body_class' ) );
 			add_action( 'template_redirect', array( $this, 'add_nocache_headers' ) );
 			add_action( 'yith_wcwl_before_wishlist_title', array( $this, 'print_notices' ) );
@@ -213,7 +213,7 @@ if ( ! class_exists( 'YITH_WCWL_Frontend' ) ) {
 		 * @since 1.0.0
 		 */
 		public function add_body_class( $classes ) {
-			$wishlist_page_id = yith_wcwl_object_id( get_option( 'yith_wcwl_wishlist_page_id' ) );
+			$wishlist_page_id = YITH_WCWL()->get_wishlist_page_id();
 
 			if ( ! empty( $wishlist_page_id ) && is_page( $wishlist_page_id ) ) {
 				$classes[] = 'woocommerce-wishlist';
@@ -249,7 +249,7 @@ if ( ! class_exists( 'YITH_WCWL_Frontend' ) ) {
 
 			// register dependencies
 			wp_register_style( 'jquery-selectBox', YITH_WCWL_URL . 'assets/css/jquery.selectBox.css', array(), '1.2.0' );
-			wp_register_style( 'yith-wcwl-font-awesome', YITH_WCWL_URL . 'assets/css/font-awesome.min.css', array(), '4.7.0' );
+			wp_register_style( 'yith-wcwl-font-awesome', YITH_WCWL_URL . 'assets/css/font-awesome.css', array(), '4.7.0' );
 			wp_register_style( 'woocommerce_prettyPhoto_css', $assets_path . 'css/prettyPhoto.css' );
 
 			// register main style
@@ -385,30 +385,36 @@ if ( ! class_exists( 'YITH_WCWL_Frontend' ) ) {
 		 * @since 2.2.3
 		 */
 		public function get_localize() {
-			return apply_filters( 'yith_wcwl_localize_script', array(
-				'ajax_url' => admin_url( 'admin-ajax.php', 'relative' ),
-				'redirect_to_cart' => get_option( 'yith_wcwl_redirect_cart' ),
-				'multi_wishlist' => false,
-				'hide_add_button' => apply_filters( 'yith_wcwl_hide_add_button', true ),
-				'enable_ajax_loading' => 'yes' == get_option( 'yith_wcwl_ajax_enable', 'no' ),
-				'ajax_loader_url' => YITH_WCWL_URL . 'assets/images/ajax-loader-alt.svg',
-				'remove_from_wishlist_after_add_to_cart' => get_option( 'yith_wcwl_remove_after_add_to_cart' ) == 'yes',
-				'is_wishlist_responsive' => apply_filters( 'yith_wcwl_is_wishlist_responsive', true ),
-				'labels' => array(
-					'cookie_disabled' => __( 'We are sorry, but this feature is available only if cookies on your browser are enabled.', 'yith-woocommerce-wishlist' ),
-					'added_to_cart_message' => sprintf( '<div class="woocommerce-notices-wrapper"><div class="woocommerce-message" role="alert">%s</div></div>', apply_filters( 'yith_wcwl_added_to_cart_message', __( 'Product added to cart successfully', 'yith-woocommerce-wishlist' ) ) )
-				),
-				'actions' => array(
-					'add_to_wishlist_action' => 'add_to_wishlist',
-					'remove_from_wishlist_action' => 'remove_from_wishlist',
-					'reload_wishlist_and_adding_elem_action'  => 'reload_wishlist_and_adding_elem',
-					'load_mobile_action' => 'load_mobile',
-					'delete_item_action' => 'delete_item',
-					'save_title_action' => 'save_title',
-					'save_privacy_action' => 'save_privacy',
-					'load_fragments' => 'load_fragments'
+			return apply_filters(
+				'yith_wcwl_localize_script',
+				array(
+					'ajax_url' => admin_url( 'admin-ajax.php', 'relative' ),
+					'redirect_to_cart' => get_option( 'yith_wcwl_redirect_cart' ),
+					'multi_wishlist' => false,
+					'hide_add_button' => apply_filters( 'yith_wcwl_hide_add_button', true ),
+					'enable_ajax_loading' => 'yes' == get_option( 'yith_wcwl_ajax_enable', 'no' ),
+					'ajax_loader_url' => YITH_WCWL_URL . 'assets/images/ajax-loader-alt.svg',
+					'remove_from_wishlist_after_add_to_cart' => get_option( 'yith_wcwl_remove_after_add_to_cart' ) == 'yes',
+					'is_wishlist_responsive' => apply_filters( 'yith_wcwl_is_wishlist_responsive', true ),
+					'time_to_close_prettyphoto' => apply_filters( 'yith_wcwl_time_to_close_prettyphoto', 3000 ),
+					'fragments_index_glue' => apply_filters( 'yith_wcwl_fragments_index_glue', '.' ),
+					'reload_on_found_variation' => apply_filters( 'yith_wcwl_reload_on_found_variation', true ),
+					'labels' => array(
+						'cookie_disabled' => __( 'We are sorry, but this feature is available only if cookies on your browser are enabled.', 'yith-woocommerce-wishlist' ),
+						'added_to_cart_message' => sprintf( '<div class="woocommerce-notices-wrapper"><div class="woocommerce-message" role="alert">%s</div></div>', apply_filters( 'yith_wcwl_added_to_cart_message', __( 'Product added to cart successfully', 'yith-woocommerce-wishlist' ) ) ),
+					),
+					'actions' => array(
+						'add_to_wishlist_action' => 'add_to_wishlist',
+						'remove_from_wishlist_action' => 'remove_from_wishlist',
+						'reload_wishlist_and_adding_elem_action'  => 'reload_wishlist_and_adding_elem',
+						'load_mobile_action' => 'load_mobile',
+						'delete_item_action' => 'delete_item',
+						'save_title_action' => 'save_title',
+						'save_privacy_action' => 'save_privacy',
+						'load_fragments' => 'load_fragments',
+					),
 				)
-			) );
+			);
 		}
 
 		/**
@@ -539,6 +545,7 @@ if ( ! class_exists( 'YITH_WCWL_Frontend' ) ) {
 						unset( $options['found_in_list'] );
 						unset( $options['found_item'] );
 						unset( $options['popup_title'] );
+						unset( $options['wishlist_url'] );
 						break;
 				}
 			}
@@ -549,17 +556,18 @@ if ( ! class_exists( 'YITH_WCWL_Frontend' ) ) {
 		/**
 		 * Decode options that comes from the fragment
 		 *
-		 * @param $options array Options for the fragments
+		 * @param array $options Options for the fragments.
 		 * @return array Filtered options for the fragment
 		 */
 		public function decode_fragment_options( $options ) {
-			if( ! empty( $options ) ){
-				foreach( $options as $id => $value ){
-					if( 'true' == $value ){
+			if ( ! empty( $options ) ) {
+				foreach ( $options as $id => $value ) {
+					if ( 'true' == $value ) {
 						$options[ $id ] = true;
-					}
-					elseif( 'false' == $value ){
+					} elseif ( 'false' == $value ) {
 						$options[ $id ] = false;
+					} else {
+						$options[ $id ] = sanitize_text_field( wp_unslash( $value ) );
 					}
 				}
 			}

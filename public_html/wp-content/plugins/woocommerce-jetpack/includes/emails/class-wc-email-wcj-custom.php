@@ -21,14 +21,14 @@ class WC_Email_WCJ_Custom extends WC_Email {
 	/**
 	 * Constructor
 	 *
-	 * @version 4.6.1
+	 * @version 5.3.4
 	 */
 	function __construct( $id = 1 ) {
 
 		$this->id               = 'wcj_custom' . '_' . $id;
 		$this->customer_email   = ( '%customer%' === $this->get_option( 'recipient' ) );
 		$this->original_recipient = $this->get_option( 'recipient' );
-		$this->title            = get_option( 'wcj_emails_custom_emails_admin_title_' . $id, __( 'Custom', 'woocommerce-jetpack' ) . ' #' . $id );
+		$this->title            = wcj_get_option( 'wcj_emails_custom_emails_admin_title_' . $id, __( 'Custom', 'woocommerce-jetpack' ) . ' #' . $id );
 		$this->description      = __( 'Custom emails are sent to the recipient list when selected triggers are called.', 'woocommerce-jetpack' );
 
 		$this->heading          = __( 'Custom Heading', 'woocommerce' );
@@ -106,7 +106,7 @@ class WC_Email_WCJ_Custom extends WC_Email {
 	/**
 	 * trigger.
 	 *
-	 * @version 4.6.1
+	 * @version 5.3.4
 	 */
 	function trigger( $object_id ) {
 
@@ -178,7 +178,7 @@ class WC_Email_WCJ_Custom extends WC_Email {
 	/**
 	 * get_content_html.
 	 *
-	 * @version 3.1.0
+	 * @version 5.3.4
 	 * @access  public
 	 * @return  string
 	 * @todo    (maybe) use `wc_get_template` for custom templates (same for `get_content_plain()`)
@@ -194,7 +194,7 @@ class WC_Email_WCJ_Custom extends WC_Email {
 	/**
 	 * get_content_plain.
 	 *
-	 * @version 2.4.8
+	 * @version 5.3.4
 	 * @access  public
 	 * @return  string
 	 */

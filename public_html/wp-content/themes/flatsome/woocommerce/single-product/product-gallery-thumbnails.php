@@ -25,11 +25,9 @@ if ( $attachment_ids ) {
 	$gallery_class = array( 'product-thumbnails', 'thumbnails' );
 
 	// Check if custom gallery thumbnail size is set and use that.
-	if ( fl_woocommerce_version_check( '3.3.3' ) ) {
-		$image_check = wc_get_image_size( 'gallery_thumbnail' );
-		if ( $image_check['width'] !== 100 ) {
-			$image_size = 'gallery_thumbnail';
-		}
+	$image_check = wc_get_image_size( 'gallery_thumbnail' );
+	if ( $image_check['width'] !== 100 ) {
+		$image_size = 'gallery_thumbnail';
 	}
 
 	$gallery_thumbnail = wc_get_image_size( apply_filters( 'woocommerce_gallery_thumbnail_size', 'woocommerce_' . $image_size ) );

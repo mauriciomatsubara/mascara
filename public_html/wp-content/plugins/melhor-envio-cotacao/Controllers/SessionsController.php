@@ -2,13 +2,27 @@
 
 namespace Controllers;
 
-use Models\Address;
-use Models\Store;
-use Models\User;
+use Services\ClearDataStored;
 
-class SessionsController {
+class SessionsController
+{
+    /**
+     * Function to get information from the plugin session
+     *
+     * @return json
+     */
+    public function getSession()
+    {
+        return wp_send_json($_SESSION, 200);
+    }
 
-    const URL = 'https://api.melhorenvio.com';
-
-
+    /**
+     * Function to delete information from the plugin session
+     *
+     * @return json
+     */
+    public function deleteSession()
+    {
+        (new ClearDataStored())->clear();
+    }
 }

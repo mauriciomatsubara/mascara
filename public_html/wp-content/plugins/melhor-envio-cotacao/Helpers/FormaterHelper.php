@@ -10,9 +10,24 @@ class FormaterHelper
      * @param string $phone
      * @return string $phone
      */
-    public function formatPhone($phone)
+    public static function formatPhone($phone)
     {
         return str_replace(['(', ')', '-', ' '], [''], $phone);
+    }
+
+    /**
+     * function to insert mask phone
+     *
+     * @param string $phone
+     * @return string
+     */
+    public function maskPhone($phone)
+    {
+        $phone = preg_replace('/\D/', '', $phone);
+        $string = '';
+        $string .= '(' . substr($phone, 0, 2) . ') ';
+        $string .= substr($phone, 2, 4) . '-' . substr($phone, 6, 10);
+        return $string;
     }
 
     /**
@@ -21,7 +36,7 @@ class FormaterHelper
      * @param string $document
      * @return string $document
      */
-    public function formatDocuemnt($document)
+    public static function formatDocument($document)
     {
         return str_replace(['-', '.', '/', ' '], [''], $document);
     }

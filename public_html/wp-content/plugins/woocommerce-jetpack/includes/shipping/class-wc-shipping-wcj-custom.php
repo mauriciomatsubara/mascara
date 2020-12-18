@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Shipping - Custom Shipping
  *
- * @version 3.4.0
+ * @version 5.3.4
  * @since   2.4.8
  * @author  Pluggabl LLC.
  */
@@ -27,14 +27,14 @@ class WC_Shipping_WCJ_Custom_Template extends WC_Shipping_Method {
 	/**
 	 * Init settings
 	 *
-	 * @version 2.8.0
+	 * @version 5.3.4
 	 * @access  public
 	 * @return  void
 	 */
 	function init( $id_count ) {
 
 		$this->id                 = 'booster_custom_shipping_' . $id_count;
-		$this->method_title       = get_option( 'wcj_shipping_custom_shipping_admin_title_' . $id_count, __( 'Custom', 'woocommerce-jetpack' ) . ' #' . $id_count );
+		$this->method_title       = wcj_get_option( 'wcj_shipping_custom_shipping_admin_title_' . $id_count, __( 'Custom', 'woocommerce-jetpack' ) . ' #' . $id_count );
 		$this->method_description = __( 'Booster: Custom Shipping Method', 'woocommerce-jetpack' ) . ' #' . $id_count;
 
 		// Load the settings.
@@ -84,7 +84,7 @@ class WC_Shipping_WCJ_Custom_Template extends WC_Shipping_Method {
 	/**
 	 * Initialise Settings Form Fields
 	 *
-	 * @version 2.8.0
+	 * @version 5.3.4
 	 */
 	function init_form_fields() {
 		$type_options = array(

@@ -138,7 +138,7 @@ if(is_admin()){
 		    }
 		    ?>
 		    <tr class="form-field">
-			    <th scope="row" valign="top"><label for="term_meta[cat_product_block]"><?php _e( 'Custom product layout', 'flatsome' ); echo ' (NEW)';?></label></th>
+			    <th scope="row" valign="top"><label for="term_meta[cat_product_block]"><?php _e( 'Custom product layout', 'flatsome' ); ?></label></th>
 			    <td>
 				    <?php
 				    $selected = esc_attr( isset( $term_meta[0]['cat_product_block'] ) ) ? esc_attr( $term_meta[0]['cat_product_block'] ) : 0;

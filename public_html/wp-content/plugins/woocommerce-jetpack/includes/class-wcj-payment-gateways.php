@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Custom Gateways
  *
- * @version 4.7.0
+ * @version 5.2.0
  * @author  Pluggabl LLC.
  */
 
@@ -15,13 +15,14 @@ class WCJ_Payment_Gateways extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 3.3.0
+	 * @version 5.2.0
 	 */
 	function __construct() {
 
 		$this->id         = 'payment_gateways';
 		$this->short_desc = __( 'Custom Gateways', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Add multiple custom payment gateways to WooCommerce.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Add multiple custom payment gateways to WooCommerce (1 custom gateway allowed in free version).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Add multiple custom payment gateways to WooCommerce.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-custom-payment-gateways';
 		parent::__construct();
 
@@ -112,7 +113,7 @@ class WCJ_Payment_Gateways extends WCJ_Module {
 			$table_data[] = array( $name, $value );
 		}
 		$html .= wcj_get_table_html( $table_data, array( 'table_class' => 'widefat striped', 'table_heading_type' => 'vertical', ) );
-		if ( 'yes' === get_option( 'wcj_custom_payment_gateways_input_fields_delete_button', 'no' ) ) {
+		if ( 'yes' === wcj_get_option( 'wcj_custom_payment_gateways_input_fields_delete_button', 'no' ) ) {
 			$html .= '<p><a style="color:#a00;" href="' . add_query_arg( 'wcj_delete_payment_gateway_input_fields', $order_id ) . '"' . wcj_get_js_confirmation() . '>' .
 				__( 'Delete', 'woocommerce-jetpack' ) . '</a></p>';
 		}

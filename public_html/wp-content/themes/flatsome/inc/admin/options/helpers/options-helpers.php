@@ -113,11 +113,13 @@ $sizes = array(
 );
 
 $button_styles = array(
-    '' => __( 'Normal', 'flatsome-admin' ),
-    'outline' => __( 'Outline', 'flatsome-admin' ),
-    'shade' => __( 'Shade', 'flatsome-admin' ),
-    'underline' => __( 'Underline', 'flatsome-admin' ),
-    'link' => __( 'Link', 'flatsome-admin' ),
+	''          => __( 'Default', 'flatsome-admin' ),
+	'outline'   => __( 'Outline', 'flatsome-admin' ),
+	'underline' => __( 'Underline', 'flatsome-admin' ),
+	'shade'     => __( 'Shade', 'flatsome-admin' ),
+	'bevel'     => __( 'Bevel', 'flatsome-admin' ),
+	'gloss'     => __( 'Gloss', 'flatsome-admin' ),
+	'link'      => __( 'Link', 'flatsome-admin' ),
 );
 
 $nav_sizes = array(

@@ -11,8 +11,8 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce\Templates
- * @version 4.4.0
+ * @package    WooCommerce/Templates
+ * @version    1.6.4
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <h1 class="product-title product_title entry-title">
-	<?php echo esc_html( get_the_title() ); ?>
+	<?php the_title(); ?>
 </h1>
 
 <?php if ( get_theme_mod( 'product_title_divider', 1 ) ) { ?>

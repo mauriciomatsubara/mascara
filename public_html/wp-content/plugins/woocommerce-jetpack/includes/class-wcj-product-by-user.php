@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Product by User
  *
- * @version 2.9.0
+ * @version 5.2.0
  * @since   2.5.2
  * @author  Pluggabl LLC.
  */
@@ -16,7 +16,7 @@ class WCJ_Product_By_User extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 2.9.0
+	 * @version 5.2.0
 	 * @since   2.5.2
 	 * @todo    run `add_my_products_endpoint` only if module is enabled
 	 */
@@ -24,7 +24,8 @@ class WCJ_Product_By_User extends WCJ_Module {
 
 		$this->id         = 'product_by_user';
 		$this->short_desc = __( 'User Products', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Let users add new products from frontend.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Let users add new products from the frontend. Image additional field (Plus). Custom Taxonomies (1 allowed in free version).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Let users add new products from the frontend.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-product-by-user';
 		$this->extra_desc = __( 'Use <strong>[wcj_product_add_new]</strong> shortcode to add product upload form to frontend.', 'woocommerce-jetpack' );
 		parent::__construct();
@@ -36,7 +37,7 @@ class WCJ_Product_By_User extends WCJ_Module {
 		add_action( 'init',                   array( $this, 'add_my_products_endpoint' ) );
 
 		if ( $this->is_enabled() ) {
-			if ( 'yes' === get_option( 'wcj_product_by_user_add_to_my_account', 'yes' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_product_by_user_add_to_my_account', 'yes' ) ) {
 				add_filter( 'woocommerce_account_menu_items',               array( $this, 'add_my_products_tab_my_account_page' ) );
 				add_action( 'woocommerce_account_wcj-my-products_endpoint', array( $this, 'add_my_products_content_my_account_page' ) );
 				add_filter( 'the_title',                                    array( $this, 'change_my_products_endpoint_title' ) );

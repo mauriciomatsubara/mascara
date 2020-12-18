@@ -19,6 +19,7 @@ function ux_row($atts, $content = null) {
     // Paddings
     'padding' => '',
     'col_bg' => '',
+	'col_bg_radius' => ''
   ), $atts ) );
 
   // Stop if visibility is hidden
@@ -66,6 +67,11 @@ function ux_row($atts, $content = null) {
         'selector' => '> .col > .col-inner',
         'property' => 'background-color',
       ),
+	 'col_bg_radius' => array(
+		 'selector' => '> .col > .col-inner',
+		 'property' => 'border-radius',
+		 'unit'      => 'px',
+	 ),
   );
 
   $classes =  implode(" ", $classes);
@@ -176,21 +182,21 @@ function ux_col($atts, $content = null) {
 			'attribute' => 'background-color',
 			'value'     => $bg_color,
 		),
-		'bg_radius' => array(
-			'attribute' => 'border-radius',
-			'value'     => $bg_radius,
-			'unit'      => 'px',
-		),
 	);
 
 	$args = array(
-		'padding' => array(
+		'padding'   => array(
 			'selector' => '> .col-inner',
 			'property' => 'padding',
 		),
-		'margin'  => array(
+		'margin'    => array(
 			'selector' => '> .col-inner',
 			'property' => 'margin',
+		),
+		'bg_radius' => array(
+			'selector' => '> .col-inner',
+			'property' => 'border-radius',
+			'unit'     => 'px',
 		),
 	);
 

@@ -69,8 +69,8 @@ add_ux_builder_shortcode( 'col', array(
             'heading' => 'Margin',
             'full_width' => true,
             'responsive' => true,
-            'min' => -200,
-            'max' => 200,
+            'min' => -500,
+            'max' => 500,
             'step' => 1,
         ),
 

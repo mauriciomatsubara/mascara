@@ -19,8 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-if ( ! fl_woocommerce_version_check( '3.5.0' ) ) { wc_print_notices(); }
-
 do_action( 'woocommerce_before_customer_login_form' ); ?>
 
 <div class="account-container lightbox-inner">

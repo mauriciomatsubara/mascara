@@ -1,6 +1,6 @@
 <?php
 // [map]
-function flatsome_shortcode_map($atts, $content=null, $code) {
+function flatsome_shortcode_map( $atts, $content = null, $tag = '' ) {
 
 	$atts = shortcode_atts(array(
     '_id' => 'map-'.rand(),

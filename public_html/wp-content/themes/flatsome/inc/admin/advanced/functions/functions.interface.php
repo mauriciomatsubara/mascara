@@ -88,61 +88,56 @@ function optionsframework_options_page(){
 /**
  * Create Options page
  *
- * @uses wp_enqueue_style()
- *
  * @since 1.0.0
  */
-function of_style_only(){
-	wp_enqueue_style('admin-style', ADMIN_DIR . 'assets/css/admin-style.css');
-	//wp_enqueue_style('color-picker', ADMIN_DIR . 'assets/css/colorpicker.css');
-	wp_enqueue_style('jquery-ui-custom-admin', ADMIN_DIR .'assets/css/jquery-ui-custom.css');
+function of_style_only() {
+	$theme   = wp_get_theme( get_template() );
+	$version = $theme->get( 'Version' );
 
-	if ( !wp_style_is( 'wp-color-picker','registered' ) ) {
-		wp_register_style( 'wp-color-picker', ADMIN_DIR . 'assets/css/color-picker.min.css' );
+	wp_enqueue_style( 'admin-style', ADMIN_DIR . 'assets/css/admin-style.css', array(), $version );
+	wp_enqueue_style( 'jquery-ui-custom-admin', ADMIN_DIR . 'assets/css/jquery-ui-custom.css', array(), $version );
+
+	if ( ! wp_style_is( 'wp-color-picker', 'registered' ) ) {
+		wp_register_style( 'wp-color-picker', ADMIN_DIR . 'assets/css/color-picker.min.css', array(), $version );
 	}
+
 	wp_enqueue_style( 'wp-color-picker' );
-	do_action('of_style_only_after');
+	do_action( 'of_style_only_after' );
 }
 
 /**
  * Create Options page
  *
- * @uses add_action()
- * @uses wp_enqueue_script()
- *
  * @since 1.0.0
  */
-function of_load_only()
-{
-	//add_action('admin_head', 'smof_admin_head');
+function of_load_only() {
+	$theme   = wp_get_theme( get_template() );
+	$version = $theme->get( 'Version' );
 
-	wp_enqueue_script('jquery-ui-core');
-	wp_enqueue_script('jquery-ui-sortable');
-	wp_enqueue_script('jquery-ui-slider');
-	wp_enqueue_script('jquery-input-mask', ADMIN_DIR .'assets/js/jquery.maskedinput-1.4.1.js', array( 'jquery' ));
-	wp_enqueue_script('tipsy', ADMIN_DIR .'assets/js/jquery.tipsy.js', array( 'jquery' ));
-	//wp_enqueue_script('color-picker', ADMIN_DIR .'assets/js/colorpicker.js', array('jquery'));
-	wp_enqueue_script('cookie', ADMIN_DIR . 'assets/js/cookie.js', 'jquery');
-	wp_enqueue_script('smof', ADMIN_DIR .'assets/js/smof.js', array( 'jquery' ));
+	wp_enqueue_script( 'jquery-ui-core' );
+	wp_enqueue_script( 'jquery-ui-sortable' );
+	wp_enqueue_script( 'jquery-ui-slider' );
+	wp_enqueue_script( 'jquery-input-mask', ADMIN_DIR . 'assets/js/jquery.maskedinput-1.4.1.js', array( 'jquery' ), $version, true );
+	wp_enqueue_script( 'tipsy', ADMIN_DIR . 'assets/js/jquery.tipsy.js', array( 'jquery' ), $version, true );
+	wp_enqueue_script( 'cookie', ADMIN_DIR . 'assets/js/cookie.js', 'jquery', $version, true );
+	wp_enqueue_script( 'smof', ADMIN_DIR . 'assets/js/smof.js', array( 'jquery' ), $version, true );
 
-
-	// Enqueue colorpicker scripts for versions below 3.5 for compatibility
-	if ( !wp_script_is( 'wp-color-picker', 'registered' ) ) {
-		wp_register_script( 'iris', ADMIN_DIR .'assets/js/iris.min.js', array( 'jquery-ui-draggable', 'jquery-ui-slider', 'jquery-touch-punch' ), false, 1 );
-		wp_register_script( 'wp-color-picker', ADMIN_DIR .'assets/js/color-picker.min.js', array( 'jquery', 'iris' ) );
+	// Enqueue colorpicker scripts for versions below 3.5 for compatibility.
+	if ( ! wp_script_is( 'wp-color-picker', 'registered' ) ) {
+		wp_register_script( 'iris', ADMIN_DIR . 'assets/js/iris.min.js', array( 'jquery-ui-draggable', 'jquery-ui-slider', 'jquery-touch-punch' ), $version, true );
+		wp_register_script( 'wp-color-picker', ADMIN_DIR . 'assets/js/color-picker.min.js', array( 'jquery', 'iris' ), $version, true );
 	}
-	wp_enqueue_script( 'wp-color-picker' );
 
+	wp_enqueue_script( 'wp-color-picker' );
 
 	/**
 	 * Enqueue scripts for file uploader
 	 */
-
-	if ( function_exists( 'wp_enqueue_media' ) )
+	if ( function_exists( 'wp_enqueue_media' ) ) {
 		wp_enqueue_media();
+	}
 
-	do_action('of_load_only_after');
-
+	do_action( 'of_load_only_after' );
 }
 
 

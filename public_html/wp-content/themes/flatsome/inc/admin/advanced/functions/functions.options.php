@@ -174,7 +174,7 @@ if ( ! function_exists( 'of_options' ) ) {
 			'type' => 'checkbox',
 			'id'   => 'jquery_migrate',
 			'std'  => 0,
-			'desc' => 'Remove jQuery Migrate. Most up-to-date front-end code and plugins don’t require jquery-migrate.min.js. More often than not, keeping this - simply adds unnecessary load to your site. (for < WP 5.5)',
+			'desc' => 'Remove jQuery Migrate. Most up-to-date front-end code and plugins don’t require jquery-migrate.min.js. More often than not, keeping this - simply adds unnecessary load to your site.',
 		);
 
 		$of_options[] = array(

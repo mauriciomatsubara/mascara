@@ -2,51 +2,56 @@
 
 namespace Helpers;
 
-use Controllers\ConfigurationController;
-
-class MoneyHelper 
+class MoneyHelper
 {
     /**
-     * @param [type] $data
-     * @return void
+     * Function to define the customized price
+     *
+     * @param string $value
+     * @param string $extra
+     * @param string $percent
+     * @return string
      */
-    public function setlabel($value, $id) 
+    public static function price($value, $extra, $percent)
     {
-        $extra = 0;
-        $perc  = 0;
-        $result = (new ConfigurationController())->getOptionsShipments();
+        $value = floatval($value);
+        $extra = floatval($extra);
+        $percent = floatval($percent);
 
-        if (isset($result[$id]['tax'])) {
-            $extra = $result[$id]['tax'];
-        }
-
-        if (isset($result[$id]['perc'])) {
-            $perc = $result[$id]['perc'];
-            $perc = ($value / 100) * $perc;
-        }
-
-        $value =  floatval($value) + floatval($extra)  + floatval($perc);
+        $value = self::calculateFinalValue($value, $extra, $percent);
 
         return 'R$' . number_format($value, 2, ',', '.');
     }
 
-    public function setPrice($value, $id) 
+    /**
+     * Function to define the price
+     *
+     * @param string $value
+     * @param string $extra
+     * @param string $percent
+     * @return float
+     */
+    public static function cost($value, $extra, $percent)
     {
-        
-        $extra = 0;
-        $perc  = 0;
-        $result = (new ConfigurationController())->getOptionsShipments();
+        $value = floatval($value);
+        $extra = floatval($extra);
+        $percent = floatval($percent);
 
-        if (isset($result[$id]['tax'])) {
-            $extra = $result[$id]['tax'];
-        }
+        return self::calculateFinalValue($value, $extra, $percent);
+    }
 
-        if (isset($result[$id]['perc'])) {
-            $perc = $result[$id]['perc'];
-            $perc = ($value / 100) * $perc;
-        }
-    
-        return floatval($value) + floatval($extra)  + floatval($perc) ;
+    /**
+     * Function to calculate final value
+     *
+     * @param float $value
+     * @param float $extra
+     * @param float $percent
+     * @return string
+     */
+    public static function calculateFinalValue($value, $extra, $percent)
+    {
+        $percentExtra = ($value / 100) * $percent;
+
+        return $value + $percentExtra + $extra;
     }
 }
-

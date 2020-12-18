@@ -2,11 +2,13 @@
 
 namespace Services;
 
+use Models\Version;
+
 class RequestService
 {
-    const URL = 'https://api.melhorenvio.com';
+    const URL = 'https://api.melhorenvio.com/v2/me';
 
-    const SANDBOX_URL = 'https://sandbox.melhorenvio.com.br/api';
+    const SANDBOX_URL = 'https://sandbox.melhorenvio.com.br/api/v2/me';
 
     const TIMEOUT = 10;
 
@@ -15,10 +17,16 @@ class RequestService
     protected $headers;
 
     protected $url;
-    
+
     public function __construct()
     {
         $tokenData = (new TokenService())->get();
+
+        if (!$tokenData) {
+            return wp_send_json([
+                'message' => 'Usuário não autorizado, verificar token do Melhor Envio'
+            ], 401);
+        }
 
         if ($tokenData['token_environment'] == 'production') {
             $this->token = $tokenData['token'];
@@ -31,7 +39,8 @@ class RequestService
         $this->headers = array(
             'Content-Type'  => 'application/json',
             'Accept'        => 'application/json',
-            'Authorization' => 'Bearer '.$this->token,
+            'version-plugin-me' => Version::VERSION,
+            'Authorization' => 'Bearer ' . $this->token,
         );
     }
 
@@ -39,72 +48,84 @@ class RequestService
      * Function to make a request to API Melhor Envio.
      *
      * @param string $route
-     * @param string $type_request
+     * @param string $typeRequest
      * @param array $body
-     * @return array $response
+     * @return object $response
      */
-    public function request($route, $type_request, $body, $useJson = true)
+    public function request($route, $typeRequest, $body, $useJson = true)
     {
-        try {
-
-            if ($useJson) {
-                $body = json_encode($body);
-            }
-
-            $params = array(
-                'headers' => $this->headers,
-                'method'  => $type_request,
-                'body'    => $body,
-                'timeout '=> self::TIMEOUT
-            );
-
-            $response = json_decode(
-                wp_remote_retrieve_body(
-                    wp_remote_post($this->url . '/v2/me' . $route, $params)
-                )
-            );
-
-            if (isset($response->errors) || isset($response->error)) {
-                return $this->treatmentErrors($response);
-            }
-
-            return $response;
-
-        } catch (\Exception $excption) {
-
+        if ($useJson) {
+            $body = json_encode($body);
         }
+
+        $params = array(
+            'headers' => $this->headers,
+            'method'  => $typeRequest,
+            'body'    => $body,
+            'timeout ' => self::TIMEOUT
+        );
+
+        $response = json_decode(
+            wp_remote_retrieve_body(
+                wp_remote_post($this->url . $route, $params)
+            )
+        );
+
+        if (empty($response)) {
+            (new SessionNoticeService())->add('Ocorreu um erro ao se conectar com a API do Melhor Envio');
+            return (object) [
+                'success' => false,
+                'errors' => ['Ocorreu um erro ao se conectar com a API do Melhor Envio'],
+            ];
+        }
+
+        if (!empty($response->message) && $response->message == 'Unauthenticated.') {
+            (new SessionNoticeService())->add('Verificar seu token Melhor Envio');
+            return (object) [
+                'success' => false,
+                'errors' => ['Usuário não autenticado'],
+            ];
+        }
+
+        $errors =  $this->treatmentErrors($response);
+
+        if (!empty($errors)) {
+            return (object) [
+                'success' => false,
+                'errors' => $errors,
+            ];
+        }
+
+        return $response;
     }
 
     /**
      * treatment errors to user
      *
-     * @param array $data
+     * @param object $data
      * @return array $errors
      */
     private function treatmentErrors($data)
     {
-        $response = [];
+        $errorsResponse = [];
+        $errors = [];
 
-        if (isset($data->error)) {
-            $response[] = $data->error;
+        if (!empty($data->error)) {
+            $errors[] = $data->error;
         }
 
-        if (isset($data->errors) && is_array($data->errors)) {
-            foreach ($data->errors as $error) {
-                if (is_array($error)) {
-                    foreach ($error as $err) {
-                        $response[] = $err;
-                    }
-                } else {
-                    $response[] = $error;
-                }
+        if (!empty($data->errors)) {
+            foreach ($data->errors as $errors) {
+                $errorsResponse[] = $errors;
             }
         }
 
-        return [
-            'success' => false,
-            'message' => null,
-            'errors' => $response  
-        ];
+        if (!empty($errorsResponse) && is_array($errorsResponse)) {
+            foreach ($errorsResponse as $error) {
+                $errors[] = end($error);
+            }
+        }
+
+        return $errors;
     }
 }

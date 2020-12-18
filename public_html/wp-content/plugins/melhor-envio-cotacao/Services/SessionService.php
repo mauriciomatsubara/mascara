@@ -2,48 +2,90 @@
 
 namespace Services;
 
+/**
+ * Service responsible for managing the data stored in the session
+ */
 class SessionService
 {
-    public function clear()
+    /**
+     * Minutes that the data must be stored in the session
+     */
+    const TIME_SESSION = 5;
+
+    public function __construct()
     {
-        $codeStore = md5(get_option('home'));
-
-        $dateNow = date("Y-m-d h:i:s");
-
-        if(isset($_SESSION[$codeStore]['cotations'])) {
-
-            foreach ($_SESSION[$codeStore]['cotations'] as $key => $cotation) {
-
-                if( !isset($cotation['created'])) {
-                    unset($_SESSION[$codeStore]['cotations'][$key]);
-                }
-
-                if(date('Y-m-d H:i:s', strtotime('+2 hours', strtotime($cotation['created']))) < $dateNow) {
-                    unset($_SESSION[$codeStore]['cotations'][$key]);
-                }
-            }
+        if (empty(session_id())) {
+            session_start();
         }
     }
 
-    public function delete()
+    /**
+     * Function to get data stored on session.
+     *
+     * @param string $key
+     * @return object
+     */
+    public function getDataCached($key)
     {
-        $codeStore = md5(get_option('home'));
+        if ($this->isExpiredCache($key)) {
+            return false;
+        }
 
-        delete_option('melhorenvio_user_info');
+        return $_SESSION[$key]['data'];
+    }
 
-        unset($_SESSION[$codeStore]['cotations']);
-        unset($_SESSION[$codeStore]['melhorenvio_token']);
+    /**
+     * Function to save data user on session.   
+     *
+     * @param string $key
+     * @param mixed $data
+     * @return void
+     */
+    public function storeData($key, $data)
+    {
+        $_SESSION[$key]['data'] = $data;
+        $_SESSION[$key]['created'] = date('Y-m-d H:i:s');
+    }   
 
-        unset($_SESSION[$codeStore]['melhorenvio_user_info']);
+    /**
+     * Function to check if data cacked is expired
+     * 
+     * @param string $key
+     * @return boolean
+     */
+    public function isExpiredCache($key)
+    {
+        if (empty($_SESSION[$key]['created']) ) {
+            return true;
+        }
 
-        unset($_SESSION[$codeStore]['melhorenvio_address_selected_v2']);
-        unset($_SESSION[$codeStore]['melhorenvio_address']);
+        $created = $_SESSION[$key]['created'];
 
-        unset($_SESSION[$codeStore]['melhorenvio_stores']);
-        unset($_SESSION[$codeStore]['melhorenvio_store_v2']);
+        $dateLimit = date(
+            'Y-m-d H:i:s', 
+            strtotime(sprintf("-%d minutes", self::TIME_SESSION))
+        );
 
-        unset($_SESSION[$codeStore]['melhorenvio_options']);
-        
-        return $_SESSION;
+        if ($dateLimit > $created) {
+            unset($_SESSION[$key]);
+            return true;
+        }
+
+        if (empty($_SESSION[$key]['data'])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Function to destroy a item on session.
+     *
+     * @param string $key
+     * @return void
+     */
+    public function destroy($key)
+    {
+        unset($_SESSION[$key]);
     }
 }

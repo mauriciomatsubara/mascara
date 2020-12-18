@@ -12,8 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 $desc = '';
 if ( $this->is_enabled() ) {
-	if ( '' != get_option( 'wcj_currency_exchange_rate_cron_time', '' ) ) {
-		$scheduled_time_diff = get_option( 'wcj_currency_exchange_rate_cron_time', '' ) - time();
+	if ( '' != wcj_get_option( 'wcj_currency_exchange_rate_cron_time', '' ) ) {
+		$scheduled_time_diff = wcj_get_option( 'wcj_currency_exchange_rate_cron_time', '' ) - time();
 		if ( $scheduled_time_diff > 60 ) {
 			$desc = '<br><em>' . sprintf( __( '%s till next update.', 'woocommerce-jetpack' ), human_time_diff( 0, $scheduled_time_diff ) ) . '</em>';
 		} elseif ( $scheduled_time_diff > 0 ) {
@@ -96,6 +96,14 @@ $settings = array(
 		'default'  => 'no',
 		'type'     => 'checkbox',
 	),
+	array(
+		'title'    => __( 'Force Point as Decimal Separator', 'woocommerce-jetpack' ),
+		'desc'     => __( 'Enable', 'woocommerce-jetpack' ),
+		'desc_tip' => __( 'Force "." as decimal separator for exchange rates.', 'woocommerce-jetpack' ),
+		'id'       => 'wcj_currency_exchange_rates_point_decimal_separator',
+		'default'  => 'no',
+		'type'     => 'checkbox',
+	),
 	/*
 	array(
 		'title'    => __( 'Logging', 'woocommerce-jetpack' ),
@@ -116,7 +124,7 @@ $settings = array(
 		'id'       => 'wcj_currency_exchange_api_key',
 	),
 	array(
-		'title'    => __( 'Free Currency Converter API Key', 'woocommerce-jetpack' ),
+		'title'    => __( 'Free Currency Converter', 'woocommerce-jetpack' ),
 		'desc'     => sprintf(__( 'More information at %s', 'woocommerce-jetpack' ),'<a target="_blank" href="https://free.currencyconverterapi.com/free-api-key">https://free.currencyconverterapi.com/free-api-key</a>'),
 		'type'     => 'text',
 		'id'       => 'wcj_currency_exchange_api_key_fccapi',
@@ -147,7 +155,7 @@ $settings = array_merge( $settings, array(
 		'custom_attributes' => apply_filters( 'booster_message', '', 'readonly' ),
 	),
 ) );
-$total_number = apply_filters( 'booster_option', 1, get_option( 'wcj_currency_exchange_custom_currencies_total_number', 1 ) );
+$total_number = apply_filters( 'booster_option', 1, wcj_get_option( 'wcj_currency_exchange_custom_currencies_total_number', 1 ) );
 for ( $i = 1; $i <= $total_number; $i++ ) {
 	$settings = array_merge( $settings, array(
 		array(

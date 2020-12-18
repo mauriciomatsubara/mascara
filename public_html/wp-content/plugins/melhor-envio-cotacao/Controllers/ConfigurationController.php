@@ -1,125 +1,134 @@
 <?php
 
 namespace Controllers;
+
 use Models\Address;
 use Models\Agency;
 use Models\Store;
-use Models\CalculatorShow;
-use Models\JadlogAgenciesShow;
 use Models\Method;
+use Models\Option;
+use Services\ConfigurationsService;
+use Services\OptionsMethodShippingService;
 
-class ConfigurationController 
+/**
+ * Class responsible for the configuration controller
+ */
+class ConfigurationController
 {
     /**
-     * @param [type] $tokenUser
-     * @return void
+     * Function to get configurations of user
+     *
+     * @return json
      */
-    public function saveToken($tokenUser) 
+    public function getConfigurations()
+    {
+        return wp_send_json(
+            (new ConfigurationsService())->getConfigurations(),
+            200
+        );
+    }
+
+    /**
+     * Function to save token Melhor Envio and retur the token.
+     *
+     * @param string $tokenUser
+     * @return mixed
+     */
+    public function save($tokenUser)
     {
         $token = get_option('melhorenvio_token');
-        if (!$token or empty($token)) {
+        if (!$token) {
             add_option('melhorenvio_token', $tokenUser);
         }
 
-        update_option('melhorenvio_token', $tokenUser,true);
+        update_option('melhorenvio_token', $tokenUser, true);
         return get_option('melhorenvio_token');
     }
 
     /**
-     * @return void
+     * Function to search the user's saved address
+     *
+     * @return json
      */
-    public function getAddressShopping() 
+    public function getAddressShopping()
     {
-        echo json_encode((new Address())->getAddressesShopping());
-        die;
+        return wp_send_json(
+            (new Address())->getAddressesShopping(),
+            200
+        );
     }
 
     /**
-     * @return void
+     * Function to set selected agency jadlog
+     *
+     * @return json
      */
-    public function setAgencyJadlog() 
+    public function setAgencyJadlog()
     {
         if (!isset($_GET['id'])) {
-            echo json_encode([
+            return wp_send_json([
                 'success' => false,
                 'message' => 'É necessário infomar o ID da agência'
-            ]);
-            die;
+            ], 412);
         }
 
-        echo json_encode((new Agency())->setAgency($_GET['id']));
-        die;
+
+        if (!(new Agency())->setAgency($_GET['id'])) {
+            return wp_send_json([
+                'success' => false,
+                'message' => 'Ocorreu um erro ao atualizar a agência selecionada'
+            ], 400);
+        }
+
+        return wp_send_json([
+            'success' => true,
+            'message' => 'Agência selecionada atualizada com successo.'
+        ], 200);
     }
 
     /**
-     * @return void
+     * Function to search user stores
+     *
+     * @return json
      */
-    public function getAgencyJadlog() 
+    public function getStores()
     {
-        echo json_encode((new Agency())->getAgencies());
-        die;
+        return wp_send_json(
+            (new Store())->getStores(),
+            200
+        );
     }
 
     /**
-     * @return void
+     * Function to set user stores.
+     *
+     * @return json
      */
-    public function getStories() 
-    {
-        echo json_encode((new Store())->getStories());
-        die;
-    }
-
-    /**
-     * @return void
-     */
-    public function setStore() 
+    public function setStore()
     {
         if (!isset($_GET['id'])) {
-            echo json_encode([
+            return wp_send_json([
                 'success' => false,
                 'message' => 'É necessário infomar o ID da loja'
-            ]);
-            die;
+            ], 412);
         }
 
-        echo json_encode((new Store())->setStore($_GET['id']));
-        die;
+        return wp_send_json(
+            (new Store())->setStore($_GET['id']),
+            200
+        );
     }
 
     /**
-     * @return void
-     */
-    public function get_calculator_show() 
-    {
-        echo json_encode((new CalculatorShow())->get());
-        die;
-    }
-
-    /**
-     * @return void
-     */
-    public function set_calculator_show() 
-    {
-        if (!isset($_GET['data'])) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'É necessário infomar o parametro data ("true" ou "false")'
-            ]);
-            die;
-        }
-
-        echo json_encode((new CalculatorShow())->set($_GET['data']));
-        die;
-    }
-
-    /**
-     * @return void
+     * Function to return woocommerce shipping methods with name, fee and extra time settings
+     *
+     * @return json
      */
     public function getMethodsEnables()
-    {   
+    {
         $methods = [];
 
-        $options = $this->getOptionsShipments();
+        $options = (new OptionsMethodShippingService())->getOptionsShipments();
 
         $enableds = (new Method())->getArrayShippingMethodsEnabledByZoneMelhorEnvio();
 
@@ -132,143 +141,29 @@ class ConfigurationController
                 $methods[] = [
                     'code' => $method->code,
                     'title' => str_replace(' (Melhor Envio)', '', $method->method_title),
-                    'name' =>  (isset($options[$method->code]['name']) && $options[$method->code]['name'] != "undefined" && $options[$method->code]['name'] != "" ) ? $options[$method->code]['name'] : str_replace(' (Melhor Envio)', '', $method->method_title),
-                    'tax' => (isset($options[$method->code]['tax'])) ? floatval($options[$method->code]['tax']) : 0 ,
-                    'time' => (isset($options[$method->code]['time'])) ? floatval($options[$method->code]['time']) : 0,
-                    'perc' => (isset($options[$method->code]['perc'])) ? floatval($options[$method->code]['perc']) : 0, 
-                    'ar' => (isset($options[$method->code]['ar']) && $options[$method->code]['ar'] == "true") ? true : false ,
-                    'mp' => (isset($options[$method->code]['mp']) && $options[$method->code]['mp'] == "true") ? true : false
-                ];
-            }
-        }
-
-        echo json_encode($methods);die;
-    }
-
-    /**
-     * @return array
-     */
-    public function getMethodsEnablesArray()
-    {   
-        $methods = [];
-
-        $options = $this->getOptionsShipments();
-
-        $enableds =  (new Method())->getArrayShippingMethodsEnabledByZoneMelhorEnvio();
-
-        $shipping_methods = \WC()->shipping->get_shipping_methods();
-
-        foreach ($shipping_methods as $method) {
-            if (!isset($method->code) || is_null($method->code)) {
-                continue;
-            }
-
-            if (in_array($method->id, $enableds)) {
-                $methods[] = [
-                    'code' => $method->code,
-                    'title' => str_replace(' (Melhor Envio)', '', $method->method_title),
-                    'name' =>  (isset($options[$method->code]['name']) && $options[$method->code]['name'] != "undefined" && $options[$method->code]['name'] != "" ) ? $options[$method->code]['name'] : str_replace(' (Melhor Envio)', '', $method->method_title),
-                    'tax' => (isset($options[$method->code]['tax'])) ? floatval($options[$method->code]['tax']) : 0 ,
+                    'name' => (isset($options[$method->code]['name']) && $options[$method->code]['name'] != "undefined" && $options[$method->code]['name'] != "") ? $options[$method->code]['name'] : str_replace(' (Melhor Envio)', '', $method->method_title),
+                    'tax' => (isset($options[$method->code]['tax'])) ? floatval($options[$method->code]['tax']) : 0,
                     'time' => (isset($options[$method->code]['time'])) ? floatval($options[$method->code]['time']) : 0,
                     'perc' => (isset($options[$method->code]['perc'])) ? floatval($options[$method->code]['perc']) : 0,
-                    'ar' => (isset($options[$method->code]['ar']) && $options[$method->code]['ar'] == "true") ? true : false ,
-                    'mp' => (isset($options[$method->code]['mp']) && $options[$method->code]['mp'] == "true") ? true : false 
+                    'receipt' => (isset($options[$method->code]['receipt']) && $options[$method->code]['receipt'] == "true"),
+                    'own_hand' => (isset($options[$method->code]['own_hand']) && $options[$method->code]['own_hand'] == "true"),
+                    'insurance_value' => (isset($options[$method->code]['insurance_value']) && $options[$method->code]['insurance_value'] == "true")
                 ];
             }
         }
-                
-        return $methods;
-    }
 
-    public function getStyle()
-    {
-        $style = [
-            'calculo_de_frete' => [
-                'style' => (get_option('calculo_de_frete')) ? get_option('calculo_de_frete') : '',
-                'name'  => 'Div cálculo de frete',
-                'id' => 'calculo_de_frete'
-            ],
-            'input_calculo_frete' => [
-                'style' => (get_option('input_calculo_frete')) ? get_option('input_calculo_frete') : '',
-                'name'  => 'Input cálculo de frete',
-                'id'    => 'input_calculo_frete',
-            ],
-            'botao_calculo_frete' => [
-                'style' => (get_option('botao_calculo_frete')) ? get_option('botao_calculo_frete') : '',
-                'name'  => 'Botão cálculo de frete',
-                'id' => 'botao_calculo_frete',
-            ],
-            'botao_imagem_calculo_frete' => [
-                'style' => (get_option('botao_imagem_calculo_frete')) ? get_option('botao_imagem_calculo_frete') : '',
-                'name'  => 'Imagem cálculo de frete',
-                'id' => 'botao_imagem_calculo_frete',
-            ],
-            'botao_texto_calculo_frete' => [
-                'style' => (get_option('botao_texto_calculo_frete')) ? get_option('botao_texto_calculo_frete') : '',
-                'name'  => 'Texto do botão do cálculo de frete',
-                'id' => 'botao_texto_calculo_frete',
-            ]
-        ];
-
-        echo json_encode($style);die;
-    }
-
-    public function getStyleArray()
-    {
-        $style = [
-            'calculo_de_frete' => [
-                'style' => (get_option('calculo_de_frete')) ? get_option('calculo_de_frete') : '',
-                'name'  => 'Div cálculo de frete',
-                'id' => 'calculo_de_frete'
-            ],
-            'input_calculo_frete' => [
-                'style' => (get_option('input_calculo_frete')) ? get_option('input_calculo_frete') : '',
-                'name'  => 'Input cálculo de frete',
-                'id'    => 'input_calculo_frete',
-            ],
-            'botao_calculo_frete' => [
-                'style' => (get_option('botao_calculo_frete')) ? get_option('botao_calculo_frete') : '',
-                'name'  => 'Botão cálculo de frete',
-                'id' => 'botao_calculo_frete',
-            ],
-            'botao_imagem_calculo_frete' => [
-                'style' => (get_option('botao_imagem_calculo_frete')) ? get_option('botao_imagem_calculo_frete') : '',
-                'name'  => 'Imagem cálculo de frete',
-                'id' => 'botao_imagem_calculo_frete',
-            ],
-            'botao_texto_calculo_frete' => [
-                'style' => (get_option('botao_texto_calculo_frete')) ? get_option('botao_texto_calculo_frete') : '',
-                'name'  => 'Texto do botão do cálculo de frete',
-                'id' => 'botao_texto_calculo_frete',
-            ]
-        ];
-
-        return $style;
-    }
-
-    public function saveStyle()
-    {
-        delete_option($_GET['id']);
-        add_option($_GET['id'], $_GET['style']);
+        return wp_send_json($methods, 200);
     }
 
     public function savePathPlugins()
     {
-        if(empty($_GET['path'])) {
+        if (empty($_GET['path'])) {
             delete_option('melhor_envio_path_plugins');
             die;
         }
 
         delete_option('melhor_envio_path_plugins');
         add_option('melhor_envio_path_plugins', $_GET['path']);
-    }
-
-    public function setPathPlugins($path)
-    {
-        delete_option('melhor_envio_path_plugins');
-        add_option('melhor_envio_path_plugins', $path);
-
-        return get_option('melhor_envio_path_plugins');
     }
 
     public function getPathPlugins()
@@ -279,84 +174,9 @@ class ConfigurationController
             $path = ABSPATH . 'wp-content/plugins';
         }
 
-        echo json_encode([
+        return wp_send_json([
             'path' => $path
-        ]); 
-        die;
-    }
-
-    public function getPathPluginsArray()
-    {
-        $path = get_option('melhor_envio_path_plugins');
-
-        if (!$path) {
-            $path = ABSPATH . 'wp-content/plugins';
-        }
-
-        return $path;
-    }
-
-    public function saveoptionsMethod($item)
-    {
-        $id = $item['id'];
-
-        delete_option('melhor_envio_option_method_shipment_' . $id);
-        add_option('melhor_envio_option_method_shipment_' . $id, $item);
-
-        return get_option('melhor_envio_option_method_shipment_' . $id);
-    }
-
-    public function getOptionsShipments()
-    {   
-        $codeStore = md5(get_option('home'));
-
-        global $wpdb;
-        $sql = "select * from " . $wpdb->prefix . "options where option_name like '%melhor_envio_option_method_shipment_%'";
-        $results = $wpdb->get_results($sql);
-
-
-        if (empty($results)) {
-            return false;
-        }
-
-        $options = [];
-        foreach ($results as $item) {
-
-            if (empty($item->option_value)) {
-                continue;
-            }
-
-            $data = unserialize($item->option_value);
-
-            if (isset($data['id'])) {
-
-                $options[$data['id']] = [
-                    'name'       => $data['name'],
-                    'tax'        => $data['tax'],
-                    'time'       => $data['time'],
-                    'perc'       => $data['perc'],
-                    'mp'         => $data['mp'],
-                    'ar'         => $data['ar'],
-                    'code_modal' => 'code_shiping_' . $data['id']
-                ];
-            }
-        }
-
-        $_SESSION[$codeStore]['melhorenvio_options'] = $options;
-
-        return $options;
-    }
-
-
-    public function setWhereCalculator($option) {
-
-        delete_option('melhor_envio_option_where_show_calculator');
-        add_option('melhor_envio_option_where_show_calculator', $option);
-
-        return [
-            'success' => true,
-            'option' => $option
-        ];
+        ], 200);
     }
 
     public function getWhereCalculator()
@@ -364,16 +184,22 @@ class ConfigurationController
         $option = get_option('melhor_envio_option_where_show_calculator');
 
         if (!$option) {
-            echo json_encode([
+            return wp_send_json([
                 'option' => 'woocommerce_before_add_to_cart_button'
-            ]);die;
+            ], 200);
         }
-    
-        echo json_encode([
+
+        return wp_send_json([
             'option' => $option
-        ]);die;
+        ], 200);
     }
 
+    /**
+     * Function to obtain which hook the calculator will 
+     * be displayed on the product screen
+     *
+     * @return string
+     */
     public function getWhereCalculatorValue()
     {
         $option = get_option('melhor_envio_option_where_show_calculator');
@@ -383,33 +209,40 @@ class ConfigurationController
         return $option;
     }
 
+    /**
+     * Function to save receipt and own hands options
+     *
+     * @param array $options
+     * @return array
+     */
     public function setOptionsCalculator($options)
     {
-        delete_option('melhorenvio_ar');
-        delete_option('melhorenvio_mp');
+        delete_option(Option::OPTION_RECEIPT);
+        delete_option(Option::OPTION_OWN_HAND);
+        delete_option(Option::OPTION_INSURANCE_VALUE);
 
-        add_option('melhorenvio_ar', $options['ar'], true);
-        add_option('melhorenvio_mp', $options['mp'], true);
+        add_option(Option::OPTION_RECEIPT, $options['receipt'], true);
+        add_option(Option::OPTION_OWN_HAND, $options['own_hand'], true);
+        add_option(Option::OPTION_INSURANCE_VALUE, $options['insurance_value'], true);
 
         return [
             'success' => true,
-            'options' => [
-                'ar' => (get_option('melhorenvio_ar', true) == 'true') ? true : false ,
-                'mp' => (get_option('melhorenvio_mp', true) == 'true') ? true : false
-            ]
+            'options' => $this->getOptionsCalculator()
         ];
     }
 
+    /**
+     * Function for obtaining acknowledgment options and own hands
+     *
+     * @return array
+     */
     public function getOptionsCalculator()
-    {   
-        $ar = get_option('melhorenvio_ar');
-        $mp = get_option('melhorenvio_mp');
-
+    {
         return [
-            'ar' => ($ar == 'true') ? true : false,
-            'mp' => ($mp == 'true') ? true : false,
+            'receipt' => filter_var(get_option(Option::OPTION_RECEIPT, "false"), FILTER_VALIDATE_BOOLEAN),
+            'own_hand' => filter_var(get_option(Option::OPTION_OWN_HAND, "false"), FILTER_VALIDATE_BOOLEAN),
+            'insurance_value' => filter_var(get_option(Option::OPTION_INSURANCE_VALUE, "true"), FILTER_VALIDATE_BOOLEAN)
         ];
-        die;
     }
 
     /**
@@ -418,48 +251,10 @@ class ConfigurationController
      * @param Array $data
      * @return json
      */
-    public function saveAll($data)
-    {   
-        $response = [];
+    public function saveAll()
+    {
+        $response = (new ConfigurationsService())->saveConfigurations($_POST);
 
-        if (isset($data['address'])) {
-            $response['address'] = (new Address())->setAddressShopping($data['address']);
-        }
-
-        if (isset($data['store'])) {
-            $response['store'] = (new Store())->setStore($data['store']);
-        }
-
-        if (isset($data['agency'])) {
-            $response['agency'] = (new Agency())->setAgency($data['agency']);
-        }
-
-        if (isset($data['show_calculator'])) {
-            $response['show_calculator'] = (new CalculatorShow())->set($data['show_calculator']);
-        }
-
-        if (isset($data['show_all_agencies_jadlog']) ) {
-            $response['show_all_agencies_jadlog'] = (new JadlogAgenciesShow())->set($data['show_all_agencies_jadlog']);
-        }
-
-        if (isset($data['methods_shipments'])) {
-            foreach ($data['methods_shipments'] as $key => $method) {
-                $response['method'][$key] = $this->saveoptionsMethod($method);
-            }
-        }
-
-        if (isset($data['where_calculator'])) {
-            $response['where_calculator'] = $this->setWhereCalculator($data['where_calculator']);
-        }
-
-        if (isset($data['path_plugins'])) {
-            $response['path_plugins'] = $this->setPathPlugins($data['path_plugins']);
-        }
-
-        if (isset($data['options_calculator'])) {
-            $response['options_calculator'] = $this->setOptionsCalculator($data['options_calculator']);
-        }
         return wp_send_json($response, 200);
     }
-    
 }

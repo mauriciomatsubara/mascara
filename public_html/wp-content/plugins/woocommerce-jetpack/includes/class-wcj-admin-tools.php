@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Admin Tools
  *
- * @version 4.9.0
+ * @version 5.2.0
  * @author  Pluggabl LLC.
  */
 
@@ -15,14 +15,15 @@ class WCJ_Admin_Tools extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 4.9.0
+	 * @version 5.2.0
 	 * @todo    [feature] (maybe) add editable (product and order) metas
 	 */
 	function __construct() {
 
 		$this->id         = 'admin_tools';
 		$this->short_desc = __( 'Admin Tools', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Booster for WooCommerce general back-end tools.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Booster for WooCommerce general back-end tools. Enable interface by user roles (Plus). Custom shop manager editable roles (Plus).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Booster for WooCommerce general back-end tools.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-booster-admin-tools';
 		parent::__construct();
 
@@ -35,32 +36,32 @@ class WCJ_Admin_Tools extends WCJ_Module {
 
 		if ( $this->is_enabled() ) {
 			// Order Meta
-			if ( 'yes' === get_option( 'wcj_admin_tools_show_order_meta_enabled', 'no' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_admin_tools_show_order_meta_enabled', 'no' ) ) {
 				add_action( 'add_meta_boxes', array( $this, 'add_order_meta_meta_box' ) );
 			}
 			// Product Meta
-			if ( 'yes' === get_option( 'wcj_admin_tools_show_product_meta_enabled', 'no' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_admin_tools_show_product_meta_enabled', 'no' ) ) {
 				add_action( 'add_meta_boxes', array( $this, 'add_product_meta_meta_box' ) );
 			}
 			// Variable Product Pricing
-			if ( 'yes' === get_option( 'wcj_admin_tools_variable_product_pricing_table_enabled', 'no' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_admin_tools_variable_product_pricing_table_enabled', 'no' ) ) {
 				add_action( 'admin_head',        array( $this, 'make_original_variable_product_pricing_readonly' ) );
 				add_action( 'add_meta_boxes',    array( $this, 'maybe_add_variable_product_pricing_meta_box' ) );
 				add_action( 'save_post_product', array( $this, 'save_meta_box' ), PHP_INT_MAX, 2 );
 			}
 			// Product revisions
-			if ( 'yes' === get_option( 'wcj_product_revisions_enabled', 'no' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_product_revisions_enabled', 'no' ) ) {
 				add_filter( 'woocommerce_register_post_type_product', array( $this, 'enable_product_revisions' ) );
 			}
 			// Admin Notices
-			if ( 'yes' === get_option( 'wcj_admin_tools_suppress_connect_notice', 'no' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_admin_tools_suppress_connect_notice', 'no' ) ) {
 				add_filter( 'woocommerce_helper_suppress_connect_notice', '__return_true' );
 			}
-			if ( 'yes' === get_option( 'wcj_admin_tools_suppress_admin_notices', 'no' ) ) {
+			if ( 'yes' === wcj_get_option( 'wcj_admin_tools_suppress_admin_notices', 'no' ) ) {
 				add_filter( 'woocommerce_helper_suppress_admin_notices', '__return_true' );
 			}
 			// JSON product search limit
-			if ( 0 != get_option( 'wcj_product_json_search_limit', 0 ) ) {
+			if ( 0 != wcj_get_option( 'wcj_product_json_search_limit', 0 ) ) {
 				add_filter( 'woocommerce_json_search_limit', array( $this, 'set_json_search_limit' ) );
 			}
 			// Enable interface by user role
@@ -84,7 +85,7 @@ class WCJ_Admin_Tools extends WCJ_Module {
 	 */
 	function change_shop_manager_editable_roles( $roles ) {
 		remove_filter( 'woocommerce_shop_manager_editable_roles', array( $this, 'change_shop_manager_editable_roles' ) );
-		$roles = get_option( 'wcj_admin_tools_shop_manager_editable_roles', apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) ) );
+		$roles = wcj_get_option( 'wcj_admin_tools_shop_manager_editable_roles', apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) ) );
 		return $roles;
 	}
 
@@ -99,7 +100,7 @@ class WCJ_Admin_Tools extends WCJ_Module {
 	 * @return bool
 	 */
 	function enable_interface_by_user_roles( $allowed ) {
-		if ( empty( $disabled_roles = get_option( 'wcj_admin_tools_enable_interface_by_role', array() ) ) ) {
+		if ( empty( $disabled_roles = wcj_get_option( 'wcj_admin_tools_enable_interface_by_role', array() ) ) ) {
 			return $allowed;
 		}
 		$current_user_roles = wcj_get_current_user_all_roles();
@@ -119,7 +120,7 @@ class WCJ_Admin_Tools extends WCJ_Module {
 	 * @since   4.1.0
 	 */
 	function set_json_search_limit( $limit ) {
-		return get_option( 'wcj_product_json_search_limit', 0 );
+		return wcj_get_option( 'wcj_product_json_search_limit', 0 );
 	}
 
 	/**

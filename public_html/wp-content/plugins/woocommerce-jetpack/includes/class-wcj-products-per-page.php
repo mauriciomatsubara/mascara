@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Products per Page
  *
- * @version 4.7.0
+ * @version 5.2.0
  * @since   2.6.0
  * @author  Pluggabl LLC.
  */
@@ -16,7 +16,7 @@ class WCJ_Products_Per_Page extends WCJ_Module {
 	/**
 	 * Constructor.
 	 *
-	 * @version 4.1.0
+	 * @version 5.2.0
 	 * @since   2.6.0
 	 * @todo    (dev) position priority for every hook
 	 * @todo    (dev) post or get
@@ -26,19 +26,20 @@ class WCJ_Products_Per_Page extends WCJ_Module {
 
 		$this->id         = 'products_per_page';
 		$this->short_desc = __( 'Products per Page', 'woocommerce-jetpack' );
-		$this->desc       = __( 'Add "products per page" selector to WooCommerce.', 'woocommerce-jetpack' );
+		$this->desc       = __( 'Add "products per page" selector to WooCommerce (Select options available in Plus).', 'woocommerce-jetpack' );
+		$this->desc_pro   = __( 'Add "products per page" selector to WooCommerce.', 'woocommerce-jetpack' );
 		$this->link_slug  = 'woocommerce-products-per-page';
 		parent::__construct();
 
 		if ( $this->is_enabled() ) {
-			if ( 'session' === ( $this->products_per_page_saving_method = get_option( 'wcj_products_per_page_saving_method', 'cookie' ) ) ) {
+			if ( 'session' === ( $this->products_per_page_saving_method = wcj_get_option( 'wcj_products_per_page_saving_method', 'cookie' ) ) ) {
 				add_action( 'init', 'wcj_session_maybe_start' );
 			}
 			add_filter( 'loop_shop_per_page', array( $this, 'set_products_per_page_number' ), PHP_INT_MAX );
 			add_filter( 'option_et_divi', array( $this, 'set_products_per_page_number_on_divi' ), PHP_INT_MAX );
-			$position_hooks = get_option( 'wcj_products_per_page_position', array( 'woocommerce_before_shop_loop' ) );
+			$position_hooks = wcj_get_option( 'wcj_products_per_page_position', array( 'woocommerce_before_shop_loop' ) );
 			foreach ( $position_hooks as $position_hook ) {
-				add_action( $position_hook, array( $this, 'add_products_per_page_form' ), get_option( 'wcj_products_per_page_position_priority', 40 ) );
+				add_action( $position_hook, array( $this, 'add_products_per_page_form' ), wcj_get_option( 'wcj_products_per_page_position_priority', 40 ) );
 			}
 		}
 	}
@@ -77,15 +78,15 @@ class WCJ_Products_Per_Page extends WCJ_Module {
 			}
 		}
 		$select_form .= '</select>';
-		$form_method = get_option( 'wcj_products_per_page_form_method', 'post' );
+		$form_method = wcj_get_option( 'wcj_products_per_page_form_method', 'post' );
 		$html = '';
-		$html .= get_option( 'wcj_products_per_page_text_before', '<div class="clearfix"></div><div>' );
+		$html .= wcj_get_option( 'wcj_products_per_page_text_before', '<div class="clearfix"></div><div>' );
 		$html .= '<form action="' . esc_url( remove_query_arg( 'paged' ) ) . '" method="' . $form_method . '">';
-		$_text = get_option( 'wcj_products_per_page_text',
+		$_text = wcj_get_option( 'wcj_products_per_page_text',
 			__( 'Products <strong>%from% - %to%</strong> from <strong>%total%</strong>. Products on page %select_form%', 'woocommerce-jetpack' ) );
 		$html .= str_replace( array( '%from%', '%to%', '%total%', '%select_form%' ), array( $products_from, $products_to, $products_total, $select_form ), $_text );
 		$html .= '</form>';
-		$html .= get_option( 'wcj_products_per_page_text_after', '</div>' );
+		$html .= wcj_get_option( 'wcj_products_per_page_text_after', '</div>' );
 
 		echo $html;
 	}
@@ -130,7 +131,7 @@ class WCJ_Products_Per_Page extends WCJ_Module {
 		} elseif ( $products_per_page = $this->get_saved_products_per_page_number() ) {
 			return $products_per_page;
 		} else {
-			return get_option( 'wcj_products_per_page_default', 10 ); // default
+			return wcj_get_option( 'wcj_products_per_page_default', 10 ); // default
 		}
 	}
 

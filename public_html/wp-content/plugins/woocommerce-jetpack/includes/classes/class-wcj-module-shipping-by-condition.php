@@ -2,7 +2,7 @@
 /**
  * Booster for WooCommerce - Module - Shipping by Condition
  *
- * @version 4.8.0
+ * @version 5.3.5
  * @since   3.2.0
  * @author  Pluggabl LLC.
  */
@@ -22,7 +22,7 @@ abstract class WCJ_Module_Shipping_By_Condition extends WCJ_Module {
 	function __construct( $type = 'module' ) {
 		parent::__construct( $type );
 		if ( $this->is_enabled() ) {
-			$this->use_shipping_instances = ( 'yes' === get_option( 'wcj_' . $this->id . '_use_shipping_instance', 'no' ) );
+			$this->use_shipping_instances = ( 'yes' === wcj_get_option( 'wcj_' . $this->id . '_use_shipping_instance', 'no' ) );
 			add_filter( 'woocommerce_package_rates', array( $this, 'available_shipping_methods' ), wcj_get_woocommerce_package_rates_module_filter_priority( $this->id ) , 2 );
 		}
 	}
@@ -42,32 +42,44 @@ abstract class WCJ_Module_Shipping_By_Condition extends WCJ_Module {
 	/**
 	 * available_shipping_methods.
 	 *
-	 * @version 3.6.0
+	 * @version 5.3.5
 	 * @since   3.2.0
 	 * @todo    apply_filters( 'booster_option' )
 	 */
 	function available_shipping_methods( $rates, $package ) {
+		$include_arr = array();
+		$exclude_arr = array();
 		foreach ( $rates as $rate_key => $rate ) {
 			foreach ( $this->condition_options as $options_id => $options_data ) {
-				if ( 'no' === get_option( 'wcj_shipping_by_' . $options_id . '_section_enabled', 'yes' ) ) {
+				if ( 'no' === wcj_get_option( 'wcj_shipping_by_' . $options_id . '_section_enabled', 'yes' ) ) {
 					continue;
 				}
 				$include = ( $this->use_shipping_instances ?
 					get_option( 'wcj_shipping_' . $options_id . '_include_' . 'instance_' . $rate->instance_id, '' ) :
-					get_option( 'wcj_shipping_' . $options_id . '_include_' .               $rate->method_id, '' )
+					get_option( 'wcj_shipping_' . $options_id . '_include_' . $rate->method_id, '' )
 				);
-				if ( ! empty( $include ) && ! $this->check( $options_id, $include, 'include', $package ) ) {
-					unset( $rates[ $rate_key ] );
-					break;
+				if ( ! empty( $include ) ) {
+					if ( $this->check( $options_id, $include, 'include', $package ) ) {
+						//$include_arr[] = $rate_key;
+					} else {
+						unset( $rates[ $rate_key ] );
+					}
 				}
 				$exclude = ( $this->use_shipping_instances ?
 					get_option( 'wcj_shipping_' . $options_id . '_exclude_' . 'instance_' . $rate->instance_id, '' ) :
-					get_option( 'wcj_shipping_' . $options_id . '_exclude_' .               $rate->method_id, '' )
+					get_option( 'wcj_shipping_' . $options_id . '_exclude_' . $rate->method_id, '' )
 				);
-				if ( ! empty( $exclude ) && $this->check( $options_id, $exclude , 'exclude', $package ) ) {
-					unset( $rates[ $rate_key ] );
-					break;
+				if ( ! empty( $exclude ) && $this->check( $options_id, $exclude, 'exclude', $package ) ) {
+					$exclude_arr[] = $rate_key;
 				}
+			}
+		}
+		foreach ( $rates as $rate_key => $rate ) {
+			if (
+				//( ! empty( $include_arr ) && ! in_array( $rate_key, $include_arr ) ) ||
+				( ! empty( $exclude_arr ) && in_array( $rate_key, $exclude_arr ) )
+			) {
+				unset( $rates[ $rate_key ] );
 			}
 		}
 		return $rates;
